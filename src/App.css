@@ -1,0 +1,19 @@
+.gradient-color {
+    background: linear-gradient(#36C0EF, #29ABE2);
+}
+
+.gradient-image {
+    background: linear-gradient(#36c1ef19, #29aae224);
+}
+
+.wallet-gradient {
+    background: linear-gradient(160deg,rgba(54, 192, 239, 1) 0%, rgba(31, 137, 137, 1) 50%, rgba(31, 110, 137, 1) 100%);
+}
+
+.gradient-text {
+    background: linear-gradient( #36C0EF, #29ABE2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+  }

@@ -1,0 +1,19 @@
+[
+ {
+  "_id": 1,
+  "name": "First Property",
+  "image": "https://nextjs.org/static/images/learn/foundations/next-app.png",
+  "author":"John Doe",
+  "rent":1200,
+  "address":"New York, NY"
+ },
+ {
+  "_id": 2,
+  "name": "Second Property",
+  "image": "https://nextjs.org/static/images/learn/foundations/components.png",
+  "author":"Claman Joe",
+    "rent":1500,
+    "address":"Los Angeles, CA"
+
+ }
+]

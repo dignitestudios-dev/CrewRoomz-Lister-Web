@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+.shadow-lite {
+  box-shadow: rgba(0, 0, 0, 0.09) 0px 0px 2px;
+}
+
+.field-shadow{
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 3px 18px 0px;
+}
+
+body {
+  font-family: 'General Sans', sans-serif;
+   background-image: url('./assets/background.png');
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+}
