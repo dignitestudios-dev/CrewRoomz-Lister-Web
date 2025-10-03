@@ -73,4 +73,67 @@ declare global {
   };
 
   type HomeStatus = "pending" | "approved" | "rejected";
+
+  type BunkType = "top" | "bottom";
+
+  // For normal bed pricing
+  interface Prices {
+    dailyPrice: string;
+    monthlyPrice: string;
+  }
+
+  // For bunk bed pricing (top + bottom)
+  interface BunkPrices {
+    top: Prices;
+    bottom: Prices;
+  }
+
+  // A single bed entry
+  interface Bed {
+    bedType: string;
+    prices: Prices;
+    bunkPrices: BunkPrices;
+  }
+
+  // Entire reducer state
+  interface State {
+    beds: Bed[];
+  }
+
+  interface Message {
+    text: string;
+    time: string;
+  }
+
+  interface User {
+    id: number;
+    name: string;
+    initials: string;
+    image: string; // or StaticImport if using Next.js images
+  }
+  type Sender = "me" | "them";
+
+  interface BaseMessage {
+    sender: Sender;
+    time: string;
+  }
+
+  interface TextMessage extends BaseMessage {
+    type: "text";
+    text: string;
+  }
+
+  interface ImageMessage extends BaseMessage {
+    type: "image";
+    file: string;
+  }
+
+  interface FileMessage extends BaseMessage {
+    type: "file";
+    file: string;
+    name: string;
+  }
+
+  type Message = TextMessage | ImageMessage | FileMessage;
+  type Chats = Record<number, Message[]>;
 }

@@ -1,11 +1,10 @@
 import { useState, useRef } from "react";
 import { IoSend } from "react-icons/io5";
-import { MdAttachFile } from "react-icons/md";
-import { FaArrowLeft, FaTimes } from "react-icons/fa";
+import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router";
-import { pdfIcon, user } from "../assets/export";
+import { user } from "../assets/export";
 
-const users = [
+const users: User[] = [
   { id: 1, name: "Mike Smith (258496)", initials: "MS", image: user },
   { id: 2, name: "Darlene Steward (123456)", initials: "DS", image: user },
   { id: 3, name: "Maria Steward (456789)", initials: "MS", image: user },
@@ -52,21 +51,29 @@ const initialChats = {
   ],
 };
 
+type Attachment = { type: "image"; file: File } | { type: "file"; file: File };
+
 const Chat = () => {
-  const [selectedUserId, setSelectedUserId] = useState(1);
-  const [chats, setChats] = useState(initialChats);
+  const [chats, setChats] = useState<Chats>(initialChats);
+  const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
+
+  const selectedMessages: Message[] = selectedUserId
+    ? chats[selectedUserId] || []
+    : [];
   const [input, setInput] = useState("");
-  const [attachments, setAttachments] = useState([]);
-  const fileInputRef = useRef();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
+
   const navigate = useNavigate();
 
-  const selectedMessages = chats[selectedUserId] || [];
-
   const handleSendMessage = () => {
-    const newMessages = [...(chats[selectedUserId] || [])];
+    if (!selectedUserId) return;
 
+    const newMessages: Message[] = [...(chats[selectedUserId] || [])];
+
+    // ✅ Add text messages
     if (input.trim()) {
-      newMessages.push({
+      const textMessage: TextMessage = {
         sender: "me",
         type: "text",
         text: input,
@@ -74,20 +81,36 @@ const Chat = () => {
           hour: "2-digit",
           minute: "2-digit",
         }),
-      });
+      };
+      newMessages.push(textMessage);
     }
 
-    attachments.forEach((file) => {
-      newMessages.push({
-        file: URL.createObjectURL(file.file),
-        name: file.file.name,
-        type: file.type,
-        sender: "me",
-        time: new Date().toLocaleTimeString([], {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      });
+    // ✅ Add file/image attachments
+    attachments.forEach((attachment) => {
+      if (attachment.type === "image") {
+        // const imageMessage: ImageMessage = {
+        //   sender: "me",
+        //   type: "image",
+        //   file: URL.createObjectURL(attachment.file),
+        //   time: new Date().toLocaleTimeString([], {
+        //     hour: "2-digit",
+        //     minute: "2-digit",
+        //   }),
+        // };
+        // newMessages.push(imageMessage);
+      } else {
+        // const fileMessage: FileMessage = {
+        //   sender: "me",
+        //   type: "file",
+        //   file: URL.createObjectURL(attachment.file),
+        //   name: attachment.file.name,
+        //   time: new Date().toLocaleTimeString([], {
+        //     hour: "2-digit",
+        //     minute: "2-digit",
+        //   }),
+        // };
+        // newMessages.push(fileMessage);
+      }
     });
 
     setChats((prev) => ({ ...prev, [selectedUserId]: newMessages }));
@@ -95,20 +118,20 @@ const Chat = () => {
     setAttachments([]);
   };
 
-  const handleFileChange = (e) => {
-    const files = Array.from(e.target.files);
-    const previews = files.map((file) => ({
-      file,
-      type: file.type.startsWith("image/") ? "image" : "file",
-    }));
-    setAttachments((prev) => [...prev, ...previews]);
-  };
+  // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // const files = Array.from(e.target.files);
+  // const previews = files.map((file) => ({
+  //   file,
+  //   type: file.type.startsWith("image/") ? "image" : "file",
+  // }));
+  // setAttachments((prev) => [...prev, ...previews]);
+  // };
 
-  const removeAttachment = (index) => {
-    const updated = [...attachments];
-    updated.splice(index, 1);
-    setAttachments(updated);
-  };
+  // const removeAttachment = (index) => {
+  //   const updated = [...attachments];
+  //   updated.splice(index, 1);
+  //   setAttachments(updated);
+  // };
 
   return (
     <div className="max-w-[1260px] mx-auto px-6 py-10">
@@ -132,7 +155,7 @@ const Chat = () => {
                     : "hover:bg-gray-100"
                 }`}
               >
-                <div className={`w-10 h-10 rounded-full ${user.color}`}>
+                <div className={`w-10 h-10 rounded-full`}>
                   <img src={user.image} alt="" />
                 </div>
                 <div className="flex-1">
@@ -157,17 +180,19 @@ const Chat = () => {
           {/* Header */}
           <div className="flex items-center gap-3 border-b pb-3 p-3 bg-white rounded-t-xl ">
             <div className="w-10 h-10 rounded-full">
-              <img
-                src={users.find((u) => u.id === selectedUserId).image}
-                alt=""
-              />
+              {selectedUserId && (
+                <img
+                  src={users.find((u) => u.id === selectedUserId)?.image || ""}
+                  alt=""
+                />
+              )}
             </div>
-            <div>
-              <h4 className="text-sm font-semibold">
-                {users.find((u) => u.id === selectedUserId).name}
-              </h4>
-              <p className="text-xs text-gray-500">Tenant</p>
-            </div>
+
+            <h4 className="text-sm font-semibold">
+              {selectedUserId
+                ? users.find((u) => u.id === selectedUserId)?.name
+                : "Select a user"}
+            </h4>
           </div>
 
           {/* Messages */}
@@ -178,26 +203,26 @@ const Chat = () => {
               <div
                 key={idx}
                 className={`flex flex-col ${
-                  msg.sender === "me" ? "items-end" : "items-start"
+                  msg.text === "me" ? "items-end" : "items-start"
                 }`}
               >
-                {msg.type === "text" ? (
+                {msg.text === "text" ? (
                   <div className="gradient-color text-white px-4 py-2 rounded-xl max-w-xs">
                     {msg.text}
                   </div>
-                ) : msg.type === "image" ? (
+                ) : msg.text === "image" ? (
                   <img
-                    src={msg.file}
+                    src={msg.text}
                     alt="attachment"
                     className="w-10 rounded-xl shadow"
                   />
                 ) : (
                   <a
-                    href={msg.file}
-                    download={msg.name}
+                    href={msg.text}
+                    download={msg.text}
                     className="bg-gray-200 px-4 py-2 rounded-xl text-blue-700 underline"
                   >
-                    {msg.name}
+                    {msg.text}
                   </a>
                 )}
                 <span className="text-xs text-gray-400 mt-1">{msg.time}</span>
@@ -211,7 +236,7 @@ const Chat = () => {
               type="file"
               multiple
               ref={fileInputRef}
-              onChange={handleFileChange}
+              // onChange={handleFileChange}
               className="hidden"
             />
             <input

@@ -23,7 +23,10 @@ const ListingCreate = () => {
         What type of space are you offering?
       </p>
       <div className="space-y-2 mt-6">
-        <div className=" h-[50px] bg-[#ffffff] rounded-lg  px-4 text-center flex items-center justify-between ">
+        <div
+          onClick={() => navigate("/add-property")}
+          className=" h-[50px] bg-[#ffffff] rounded-lg px-4 text-center cursor-pointer flex items-center justify-between "
+        >
           <p className="text-[16px] font-[500]">Private</p>
           <IoIosArrowForward className="text-[#18181899]" />
         </div>

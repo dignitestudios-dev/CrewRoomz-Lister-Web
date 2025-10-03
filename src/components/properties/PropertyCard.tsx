@@ -1,8 +1,9 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { LuMapPin } from "react-icons/lu";
 import ConfirmationModal from "../global/ConfirmationModal";
 import { bgChecked } from "../../assets/export";
+import { FaStar } from "react-icons/fa6";
 
 interface Property {
   _id: string | number; // allow both
@@ -32,6 +33,16 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, dotBar }) => {
     setIsOptionDropdownOpen(false);
     // You can later expand: call API, open modal, etc.
   };
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (cardRef.current && !cardRef.current.contains(e.target as Node)) {
+        setIsOptionDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
     <div
@@ -88,7 +99,9 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property, dotBar }) => {
           >
             {property.name}
           </span>
-          <p className="mt-2 text-[#0151DA]">${property.rent}</p>
+          <div className="flex items-center gap-2 mb-2">
+            <FaStar className="text-yellow-400 text-lg" /> <p>4.5</p>
+          </div>
         </div>
 
         <div className="flex gap-1 items-start">

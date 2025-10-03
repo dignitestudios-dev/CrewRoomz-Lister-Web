@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router";
 import { dotBar, homeOne, homeTwo } from "../assets/export.ts";
 import { HomeFilterDropDown } from "../components/global/FilterDropDown.tsx";
@@ -42,18 +42,6 @@ const Home = () => {
   const [activeStatus, setActiveStatus] = useState(0);
   const [status, setStatus] = useState<HomeStatus>("pending");
   console.log("🚀 ~ Home ~ status:", status);
-
-  const cardRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (cardRef.current && !cardRef.current.contains(e.target as Node)) {
-        setIsOptionDropdownOpen(null);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const statusOptions: StatusOption[] = [
     { label: "pending", isActive: activeStatus === 0 },
@@ -99,7 +87,10 @@ const Home = () => {
           </p>
         </div>
         <button
-          onClick={() => navigate("/add-property")}
+          onClick={() => {
+            navigate("/add-listing");
+            setUserData([]);
+          }}
           className="gradient-color rounded-full text-white text-[14px] font-[600] px-4 py-3 transition cursor-pointer"
         >
           + Add Property

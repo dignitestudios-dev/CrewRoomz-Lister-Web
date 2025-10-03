@@ -8,9 +8,23 @@ import { validationSchema } from "../schema/appSchema";
 import { useFormik } from "formik";
 import { propertyValues } from "./../init/appValues";
 import { RxCross2 } from "react-icons/rx";
-import { RiDeleteBin3Line } from "react-icons/ri";
 
-const initialState = {
+type Action =
+  | { type: "ADD_BED" }
+  | { type: "REMOVE_BED"; index: number }
+  | { type: "SET_BED_TYPE"; index: number; payload: string }
+  | {
+      type: "SET_PRICE";
+      index: number;
+      payload: { name: keyof Prices; value: string };
+    }
+  | {
+      type: "SET_BUNK_PRICE";
+      index: number;
+      payload: { bunk: BunkType; name: keyof Prices; value: string };
+    };
+
+const initialState: State = {
   beds: [
     {
       bedType: "",
@@ -23,7 +37,7 @@ const initialState = {
   ],
 };
 
-function reducer(state, action) {
+function reducer(state: State, action: Action) {
   switch (action.type) {
     case "ADD_BED":
       return {
@@ -104,23 +118,37 @@ const PropertyAdd = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
   console.log("🚀 ~ PropertyAdd ~ state:", state);
 
-  const handleBedTypeChange = (index, e) => {
+  const handleBedTypeChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     dispatch({ type: "SET_BED_TYPE", index, payload: e.target.value });
   };
 
-  const handlePriceChange = (index, e) => {
+  const handlePriceChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     dispatch({
       type: "SET_PRICE",
       index,
-      payload: { name: e.target.name, value: e.target.value },
+      payload: { name: e.target.name as keyof Prices, value: e.target.value },
     });
   };
 
-  const handleBunkPriceChange = (index, bunk, e) => {
+  const handleBunkPriceChange = (
+    index: number,
+    bunk: BunkType,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     dispatch({
       type: "SET_BUNK_PRICE",
       index,
-      payload: { bunk, name: e.target.name, value: e.target.value },
+      payload: {
+        bunk,
+        name: e.target.name as keyof Prices,
+        value: e.target.value,
+      },
     });
   };
 
@@ -430,9 +458,15 @@ const PropertyAdd = () => {
                             </label>
                             <input
                               name="dailyPrice"
-                              value={bed.bunkPrices[bunk].dailyPrice}
+                              value={
+                                bed.bunkPrices[bunk as BunkType].dailyPrice
+                              }
                               onChange={(e) =>
-                                handleBunkPriceChange(index, bunk, e)
+                                handleBunkPriceChange(
+                                  index,
+                                  bunk as BunkType,
+                                  e
+                                )
                               }
                               className="w-full bg-transparent text-[16px] text-[#181818]"
                               placeholder="e.g. 50"
@@ -444,9 +478,15 @@ const PropertyAdd = () => {
                             </label>
                             <input
                               name="monthlyPrice"
-                              value={bed.bunkPrices[bunk].monthlyPrice}
+                              value={
+                                bed.bunkPrices[bunk as BunkType].monthlyPrice
+                              }
                               onChange={(e) =>
-                                handleBunkPriceChange(index, bunk, e)
+                                handleBunkPriceChange(
+                                  index,
+                                  bunk as BunkType,
+                                  e
+                                )
                               }
                               className="w-full bg-transparent text-[16px] text-[#181818]"
                               placeholder="e.g. 1000"

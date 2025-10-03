@@ -1,4 +1,3 @@
-import React from "react";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate } from "react-router";
 import { messageIcon, nextBtn, user } from "../assets/export";
