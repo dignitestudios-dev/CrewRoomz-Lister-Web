@@ -8,8 +8,7 @@ const ChangePassword = () => {
     values,
     handleBlur,
     handleChange,
-    handleSubmit,
-    setFieldValue,
+
     errors,
     touched,
   } = useFormik({

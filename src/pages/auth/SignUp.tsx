@@ -1,22 +1,23 @@
 import { useState } from "react";
-import { checked, signInSideImg, unchecked } from "../assets/export";
-import AuthInput from "../components/Auth/AuthInput";
+import { checked, signInSideImg, unchecked } from "../../assets/export";
+import AuthInput from "../../components/Auth/AuthInput";
 import { useFormik } from "formik";
-// import axios from "axios";
-import { signUpSchema } from "../schema/authSchema";
-import { signUpValues } from "../init/authValues";
-// import { ErrorToast, SuccessToast } from "../components/global/Toaster";
-// import useAuthStore from "../store/authStore";
+import { signUpSchema } from "../../schema/authSchema";
+import { signUpValues } from "../../init/authValues";
 import { NavLink, useNavigate } from "react-router";
-import AuthButton from "../components/Auth/AuthButton";
-import SocialLogin from "../components/Auth/SocialLogin";
+import AuthButton from "../../components/Auth/AuthButton";
+import SocialLogin from "../../components/Auth/SocialLogin";
+import axios from "../../axios";
+import { useToast } from "../../components/global/useToast";
+import Toast from "../../components/global/Toast";
+import { getErrorMessage } from "../../init/appValues";
 
 const SignUp = () => {
   const navigate = useNavigate();
-  // const setAuth = useAuthStore((s) => s.setAuth);
-  const [isChecked, setIsChecked] = useState(true);
+  const { toast, showToast } = useToast();
+  const [state, setState] = useState<LoadState>("idle");
 
-  const [loading, setLoading] = useState(false);
+  const [isChecked, setIsChecked] = useState(true);
   const [files, setFiles] = useState<{ profilePreview: string | null }>({
     profilePreview: null,
   });
@@ -32,16 +33,39 @@ const SignUp = () => {
   } = useFormik({
     initialValues: signUpValues,
     validationSchema: signUpSchema,
-    onSubmit: (values) => {
-      console.log("Form submitted:", values);
-      setLoading(false);
-      navigate("/verify-login-otp");
+    onSubmit: async (values) => {
+      setState("loading");
+      const formData = new FormData();
+
+      formData.append("email", values.email);
+      formData.append("name", values.fullName);
+      formData.append("idToken", "xnqxqwxweo3he2he32h9328dh328d239");
+      formData.append("role", "lister");
+      formData.append("password", values.password);
+
+      if (values.profile) {
+        formData.append("profilePicture", values.profile);
+      }
+      try {
+        const response = await axios.post("/auth/signUp", formData);
+        if (response.status === 200) {
+          setState("ready");
+          showToast("Login Success", "success");
+          navigate("/verify-login-otp", { state: { email: values?.email } });
+        }
+      } catch (error) {
+        console.log("🚀 ~ SignUp ~ error:", error);
+        setState("error");
+        showToast(getErrorMessage(error), "error");
+      }
     },
   });
 
   // File handler
-  const handleFileChange = (e) => {
-    const file = e.currentTarget.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const filesList = e.currentTarget.files;
+    const file = filesList && filesList[0];
+
     if (file) {
       setFieldValue("profile", file);
       setFiles((prev) => ({
@@ -53,6 +77,7 @@ const SignUp = () => {
 
   return (
     <div className="lg:min-h-screen lg:flex p-8  lg:p-0">
+      {(state === "error" || state === "ready") && <Toast {...toast} />}
       <div className="grid lg:grid-cols-2 grid-cols-1 p-0 lg:p-4">
         <div className="lg:block hidden">
           <img
@@ -192,7 +217,11 @@ const SignUp = () => {
                 </label>
               </div>
               <div className="mt-6">
-                <AuthButton text="Sign Up" loading={loading} type="submit" />
+                <AuthButton
+                  text="Sign Up"
+                  loading={state === "loading" ? true : false}
+                  type="submit"
+                />
               </div>
             </form>
           </div>

@@ -1,14 +1,14 @@
 import { useState } from "react";
-import { signInSideImg } from "../assets/export";
-import AuthInput from "../components/Auth/AuthInput";
+import { signInSideImg } from "../../assets/export";
+import AuthInput from "../../components/Auth/AuthInput";
 import { useFormik } from "formik";
 // import axios from "axios";
-import { resetPasswordSchema } from "../schema/authSchema";
-import { resetValue } from "../init/authValues";
+import { resetPasswordSchema } from "../../schema/authSchema";
+import { resetValue } from "../../init/authValues";
 // import { ErrorToast, SuccessToast } from "../components/global/Toaster";
 // import useAuthStore from "../store/authStore";
 import { useNavigate } from "react-router";
-import AuthButton from "../components/Auth/AuthButton";
+import AuthButton from "../../components/Auth/AuthButton";
 import { CiCircleCheck } from "react-icons/ci";
 
 const ResetPassword = () => {

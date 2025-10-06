@@ -1,25 +1,29 @@
 import { useRef, useState } from "react";
-import { signupSideImg } from "../assets/export";
+import { signupSideImg } from "../../assets/export";
 // import AuthInput from "../components/Auth/AuthInput";
 
 // import { ErrorToast, SuccessToast } from "../components/global/Toaster";
 // import useAuthStore from "../store/authStore";
-import AuthButton from "../components/Auth/AuthButton";
-import CountDown from "../components/Auth/CountDown";
-import { ErrorToast } from "../components/global/Toaster";
-// import axios from "axios";
-import { useNavigate } from "react-router";
+import AuthButton from "../../components/Auth/AuthButton";
+import CountDown from "../../components/Auth/CountDown";
+import { ErrorToast } from "../../components/global/Toaster";
+import { useLocation } from "react-router";
+import axios from "../../axios";
+import { getErrorMessage } from "../../init/appValues";
+import { useToast } from "../../components/global/useToast";
+import Toast from "../../components/global/Toast";
 
 const PasswordOtp = () => {
   // const setAuth = useAuthStore((s) => s.setAuth);
-  const navigate = useNavigate();
-  const [otp, setOtp] = useState<string[]>(["", "", "", "", ""]);
+  // const navigate = useNavigate();
+  const { toast, showToast } = useToast();
+  const [state, setState] = useState<LoadState>("idle");
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
-  //   const location = useLocation();
-  //   const { email } = location.state || {};
+
   const [resendLoading, setResendLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
-  console.log("🚀 ~ PasswordOtp ~ loading:", loading);
+  const location = useLocation();
+  const { email } = location.state || {};
 
   const [isActive, setIsActive] = useState(true);
   const [seconds, setSeconds] = useState(10);
@@ -71,24 +75,23 @@ const PasswordOtp = () => {
       ErrorToast("Please enter complete OTP.");
       return;
     }
-    setLoading(true);
-    navigate("/reset-password");
-    // const otpValue = otp.join("");
+    const otpValue = otp.join("");
     try {
-      // setLoading(true);
-      // const response = await axios.post("/auth/validatePassOTP", {
-      //   code: otpValue,
-      //   email: email,
-      //   role: "landlord",
-      // });
-      // if (response.status === 200) {
-      //   let resetToken = response.data.resetToken;
-      // }
+      setState("loading");
+      const response = await axios.post("/auth/verifyOTP", {
+        otp: otpValue,
+        email: email,
+        role: "lister",
+      });
+      if (response.status === 200) {
+        console.log(response.data.resetToken);
+        setState("ready");
+        showToast("Login Success", "success");
+      }
     } catch (error) {
       console.log("🚀 ~ handleSubmit ~ error:", error);
-      // ErrorToast(error.response.data.message);
-    } finally {
-      // setLoading(false);
+      setState("error");
+      showToast(getErrorMessage(error), "error");
     }
   };
 
@@ -96,22 +99,21 @@ const PasswordOtp = () => {
     try {
       setResendLoading(true);
       handleRestart();
-      // let obj = {
-      //   email: email,
-      //   role: "landlord",
-      // };
-
-      // const response = await axios.post("/auth/sendPassOTP", obj);
-
-      // if (response.status === 201) {
-      //   SuccessToast(response?.data?.message);
-      //   setResendLoading(false);
-      //   setOtp(Array(5).fill("")); // Reset OTP fields
-
-      // }
+      const obj = {
+        email: email,
+        role: "lister",
+      };
+      const response = await axios.post("/auth/resendOtp", obj);
+      if (response.status === 201) {
+        setResendLoading(false);
+        setOtp(Array(5).fill(""));
+        setState("ready");
+        showToast("Login Success", "success");
+      }
     } catch (err) {
       console.log("🚀 ~ handleResendOtp ~ err:", err);
-      // ErrorToast(err?.response?.data?.message);
+      setState("error");
+      showToast(getErrorMessage(err), "error");
     } finally {
       setResendLoading(false);
     }
@@ -123,6 +125,7 @@ const PasswordOtp = () => {
 
   return (
     <div className="lg:min-h-screen lg:flex p-8  lg:p-0">
+      {(state === "error" || state === "ready") && <Toast {...toast} />}
       <div className="grid lg:grid-cols-2 grid-cols-1 p-0 lg:p-4">
         <div className="lg:block hidden">
           <img
@@ -135,8 +138,7 @@ const PasswordOtp = () => {
           <div className="mb-8 text-center space-y-2 lg:max-w-[55%] md:max-w-[60%] sm:max-w-[75%] xs:max-w-[90%] ">
             <p className="text-[24px] font-semibold">Verification</p>
             <p className="text-[14px] text-[#565656]">
-              Enter the code send to{" "}
-              <span className="text-black">mikesmith@workemail.com</span>
+              Enter the code send to <span className="text-black">{email}</span>
             </p>
           </div>
           <div className="flex justify-center items-center w-full ">
@@ -187,7 +189,11 @@ const PasswordOtp = () => {
               </div>
 
               <div className="mt-6">
-                <AuthButton text="Verify" loading={false} type="submit" />
+                <AuthButton
+                  text="Verify"
+                  loading={state === "loading" ? true : false}
+                  type="submit"
+                />
               </div>
             </form>
           </div>

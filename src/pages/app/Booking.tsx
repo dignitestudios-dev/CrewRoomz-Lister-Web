@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import { homeOne, nextBtn, user } from "../assets/export";
-import BookingCalendar from "../components/Calendar/BookingCalendar";
-import { BookingFilterDropDown } from "../components/global/FilterDropDown";
+import { homeOne, nextBtn, user } from "../../assets/export";
+import BookingCalendar from "../../components/Calendar/BookingCalendar";
+import { BookingFilterDropDown } from "../../components/global/FilterDropDown";
 
 type bookingStatus = "private" | "multi" | "semi";
 type bookingStatusOption = {

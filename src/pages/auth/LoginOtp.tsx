@@ -1,22 +1,25 @@
 import { useRef, useState } from "react";
-import { signupSideImg } from "../assets/export";
-// import AuthInput from "../components/Auth/AuthInput";
-// import axios from "axios";
-
+import { signupSideImg } from "../../assets/export";
 // import useAuthStore from "../store/authStore";
-import AuthButton from "../components/Auth/AuthButton";
-import CountDown from "../components/Auth/CountDown";
-import { ErrorToast } from "../components/global/Toaster";
+import AuthButton from "../../components/Auth/AuthButton";
+import CountDown from "../../components/Auth/CountDown";
+import { ErrorToast } from "../../components/global/Toaster";
 import { CiCircleCheck } from "react-icons/ci";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+import axios from "../../axios";
+import { useToast } from "../../components/global/useToast";
+import { getErrorMessage } from "../../init/appValues";
+import Toast from "../../components/global/Toast";
 
 const LoginOtp = () => {
   // const setAuth = useAuthStore((s) => s.setAuth);
   const navigate = useNavigate();
+  const { toast, showToast } = useToast();
+  const [state, setState] = useState<LoadState>("idle");
   const [otp, setOtp] = useState<string[]>(["", "", "", "", ""]);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
-  //   const location = useLocation();
-  //   const { email } = location.state || {};
+  const location = useLocation();
+  const { email } = location.state || {};
   const [resendLoading, setResendLoading] = useState(false);
 
   const [isActive, setIsActive] = useState(true);
@@ -72,22 +75,22 @@ const LoginOtp = () => {
       return;
     }
     setIsVerified(true);
-    // const otpValue = otp.join("");
+    const otpValue = otp.join("");
     try {
-      // setLoading(true);
-      // const response = await axios.post("/auth/validatePassOTP", {
-      //   code: otpValue,
-      //   email: email,
-      //   role: "landlord",
-      // });
-      // if (response.status === 200) {
-      //   let resetToken = response.data.resetToken;
-      // }
+      const response = await axios.post("/auth/verifyOTP", {
+        otp: otpValue,
+        email: email,
+        role: "lister",
+      });
+      if (response.status === 200) {
+        console.log(response.data.resetToken);
+        setState("ready");
+        showToast("Login Success", "success");
+      }
     } catch (error) {
       console.log("🚀 ~ handleSubmit ~ error:", error);
-      // ErrorToast(error.response.data.message);
-    } finally {
-      // setLoading(false);
+      setState("error");
+      showToast(getErrorMessage(error), "error");
     }
   };
 
@@ -95,22 +98,21 @@ const LoginOtp = () => {
     try {
       setResendLoading(true);
       handleRestart();
-      // let obj = {
-      //   email: email,
-      //   role: "landlord",
-      // };
-
-      // const response = await axios.post("/auth/sendPassOTP", obj);
-
-      // if (response.status === 201) {
-      //   SuccessToast(response?.data?.message);
-      //   setResendLoading(false);
-      //   setOtp(Array(5).fill("")); // Reset OTP fields
-
-      // }
+      const obj = {
+        email: email,
+        role: "lister",
+      };
+      const response = await axios.post("/auth/resendOtp", obj);
+      if (response.status === 201) {
+        setResendLoading(false);
+        setOtp(Array(5).fill(""));
+        setState("ready");
+        showToast("Login Success", "success");
+      }
     } catch (err) {
       console.log("🚀 ~ handleResendOtp ~ err:", err);
-      // ErrorToast(err?.response?.data?.message);
+      setState("error");
+      showToast(getErrorMessage(err), "error");
     } finally {
       setResendLoading(false);
     }
@@ -123,6 +125,7 @@ const LoginOtp = () => {
 
   return (
     <div className="lg:min-h-screen lg:flex p-8  lg:p-0">
+      {(state === "error" || state === "ready") && <Toast {...toast} />}
       <div className="grid lg:grid-cols-2 grid-cols-1 p-0 lg:p-4">
         <div className="lg:block hidden">
           <img
@@ -203,7 +206,11 @@ const LoginOtp = () => {
                 </div>
 
                 <div className="mt-6">
-                  <AuthButton text="Verify" loading={false} type="submit" />
+                  <AuthButton
+                    text="Verify"
+                    loading={state === "loading" ? true : false}
+                    type="submit"
+                  />
                 </div>
               </form>
             </div>

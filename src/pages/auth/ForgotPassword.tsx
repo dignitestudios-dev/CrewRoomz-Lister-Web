@@ -1,20 +1,21 @@
 import { useState } from "react";
-import { signupSideImg } from "../assets/export";
-import AuthInput from "../components/Auth/AuthInput";
 import { useFormik } from "formik";
-// import axios from "axios";
-import { forgotPasswordSchema } from "../schema/authSchema";
-import { forgotPasswordValue } from "../init/authValues";
-// import { ErrorToast, SuccessToast } from "../components/global/Toaster";
-// import useAuthStore from "../store/authStore";
-import AuthButton from "../components/Auth/AuthButton";
+import { signupSideImg } from "../../assets/export";
+import AuthInput from "../../components/Auth/AuthInput";
+import { forgotPasswordSchema } from "../../schema/authSchema";
+import { forgotPasswordValue } from "../../init/authValues";
+import AuthButton from "../../components/Auth/AuthButton";
 import { useNavigate } from "react-router";
+import axios from "../../axios";
+import { useToast } from "../../components/global/useToast";
+import Toast from "../../components/global/Toast";
+import { getErrorMessage } from "../../init/appValues";
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
   // const setAuth = useAuthStore((s) => s.setAuth);
-  const [loading, setLoading] = useState(false);
-  console.log("🚀 ~ Login ~ loading:", loading);
+  const { toast, showToast } = useToast();
+  const [state, setState] = useState<LoadState>("idle");
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
@@ -23,34 +24,38 @@ const ForgotPassword = () => {
       validateOnChange: true,
       validateOnBlur: true,
       onSubmit: async (values) => {
-        console.log("🚀 ~ Login ~ values:", values);
-        // const payload = {
-        //   email: values.email,
-        //   password: values.password,
-        //   role: "landlord",
-        // };
+        const payload = {
+          email: values.email,
+          role: "lister",
+        };
         try {
-          navigate("/verify-password-otp");
           // setLoading(true);
-          // const response = await axios.post("/auth/emailSignIn", payload);
-          // if (response.status === 200) {
-          //   const data = response?.data?.data;
-          //   SuccessToast("Success");
-          //   setAuth(data.token, data.user, true);
-          // }
+          setState("loading");
+          const response = await axios.post("/auth/forgot", payload);
+          console.log("🚀 ~ ForgotPassword ~ response:", response);
+          if (response.status === 200) {
+            //   const data = response?.data?.data;
+            setState("ready");
+            showToast("Otp Send Successfully", "success");
+
+            if (toast?.visible === false) {
+              navigate("/verify-password-otp", {
+                state: { email: values.email },
+              });
+            }
+            //   setAuth(data.token, data.user, true);
+          }
         } catch (error) {
           console.log("🚀 ~ Login ~ error:", error);
-          // ErrorToast(error.response.data.message);
-          // navigate("/auth/signup-otp", { state: { email: values.email } });
-        } finally {
-          setLoading(false);
+          setState("error");
+          showToast(getErrorMessage(error), "error");
         }
       },
     });
-  console.log("🚀 ~ ForgotPassword ~ errors:", errors);
 
   return (
     <div className="lg:min-h-screen lg:flex p-8  lg:p-0">
+      {(state === "error" || state === "ready") && <Toast {...toast} />}
       <div className="grid lg:grid-cols-2 grid-cols-1 p-0 lg:p-4">
         <div className="lg:block hidden">
           <img
@@ -89,7 +94,11 @@ const ForgotPassword = () => {
               </div>
 
               <div className="mt-6">
-                <AuthButton text="Send OTP" loading={loading} type="submit" />
+                <AuthButton
+                  text="Send OTP"
+                  loading={state === "loading" ? true : false}
+                  type="submit"
+                />
               </div>
             </form>
           </div>

@@ -3,8 +3,8 @@ export const signInValues = {
   password: "",
 };
 
-export const signUpValues = {
-  profile:null,
+export const signUpValues: SignupFormValues = {
+  profile: null,
   fullName: "",
   email: "",
   password: "",

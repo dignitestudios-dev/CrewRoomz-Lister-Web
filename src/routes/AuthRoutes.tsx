@@ -1,9 +1,9 @@
-import ForgotPassword from "../pages/ForgotPassword";
-import Login from "../pages/Login";
-import LoginOtp from "../pages/LoginOtp";
-import PasswordOtp from "../pages/PasswordOtp";
-import ResetPassword from "../pages/ResetPassword";
-import SignUp from "../pages/SignUp";
+import ForgotPassword from "../pages/auth/ForgotPassword";
+import Login from "../pages/auth/Login";
+import LoginOtp from "../pages/auth/LoginOtp";
+import PasswordOtp from "../pages/auth/PasswordOtp";
+import ResetPassword from "../pages/auth/ResetPassword";
+import SignUp from "../pages/auth/SignUp";
 
 export const AuthRoute = [
   {

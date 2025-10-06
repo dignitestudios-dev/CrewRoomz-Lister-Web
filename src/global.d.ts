@@ -1,16 +1,19 @@
 export {}; // makes this a module
 
 declare global {
+  type LoadState = "idle" | "loading" | "error" | "ready";
+
   interface LoginFormValues {
     email: string;
     password: string;
   }
 
   interface SignupFormValues {
+    profile: File | null;
+    fullName: string;
     email: string;
     password: string;
-    firstName: string;
-    lastName: string;
+    confirmPassword: string;
   }
 
   interface ForgotPasswordFormValues {

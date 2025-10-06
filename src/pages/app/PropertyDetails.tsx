@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router";
-import ImageGallery from "../components/global/ImageGallery";
+import ImageGallery from "../../components/global/ImageGallery";
 import {
   bgChecked,
   homeOne,
@@ -8,13 +8,13 @@ import {
   pdfIcon,
   setting,
   user,
-} from "../assets/export";
+} from "../../assets/export";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { LuMapPin } from "react-icons/lu";
 import { useState } from "react";
 import { FaStar } from "react-icons/fa";
-import PropertyReviewModal from "../components/properties/PropertyReviewModal";
-import ConfirmationModal from "../components/global/ConfirmationModal";
+import PropertyReviewModal from "../../components/properties/PropertyReviewModal";
+import ConfirmationModal from "../../components/global/ConfirmationModal";
 
 const PropertyDetails = () => {
   const navigate = useNavigate();

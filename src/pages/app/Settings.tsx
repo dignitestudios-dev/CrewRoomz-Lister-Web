@@ -1,15 +1,15 @@
-import { SETTINGS_OPTIONS } from "../statics/settingsOptions";
+import { SETTINGS_OPTIONS } from "../../statics/settingsOptions";
 
-import ProfileEdit from "../components/settings/ProfileEdit";
+import ProfileEdit from "../../components/settings/ProfileEdit";
 import { useMemo, useState } from "react";
-import Wallet from "../components/settings/Wallet";
-import SubscriptionPlans from "../components/settings/SubscriptionPlans";
-import TermsAndConditions from "../components/settings/TermsAndConditions";
-import PrivacyPolicy from "../components/settings/PrivacyPolicy";
+import Wallet from "../../components/settings/Wallet";
+import SubscriptionPlans from "../../components/settings/SubscriptionPlans";
+import TermsAndConditions from "../../components/settings/TermsAndConditions";
+import PrivacyPolicy from "../../components/settings/PrivacyPolicy";
 import { HiChevronDown, HiChevronRight } from "react-icons/hi";
-import NotificationsSetting from "../components/settings/NotificationsSetting";
-import ChangePassword from "../components/settings/ChangePassword";
-import DeleteAccount from "../components/settings/DeleteAccount";
+import NotificationsSetting from "../../components/settings/NotificationsSetting";
+import ChangePassword from "../../components/settings/ChangePassword";
+import DeleteAccount from "../../components/settings/DeleteAccount";
 
 const Settings = () => {
   const defaultKey = useMemo(

@@ -1,19 +1,21 @@
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import CountDown from "../Auth/CountDown";
-import { ErrorToast } from "../global/Toaster";
+// import { ErrorToast } from "../global/Toaster";
 
 const DeleteAccount = () => {
   const [isDelete, setIsDelete] = useState(false);
   const [otp, setOtp] = useState(["", "", "", ""]);
-  const inputs = useRef([]);
+  const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [isActive, setIsActive] = useState(true);
   const [seconds, setSeconds] = useState(10);
 
   const [resendLoading, setResendLoading] = useState(false);
-  const [loading, setLoading] = useState(false);
 
-  const handleChange = (e, index) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    index: number
+  ) => {
     const value = e.target.value.replace(/\D/, "");
     const newOtp = [...otp];
     newOtp[index] = value;
@@ -24,13 +26,16 @@ const DeleteAccount = () => {
     }
   };
 
-  const handleKeyDown = (e, index) => {
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputs.current[index - 1]?.focus();
     }
   };
 
-  const handlePaste = (e) => {
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pasteData = e.clipboardData
       .getData("text")
@@ -67,7 +72,8 @@ const DeleteAccount = () => {
       //     handleRestart();
       //   }
     } catch (err) {
-      ErrorToast(err?.response?.data?.message);
+      console.log("🚀 ~ handleResendOtp ~ err:", err);
+      // ErrorToast(err?.response?.data?.message);
     } finally {
       setResendLoading(false);
     }
@@ -101,7 +107,9 @@ const DeleteAccount = () => {
                 onChange={(e) => handleChange(e, index)}
                 onKeyDown={(e) => handleKeyDown(e, index)}
                 onPaste={handlePaste}
-                ref={(el) => (inputs.current[index] = el)}
+                ref={(el) => {
+                  inputs.current[index] = el;
+                }}
                 className="w-[50px] h-[55px] rounded-[8px] text-blue-600 bg-[#ffffff] outline-none text-center field-shadow text-xl focus:border-[#36C0EF] focus:ring-1 focus:ring-[#36C0EF] transition"
               />
             ))}
@@ -119,14 +127,14 @@ const DeleteAccount = () => {
                   />
                 </span>
               ) : (
-                <span
+                <button
                   type="button"
                   disabled={resendLoading}
                   onClick={handleResendOtp}
                   className="bg-gradient-to-r from-blue-500 to-blue-700 bg-clip-text text-transparent font-medium pl-1 cursor-pointer"
                 >
                   {resendLoading ? "Resending..." : "Resend"}
-                </span>
+                </button>
               )}
             </p>
           </div>

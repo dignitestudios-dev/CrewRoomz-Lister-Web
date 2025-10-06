@@ -1,12 +1,12 @@
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { HiOutlinePlus } from "react-icons/hi";
 import { useNavigate } from "react-router";
-import { binIcon, map, pdfIcon, ticked, untick } from "../assets/export";
+import { binIcon, map, pdfIcon, ticked, untick } from "../../assets/export";
 import { useReducer, useState } from "react";
-import { AMENITY_GROUPS } from "../statics/amenities";
-import { validationSchema } from "../schema/appSchema";
+import { AMENITY_GROUPS } from "../../statics/amenities";
+import { validationSchema } from "../../schema/appSchema";
 import { useFormik } from "formik";
-import { propertyValues } from "./../init/appValues";
+import { propertyValues } from "../../init/appValues";
 import { RxCross2 } from "react-icons/rx";
 
 type Action =

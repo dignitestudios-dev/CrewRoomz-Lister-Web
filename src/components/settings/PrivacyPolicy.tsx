@@ -1,5 +1,3 @@
-import React from "react";
-
 const PrivacyPolicy = () => {
   return (
     <div className="bg-white p-6 rounded-2xl mb-4">

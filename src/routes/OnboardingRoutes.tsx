@@ -1,4 +1,4 @@
-import ConnectStripeAccount from "../pages/ConnectStripeAccount";
+import ConnectStripeAccount from "../pages/app/ConnectStripeAccount";
 
 export const onboardRoute = [
   {

@@ -1,13 +1,13 @@
-import Booking from "../pages/Booking";
-import BookingDetails from "../pages/BookingDetails";
-import BookingHistory from "../pages/BookingHistory";
-import Chat from "../pages/Chat";
-import Home from "../pages/Home";
-import ListingCreate from "../pages/ListingCreate";
-import Notification from "../pages/Notification";
-import PropertyAdd from "../pages/PropertyAdd";
-import PropertyDetails from "../pages/PropertyDetails";
-import Settings from "../pages/Settings";
+import Booking from "../pages/app/Booking";
+import BookingDetails from "../pages/app/BookingDetails";
+import BookingHistory from "../pages/app/BookingHistory";
+import Chat from "../pages/app/Chat";
+import Home from "../pages/app/Home";
+import ListingCreate from "../pages/app/ListingCreate";
+import Notification from "../pages/app/Notification";
+import PropertyAdd from "../pages/app/PropertyAdd";
+import PropertyDetails from "../pages/app/PropertyDetails";
+import Settings from "../pages/app/Settings";
 
 export const AppRoutes = [
   {

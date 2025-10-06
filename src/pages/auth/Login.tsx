@@ -1,21 +1,26 @@
 import { useState } from "react";
-import { signInSideImg } from "../assets/export";
-import AuthInput from "../components/Auth/AuthInput";
+import { signInSideImg } from "../../assets/export";
+import AuthInput from "../../components/Auth/AuthInput";
 import { useFormik } from "formik";
 // import axios from "axios";
-import { signInSchema } from "../schema/authSchema";
-import { signInValues } from "../init/authValues";
+import { signInSchema } from "../../schema/authSchema";
+import { signInValues } from "../../init/authValues";
 // import { ErrorToast, SuccessToast } from "../components/global/Toaster";
-// import useAuthStore from "../store/authStore";
+import useAuthStore from "../../store/authStore";
 import { NavLink, useNavigate } from "react-router";
-import AuthButton from "../components/Auth/AuthButton";
-import SocialLogin from "../components/Auth/SocialLogin";
+import AuthButton from "../../components/Auth/AuthButton";
+import SocialLogin from "../../components/Auth/SocialLogin";
+import axios from "../../axios";
+import { useToast } from "../../components/global/useToast";
+import Toast from "../../components/global/Toast";
+import { getErrorMessage } from "../../init/appValues";
 
 const Login = () => {
   const navigate = useNavigate();
-  // const setAuth = useAuthStore((s) => s.setAuth);
-  const [loading, setLoading] = useState(false);
-  console.log("🚀 ~ Login ~ loading:", loading);
+  const setAuth = useAuthStore((s) => s.setAuth);
+
+  const { toast, showToast } = useToast();
+  const [state, setState] = useState<LoadState>("idle");
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
     useFormik({
@@ -25,32 +30,35 @@ const Login = () => {
       validateOnBlur: true,
       onSubmit: async (values) => {
         console.log("🚀 ~ Login ~ values:", values);
-        navigate("/home");
-        // const payload = {
-        //   email: values.email,
-        //   password: values.password,
-        //   role: "landlord",
-        // };
+        setState("loading");
+        const payload = {
+          email: values.email,
+          password: values.password,
+          role: "lister",
+        };
         try {
-          // setLoading(true);
-          // const response = await axios.post("/auth/emailSignIn", payload);
-          // if (response.status === 200) {
-          //   const data = response?.data?.data;
-          //   SuccessToast("Success");
-          //   setAuth(data.token, data.user, true);
-          // }
+          const response = await axios.post("/auth/signIn", payload);
+          if (response.status === 200) {
+            const data = response?.data?.data;
+            console.log("🚀 ~ Login ~ data:", data);
+            navigate("/home");
+            // SuccessToast("Success");
+            setAuth(data.token, data.user, true);
+            setState("ready");
+
+            showToast("Login Success", "success");
+          }
         } catch (error) {
           console.log("🚀 ~ Login ~ error:", error);
-          // ErrorToast(error.response.data.message);
-          // navigate("/auth/signup-otp", { state: { email: values.email } });
-        } finally {
-          setLoading(false);
+          setState("error");
+          showToast(getErrorMessage(error), "error");
         }
       },
     });
 
   return (
     <div className="lg:min-h-screen lg:flex p-8 lg:p-0">
+      {(state === "error" || state === "ready") && <Toast {...toast} />}
       <div className="grid lg:grid-cols-2 grid-cols-1 p-0 lg:p-4">
         <div className="lg:block hidden">
           <img
@@ -111,7 +119,11 @@ const Login = () => {
                 </button>
               </div>
               <div className="mt-6">
-                <AuthButton text="Login" loading={loading} type="submit" />
+                <AuthButton
+                  text="Login"
+                  loading={state === "loading" ? true : false}
+                  type="submit"
+                />
               </div>
             </form>
           </div>

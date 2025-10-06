@@ -1,6 +1,6 @@
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useNavigate } from "react-router";
-import { messageIcon, nextBtn, user } from "../assets/export";
+import { messageIcon, nextBtn, user } from "../../assets/export";
 
 const BookingDetails = () => {
   const navigate = useNavigate();

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { homeOne, nextBtn, user } from "../assets/export";
+import { homeOne, nextBtn, user } from "../../assets/export";
 import { useNavigate } from "react-router";
-import { BookingFilterDropDown } from "../components/global/FilterDropDown";
+import { BookingFilterDropDown } from "../../components/global/FilterDropDown";
 
 type bookingStatus = "private" | "multi" | "semi";
 type bookingStatusProgress = "completed" | "cancelled";

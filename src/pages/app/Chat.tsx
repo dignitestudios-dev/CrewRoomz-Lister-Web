@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import { IoSend } from "react-icons/io5";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router";
-import { user } from "../assets/export";
+import { user } from "../../assets/export";
 
 const users: User[] = [
   { id: 1, name: "Mike Smith (258496)", initials: "MS", image: user },

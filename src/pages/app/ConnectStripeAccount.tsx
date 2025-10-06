@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { signupSideImg, walletConnect } from "../assets/export";
+import { signupSideImg, walletConnect } from "../../assets/export";
 import { useNavigate } from "react-router";
 import { CiCircleCheck } from "react-icons/ci";
 

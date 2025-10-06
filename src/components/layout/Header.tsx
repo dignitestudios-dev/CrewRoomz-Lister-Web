@@ -147,7 +147,7 @@ const Header = () => {
             <div className="flex justify-center my-2 ">
               <p className="text-[22px] font-semibold mb-2">Notifications</p>
             </div>
-            {Array.from({ length: 4 }).map((item, index) => (
+            {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
                 className="flex justify-between items-center mt-2 p-2"

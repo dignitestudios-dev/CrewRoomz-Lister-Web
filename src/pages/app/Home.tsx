@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import { dotBar, homeOne, homeTwo } from "../assets/export.ts";
-import { HomeFilterDropDown } from "../components/global/FilterDropDown.tsx";
-import PropertyCard from "../components/properties/PropertyCard.tsx";
+import { dotBar, homeOne, homeTwo } from "../../assets/export.ts";
+import { HomeFilterDropDown } from "../../components/global/FilterDropDown.tsx";
+import PropertyCard from "../../components/properties/PropertyCard.tsx";
 
 interface StatusIndicatorProps {
   statuses: StatusOption[];

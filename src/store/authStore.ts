@@ -1,4 +1,3 @@
-
 import { create } from "zustand";
 import Cookies from "js-cookie";
 import axios from "axios";
@@ -23,6 +22,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
     return v ? JSON.parse(v) : null;
   })(),
   setAuth: (token, user = undefined, remember = true) => {
+    console.log("🚀 ~ token:", token);
     set({ token, user });
     const opts = remember ? { expires: 7 } : undefined;
     Cookies.set(TOKEN_KEY, token, opts);
@@ -43,7 +43,7 @@ const useAuthStore = create<AuthState>((set, get) => ({
       });
       return true;
     } catch (err) {
-      console.log("🚀 ~ err:", err)
+      console.log("🚀 ~ err:", err);
       get().clearAuth();
       return false;
     }
