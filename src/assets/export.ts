@@ -2,7 +2,7 @@ import backgroundImage from "./background.png";
 import homeOne from "./homeOne.jpg";
 import homeTwo from "./homeTwo.jpg";
 import logo from "./crewLogo.png";
-import dotBar from "./dotBar.png";
+import dotBar from "./dotbar.png";
 import user from "./user.png";
 import setting from "./setting.png";
 import logout from "./logout.png";
