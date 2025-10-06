@@ -19,7 +19,7 @@ export const changePasswordSchema = Yup.object().shape({
 
   confirmPassword: Yup.string()
     .required("Please confirm your password")
-    .oneOf([Yup.ref("password"), null], "Passwords must match"),
+    .oneOf([Yup.ref("password")], "Passwords must match"),
 
   newPassword: Yup.string()
     .matches(/^(?!\s)(?!.*\s$)/, "Password must not begin or end with spaces")

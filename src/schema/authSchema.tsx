@@ -20,7 +20,7 @@ export const signInSchema = Yup.object({
 });
 
 export const signUpSchema = Yup.object({
-  profile: Yup.mixed()
+  profile: Yup.mixed<File>()
     .required("Profile picture is required")
     .test("fileSize", "File size too large (max 2MB)", (value) => {
       return value ? value.size <= 2 * 1024 * 1024 : false;
@@ -53,7 +53,7 @@ export const signUpSchema = Yup.object({
 
   confirmPassword: Yup.string()
     .required("Please confirm your password")
-    .oneOf([Yup.ref("password"), null], "Passwords must match"),
+    .oneOf([Yup.ref("password")], "Passwords must match"),
 });
 
 export const forgotPasswordSchema = Yup.object({
@@ -77,5 +77,5 @@ export const resetPasswordSchema = Yup.object({
     .required("Please enter your password"),
   cPassword: Yup.string()
     .required("Please confirm your password")
-    .oneOf([Yup.ref("password"), null], "Passwords must match"),
+    .oneOf([Yup.ref("password")], "Passwords must match"),
 });

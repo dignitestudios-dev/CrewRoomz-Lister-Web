@@ -343,7 +343,7 @@ const PropertyAdd = () => {
 
         {rulesPreviews.length > 0 && (
           <div className=" gap-2 overflow-x-auto">
-            {rulesPreviews.map((src, i) => (
+            {rulesPreviews.map((_, i) => (
               <div key={i} className="bg-white rounded-lg py-4 relative my-1">
                 <div>
                   <img

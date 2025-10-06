@@ -35,14 +35,10 @@ instance.interceptors.request.use(
     const token = Cookies.get("token");
     const visitorId = await getDeviceFingerprint();
 
-    // ✅ Attach headers
-    request.headers = {
-      ...request.headers,
-      Accept: "application/json, text/plain, */*",
-      devicemodel: navigator.userAgent,
-      deviceuniqueid: visitorId,
-      ...(token && { Authorization: `Bearer ${token}` }),
-    };
+    request.headers.set("Accept", "application/json, text/plain, */*");
+    request.headers.set("devicemodel", navigator.userAgent);
+    request.headers.set("deviceuniqueid", visitorId);
+    if (token) request.headers.set("Authorization", `Bearer ${token}`);
 
     return request;
   },
