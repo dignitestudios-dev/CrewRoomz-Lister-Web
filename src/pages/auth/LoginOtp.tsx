@@ -7,7 +7,7 @@ import { ErrorToast } from "../../components/global/Toaster";
 import { CiCircleCheck } from "react-icons/ci";
 import { useLocation, useNavigate } from "react-router";
 import axios from "../../axios";
-import { useToast } from "../../components/global/useToast";
+import { useToast } from "../../hooks/useToast";
 import { getErrorMessage } from "../../init/appValues";
 import Toast from "../../components/global/Toast";
 
@@ -75,7 +75,7 @@ const LoginOtp = () => {
       return;
     }
     setIsVerified(true);
-    const otpValue = otp.join("");
+    const otpValue = parseInt(otp.join(""), 10);
     try {
       const response = await axios.post("/auth/verifyOTP", {
         otp: otpValue,
@@ -83,12 +83,10 @@ const LoginOtp = () => {
         role: "lister",
       });
       if (response.status === 200) {
-        console.log(response.data.resetToken);
         setState("ready");
         showToast("Login Success", "success");
       }
     } catch (error) {
-      console.log("🚀 ~ handleSubmit ~ error:", error);
       setState("error");
       showToast(getErrorMessage(error), "error");
     }
@@ -105,12 +103,11 @@ const LoginOtp = () => {
       const response = await axios.post("/auth/resendOtp", obj);
       if (response.status === 201) {
         setResendLoading(false);
-        setOtp(Array(5).fill(""));
+        setOtp(Array(6).fill(""));
         setState("ready");
         showToast("Login Success", "success");
       }
     } catch (err) {
-      console.log("🚀 ~ handleResendOtp ~ err:", err);
       setState("error");
       showToast(getErrorMessage(err), "error");
     } finally {
@@ -155,7 +152,7 @@ const LoginOtp = () => {
               <p className="text-[24px] font-semibold">Verification</p>
               <p className="text-[14px] text-[#565656]">
                 Enter the code send to{" "}
-                <span className="text-black">mikesmith@workemail.com</span>
+                <span className="text-black">{email}</span>
               </p>
             </div>
             <div className="flex justify-center items-center w-full ">

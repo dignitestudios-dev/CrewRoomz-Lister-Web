@@ -9,7 +9,7 @@ interface ToastState {
   visible: boolean;
 }
 
-export const useToast = (delay = 3000) => {
+export const useToast = (delay = 6000) => {
   const [toast, setToast] = useState<ToastState>({
     message: "",
     type: "info",

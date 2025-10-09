@@ -3,6 +3,7 @@ type confirmationModalProps = {
   content: string;
   skipBtnContent: string;
   confirmBtnContent: string;
+  loading: string;
   onClose: () => void;
   onSubmit: () => void;
 };
@@ -12,6 +13,7 @@ const ConfirmationModal: React.FC<confirmationModalProps> = ({
   content,
   skipBtnContent,
   confirmBtnContent,
+  loading,
   onClose,
   onSubmit,
 }) => {
@@ -33,7 +35,7 @@ const ConfirmationModal: React.FC<confirmationModalProps> = ({
               onClick={() => onSubmit()}
               className="bg-[#DC1D00] text-[12px] font-[500] text-[#ffffff] rounded-md py-3 w-[160px]"
             >
-              {confirmBtnContent}
+              {loading === "loading" ? "Loading..." : confirmBtnContent}
             </button>
           </div>
         </div>

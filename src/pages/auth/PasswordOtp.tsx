@@ -1,30 +1,29 @@
 import { useRef, useState } from "react";
 import { signupSideImg } from "../../assets/export";
-// import AuthInput from "../components/Auth/AuthInput";
-
-// import { ErrorToast, SuccessToast } from "../components/global/Toaster";
-// import useAuthStore from "../store/authStore";
 import AuthButton from "../../components/Auth/AuthButton";
 import CountDown from "../../components/Auth/CountDown";
 import { ErrorToast } from "../../components/global/Toaster";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import axios from "../../axios";
 import { getErrorMessage } from "../../init/appValues";
-import { useToast } from "../../components/global/useToast";
+import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/global/Toast";
+import useAuthStore from "../../store/authStore";
 
 const PasswordOtp = () => {
-  // const setAuth = useAuthStore((s) => s.setAuth);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
+  const setAuth = useAuthStore((s) => s.setAuth);
+
+  const location = useLocation();
+  const { email } = location.state || {};
+
   const { toast, showToast } = useToast();
   const [state, setState] = useState<LoadState>("idle");
+
   const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
   const [resendLoading, setResendLoading] = useState(false);
-  const location = useLocation();
-  const { email } = location.state || {};
-
   const [isActive, setIsActive] = useState(true);
   const [seconds, setSeconds] = useState(10);
 
@@ -75,21 +74,24 @@ const PasswordOtp = () => {
       ErrorToast("Please enter complete OTP.");
       return;
     }
-    const otpValue = otp.join("");
+    const otpValue = parseInt(otp.join(""), 10);
     try {
       setState("loading");
-      const response = await axios.post("/auth/verifyOTP", {
+      const response = await axios.post("/auth/verifyForgotOTP", {
         otp: otpValue,
         email: email,
         role: "lister",
       });
       if (response.status === 200) {
-        console.log(response.data.resetToken);
+        const data = response?.data?.data;
         setState("ready");
-        showToast("Login Success", "success");
+        showToast(response?.data?.message, "success");
+        setAuth(data.token, data.user, true);
+        if (toast?.visible === false) {
+          navigate("/reset-password");
+        }
       }
     } catch (error) {
-      console.log("🚀 ~ handleSubmit ~ error:", error);
       setState("error");
       showToast(getErrorMessage(error), "error");
     }
@@ -98,20 +100,19 @@ const PasswordOtp = () => {
   const handleResendOtp = async () => {
     try {
       setResendLoading(true);
-      handleRestart();
       const obj = {
         email: email,
         role: "lister",
       };
       const response = await axios.post("/auth/resendOtp", obj);
-      if (response.status === 201) {
+      if (response.status === 200) {
         setResendLoading(false);
-        setOtp(Array(5).fill(""));
+        setOtp(Array(6).fill(""));
         setState("ready");
-        showToast("Login Success", "success");
+        showToast(response?.data?.message, "success");
+        handleRestart();
       }
     } catch (err) {
-      console.log("🚀 ~ handleResendOtp ~ err:", err);
       setState("error");
       showToast(getErrorMessage(err), "error");
     } finally {
@@ -164,7 +165,7 @@ const PasswordOtp = () => {
                 ))}
               </div>
               <div className="flex items-center justify-center gap-2 relative z-10 mt-6">
-                <p className=" text-[13px] leading-[21.6px] text-[#565656]">
+                <div className=" text-[13px] leading-[21.6px] text-[#565656]">
                   Didn&apos;t receive code?
                   {isActive ? (
                     <span className="inline-block ml-1 align-middle">
@@ -185,7 +186,7 @@ const PasswordOtp = () => {
                       {resendLoading ? "Resending..." : "Resend"}
                     </button>
                   )}
-                </p>
+                </div>
               </div>
 
               <div className="mt-6">

@@ -1,9 +1,14 @@
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { useNavigate } from "react-router";
-import { messageIcon, nextBtn, user } from "../../assets/export";
+import { useLocation, useNavigate } from "react-router";
+import { messageIcon, nextBtn } from "../../assets/export";
+import { getDateFormat } from "../../init/appValues";
 
 const BookingDetails = () => {
   const navigate = useNavigate();
+
+  const location = useLocation();
+  const booking = location.state.booking;
+  console.log("🚀 ~ BookingDetails ~ booking:", booking);
 
   return (
     <div className="max-w-[1260px] mx-auto pt-10">
@@ -17,8 +22,8 @@ const BookingDetails = () => {
             <FaArrowLeftLong size={16} />
           </button>
           <h1 className="text-[26px] font-[600]">Property Details</h1>
-          <div className="h-8 px-3 flex items-center text-[#29ABE2] text-[16px] rounded-4xl bg-blue-100">
-            Upcoming
+          <div className="h-8 px-3 flex items-center text-[#29ABE2] text-[16px] rounded-4xl bg-blue-100 capitalize">
+            {booking?.bookingStatus}
           </div>
         </div>
       </div>
@@ -27,21 +32,29 @@ const BookingDetails = () => {
           <div className=" bg-[#FFFFFF] p-8 rounded-3xl space-y-4">
             <div className="flex justify-between items-center">
               <p className="text-gray-700 text-[13px]">Booking ID</p>
-              <p className="text-black text-[14px] font-[500]">123456</p>
+              <p className="text-black text-[14px] font-[500]">
+                {booking?._id}
+              </p>
             </div>
             <div className="flex justify-between items-center border-t  border-[#E3DBDB] py-4">
               <p className="text-gray-700 text-[13px]">Booking Type</p>
-              <p className="text-black text-[14px] font-[500]">Daily</p>
+              <p className="text-black text-[14px] font-[500] capitalize">
+                {booking?.roomType}
+              </p>
             </div>
             <div className="flex justify-between items-center border-t  border-[#E3DBDB] py-4">
               <p className="text-gray-700 text-[13px]">Bed Type</p>
-              <p className="text-black text-[14px] font-[500]">
-                King Size, Single Bed
+              <p className="text-black text-[14px] font-[500] capitalize">
+                {booking?.bed
+                  ?.map((item: { type: string }) => item.type)
+                  ?.join(", ")}
               </p>
             </div>
             <div className="flex justify-between items-center border-t  border-[#E3DBDB] py-4">
               <p className="text-gray-700 text-[13px]">Date</p>
-              <p className="text-black text-[14px] font-[500]">12-12-25</p>
+              <p className="text-black text-[14px] font-[500]">
+                {getDateFormat(booking?.createdAt)}
+              </p>
             </div>
             <div className="flex justify-between items-center border-t border-[#E3DBDB] pt-4">
               <p className="text-black text-[18px] font-[600]">
@@ -51,18 +64,27 @@ const BookingDetails = () => {
             <div className=" p-4 rounded-lg shadow-lite space-y-4">
               <div className="flex items-center gap-2 mt-2">
                 <img
-                  src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80"
+                  src={booking?.room?.media[0]}
                   alt="user"
                   className="w-20 h-20 rounded-2xl object-cover"
                 />
                 <div>
-                  <p className="text-[16px] font-[500]">Gaular, Norway</p>
-                  <p className="text-[15px] text-[#18181899] font-[400]">
-                    456 Maple Street, Anytown, NY 12345
+                  <p className="text-[16px] font-[500]">
+                    {booking?.room?.state}, {booking?.room?.city}
                   </p>
                   <p className="text-[15px] text-[#18181899] font-[400]">
-                    1 King Bed, 1 Private Bath
+                    {booking?.room?.address}
                   </p>
+
+                  {booking?.room && (
+                    <p className=" text-[15px] text-[#18181899] font-[400]">
+                      {booking?.room?.sharedBath > 0 &&
+                        booking?.room?.sharedBath + " Shared Bath"}
+                      ,
+                      {booking?.room?.privateBath > 0 &&
+                        booking?.room?.privateBath + " Private Bath"}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="flex justify-end mt-2 border-t border-[#E3DBDB]">
@@ -85,14 +107,14 @@ const BookingDetails = () => {
           <div className=" bg-[#FFFFFF] px-4 pt-2 rounded-2xl space-y-4 flex justify-between items-center ">
             <div className="flex items-center gap-2 mt-2">
               <img
-                src={user}
+                src={booking?.user?.profilePicture}
                 alt="user"
                 className="w-14 h-14 rounded-2xl object-cover"
               />
               <div>
-                <p className="text-[18px] font-[500]">Mike Smith</p>
+                <p className="text-[18px] font-[500]">{booking?.user?.name}</p>
                 <p className="text-[15px] text-[#18181899] font-[400]">
-                  mikesmith@yopmail.com
+                  {booking?.user?.email}
                 </p>
               </div>
             </div>
@@ -107,15 +129,19 @@ const BookingDetails = () => {
             </div>
             <div className=" flex justify-between text-[14px] font-[500] text-[#18181899] ">
               <p>Stay $100*1</p>
-              <p>$100</p>
+              <p>${}</p>
+            </div>
+            <div className=" flex justify-between text-[14px] font-[500] text-[#18181899] ">
+              <p>Admin Commission</p>
+              <p>${booking?.adminCommissionAmount}</p>
             </div>
             <div className=" flex justify-between text-[14px] font-[500] text-[#18181899] ">
               <p>Sub Total</p>
-              <p>$100</p>
+              <p>${booking?.platformFee}</p>
             </div>
             <div className=" flex justify-between border-t-[1px] border-[#90909099] border-dashed text-[14px] font-[500] pt-4">
               <p> Total</p>
-              <p>$100</p>
+              <p>${booking?.totalPrice}</p>
             </div>
           </div>
         </div>

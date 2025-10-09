@@ -70,12 +70,13 @@ declare global {
     label: string | JSX.Element;
     path: string;
   }
-  type StatusOption = {
-    label: HomeStatus;
+  type FilterOptions = {
+    label: HomeFilter;
     isActive: boolean;
   };
 
-  type HomeStatus = "pending" | "approved" | "rejected";
+  type HomeFilter = "multi" | "semi-private" | "private";
+  type HomeStatus = "Active" | "Inactive";
 
   type BunkType = "top" | "bottom";
 
@@ -139,4 +140,29 @@ declare global {
 
   type Message = TextMessage | ImageMessage | FileMessage;
   type Chats = Record<number, Message[]>;
+
+  interface PaginationProps {
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
+  }
+
+  interface PaginationState {
+    currentPage: number;
+    totalPages: number;
+  }
+  export interface GeoLocation {
+    type: "Point";
+    coordinates: [number, number]; // [lng, lat]
+  }
+
+  // Address structure used across components
+  export interface Address {
+    address: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode: string;
+    location: GeoLocation;
+  }
 }

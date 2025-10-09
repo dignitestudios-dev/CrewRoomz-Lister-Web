@@ -7,6 +7,7 @@ import ListingCreate from "../pages/app/ListingCreate";
 import Notification from "../pages/app/Notification";
 import PropertyAdd from "../pages/app/PropertyAdd";
 import PropertyDetails from "../pages/app/PropertyDetails";
+import PropertyEdit from "../pages/app/PropertyEdit";
 import Settings from "../pages/app/Settings";
 
 export const AppRoutes = [
@@ -21,6 +22,10 @@ export const AppRoutes = [
   {
     url: "add-property",
     page: <PropertyAdd />,
+  },
+  {
+    url: "edit-property/:id",
+    page: <PropertyEdit />,
   },
   {
     url: "property-details/:id",

@@ -11,7 +11,7 @@ import { NavLink, useNavigate } from "react-router";
 import AuthButton from "../../components/Auth/AuthButton";
 import SocialLogin from "../../components/Auth/SocialLogin";
 import axios from "../../axios";
-import { useToast } from "../../components/global/useToast";
+import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/global/Toast";
 import { getErrorMessage } from "../../init/appValues";
 
@@ -29,7 +29,6 @@ const Login = () => {
       validateOnChange: true,
       validateOnBlur: true,
       onSubmit: async (values) => {
-        console.log("🚀 ~ Login ~ values:", values);
         setState("loading");
         const payload = {
           email: values.email,
@@ -40,16 +39,21 @@ const Login = () => {
           const response = await axios.post("/auth/signIn", payload);
           if (response.status === 200) {
             const data = response?.data?.data;
-            console.log("🚀 ~ Login ~ data:", data);
-            navigate("/home");
-            // SuccessToast("Success");
             setAuth(data.token, data.user, true);
             setState("ready");
 
-            showToast("Login Success", "success");
+            const message =
+              typeof response?.data?.message === "string"
+                ? response.data.message.toUpperCase()
+                : "SUCCESS";
+
+            showToast(message, "success");
+
+            if (toast?.visible === false) {
+              navigate("/home");
+            }
           }
         } catch (error) {
-          console.log("🚀 ~ Login ~ error:", error);
           setState("error");
           showToast(getErrorMessage(error), "error");
         }

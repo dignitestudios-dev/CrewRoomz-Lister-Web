@@ -3,7 +3,7 @@ import { PhotoProvider, PhotoView } from "react-photo-view";
 import "react-photo-view/dist/react-photo-view.css";
 
 interface ImgGalleryProps {
-  images: string[];
+  images: string[] | undefined;
 }
 
 const ImageGallery: React.FC<ImgGalleryProps> = ({ images }) => {

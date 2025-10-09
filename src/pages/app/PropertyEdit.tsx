@@ -1,163 +1,63 @@
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { HiOutlinePlus } from "react-icons/hi";
-import { useLocation, useNavigate } from "react-router";
-import { binIcon, pdfIcon, ticked, untick } from "../../assets/export";
-import { useReducer, useState } from "react";
-import { AMENITY_GROUPS } from "../../statics/amenities";
-import { addPropertySchema } from "../../schema/appSchema";
-import { useFormik } from "formik";
-import { getErrorMessage, propertyValues } from "../../init/appValues";
-import { RxCross2 } from "react-icons/rx";
+import { useEffect, useReducer, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router";
 import axios from "../../axios";
+import { useFormik } from "formik";
 import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/global/Toast";
-import { bedTypeOptions } from "../../statics/bedOptions";
 import GoogleMapComponent from "../../components/global/GoogleMap";
+import {
+  bedReducer,
+  getErrorMessage,
+  initialState,
+} from "../../init/appValues";
+import { AMENITY_GROUPS } from "../../statics/amenities";
+import { binIcon, pdfIcon, ticked, untick } from "../../assets/export";
+import { HiOutlinePlus } from "react-icons/hi";
+import { RxCross2 } from "react-icons/rx";
+import { bedTypeOptions } from "../../statics/bedOptions";
 
-type Action =
-  | { type: "ADD_BED" }
-  | { type: "REMOVE_BED"; index: number }
-  | { type: "SET_BED_TYPE"; index: number; payload: string }
-  | {
-      type: "SET_PRICE";
-      index: number;
-      payload: { name: keyof Prices; value: string };
-    }
-  | {
-      type: "SET_BUNK_PRICE";
-      index: number;
-      payload: { bunk: BunkType; name: keyof Prices; value: string };
-    };
-
-const initialState: State = {
-  beds: [
-    {
-      bedType: "",
-      prices: { dailyPrice: "", monthlyPrice: "" },
-      bunkPrices: {
-        top: { dailyPrice: "", monthlyPrice: "" },
-        bottom: { dailyPrice: "", monthlyPrice: "" },
-      },
-    },
-  ],
-};
-
-interface BedInfo {
-  bedType: string;
-  prices: {
-    dailyPrice: string;
-    monthlyPrice: string;
-  };
-  bunkPrices?: {
-    top?: {
-      dailyPrice: string;
-      monthlyPrice: string;
-    };
-    bottom?: {
-      dailyPrice: string;
-      monthlyPrice: string;
-    };
+interface Address {
+  address: string;
+  city: string;
+  state: string;
+  location: {
+    lat: number;
+    lng: number;
   };
 }
 
-interface BedDetail {
-  type: string;
-  price: number;
-  monthlyPrice: number;
-}
-
-function reducer(state: State, action: Action) {
-  switch (action.type) {
-    case "ADD_BED":
-      return {
-        ...state,
-        beds: [
-          ...state.beds,
-          {
-            bedType: "",
-            prices: { dailyPrice: "", monthlyPrice: "" },
-            bunkPrices: {
-              top: { dailyPrice: "", monthlyPrice: "" },
-              bottom: { dailyPrice: "", monthlyPrice: "" },
-            },
-          },
-        ],
-      };
-
-    case "REMOVE_BED":
-      return {
-        ...state,
-        beds: state.beds.filter((_, i) => i !== action.index),
-      };
-
-    case "SET_BED_TYPE":
-      return {
-        ...state,
-        beds: state.beds.map((bed, i) =>
-          i === action.index ? { ...bed, bedType: action.payload } : bed
-        ),
-      };
-
-    case "SET_PRICE":
-      return {
-        ...state,
-        beds: state.beds.map((bed, i) =>
-          i === action.index
-            ? {
-                ...bed,
-                prices: {
-                  ...bed.prices,
-                  [action.payload.name]: action.payload.value,
-                },
-              }
-            : bed
-        ),
-      };
-
-    case "SET_BUNK_PRICE":
-      return {
-        ...state,
-        beds: state.beds.map((bed, i) =>
-          i === action.index
-            ? {
-                ...bed,
-                bunkPrices: {
-                  ...bed.bunkPrices,
-                  [action.payload.bunk]: {
-                    ...bed.bunkPrices[action.payload.bunk],
-                    [action.payload.name]: action.payload.value,
-                  },
-                },
-              }
-            : bed
-        ),
-      };
-
-    default:
-      return state;
-  }
-}
-
-const PropertyAdd = () => {
+const PropertyEdit = () => {
   const navigate = useNavigate();
-
+  const { id } = useParams();
   const location = useLocation();
-  const type = location.state;
-
+  const room = location.state.room;
+  console.log("🚀 ~ PropertyEdit ~ room:", room);
   const { toast, showToast } = useToast();
-  const [componentState, setComponentState] = useState<LoadState>("idle");
-
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [rulesPreviews, setRulesPreviews] = useState<string[]>([]);
-
-  const [state, dispatch] = useReducer(reducer, initialState);
-  console.log("🚀 ~ PropertyAdd ~ state:", state);
+  const [componentState, setComponentState] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
 
   const [address, setAddress] = useState<Address | null>(null);
+  const [state, dispatch] = useReducer(bedReducer, initialState);
 
-  const onLocationSelect = (data: Address) => {
-    setAddress(data);
-  };
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]); // URLs for preview
+  const [newImages, setNewImages] = useState<File[]>([]); // Files newly selected
+  const [removedImages, setRemovedImages] = useState<string[]>([]); // URLs removed
+
+  // For previews and file tracking
+  const [rulesPreviews, setRulesPreviews] = useState<string[]>([]);
+  const [newRulesFiles, setNewRulesFiles] = useState<File[]>([]); // new uploads
+  const [removedRules, setRemovedRules] = useState<string[]>([]); // removed old files
+
+  const [initialValues, setInitialValues] = useState<any>({
+    description: "",
+    amenities: [],
+    sharedBath: "",
+    privateBath: "",
+    images: [],
+    rulesFiles: [],
+  });
 
   const handleBedTypeChange = (
     index: number,
@@ -166,6 +66,7 @@ const PropertyAdd = () => {
     dispatch({ type: "SET_BED_TYPE", index, payload: e.target.value });
   };
 
+  // Update regular bed prices
   const handlePriceChange = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -177,6 +78,7 @@ const PropertyAdd = () => {
     });
   };
 
+  // Update bunk bed prices
   const handleBunkPriceChange = (
     index: number,
     bunk: BunkType,
@@ -193,56 +95,154 @@ const PropertyAdd = () => {
     });
   };
 
+  // Handle file upload
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    setFieldValue("images", files);
-    const previews = files.map((f) => URL.createObjectURL(f));
-    setImagePreviews(previews);
+    const files = e.target.files;
+    if (!files) return;
+
+    const selectedFiles = Array.from(files);
+    const previewURLs = selectedFiles.map((file) => URL.createObjectURL(file));
+
+    setNewImages((prev) => [...prev, ...selectedFiles]);
+    setImagePreviews((prev) => [...prev, ...previewURLs]);
+  };
+
+  // Handle removing an image
+  const handleRemoveImage = (index: number) => {
+    const removed = imagePreviews[index];
+
+    // If it’s an existing image (URL from backend), track it for deletion
+    if (removed.startsWith("http")) {
+      setRemovedImages((prev) => [...prev, removed]);
+    }
+
+    // Remove from both preview and new files if needed
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+    setNewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleRulesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
-    setFieldValue("rulesFiles", files);
     const previews = files.map((f) => URL.createObjectURL(f));
-    setRulesPreviews(previews);
+
+    setNewRulesFiles((prev) => [...prev, ...files]);
+    setRulesPreviews((prev) => [...prev, ...previews]);
+
+    // Keep Formik in sync
+    setFieldValue("rulesFiles", [...(values.rulesFiles || []), ...files]);
   };
 
   const handleRemoveRules = (index: number) => {
     const preview = rulesPreviews[index];
-    if (preview && preview.startsWith("blob:")) {
+
+    // Track if user removes an existing file (from backend)
+    if (preview.startsWith("http")) {
+      setRemovedRules((prev) => [...prev, preview]);
+    } else if (preview.startsWith("blob:")) {
+      // Clean up blob URLs
       try {
         URL.revokeObjectURL(preview);
       } catch {
-        console.log("Error ~ 37 ~");
+        console.log("Error revoking blob URL");
       }
     }
-    const newPreviews = rulesPreviews.filter((_, i) => i !== index);
 
-    setRulesPreviews(newPreviews);
+    // Remove preview
+    const updatedPreviews = rulesPreviews.filter((_, i) => i !== index);
+    setRulesPreviews(updatedPreviews);
 
+    // Remove from new uploads if applicable
+    const updatedFiles = newRulesFiles.filter((_, i) => i !== index);
+    setNewRulesFiles(updatedFiles);
+
+    // Update Formik field
     const currentFiles: File[] = values.rulesFiles || [];
-    const newFiles = currentFiles.filter((_, i) => i !== index);
-
-    setFieldValue("rulesFiles", newFiles);
+    const filteredFiles = currentFiles.filter((_, i) => i !== index);
+    setFieldValue("rulesFiles", filteredFiles);
   };
 
-  const handleRemoveImage = (index: number) => {
-    const preview = imagePreviews[index];
-    if (preview && preview.startsWith("blob:")) {
-      try {
-        URL.revokeObjectURL(preview);
-      } catch {
-        console.log("Error ~ 57 ~");
-      }
+  // ✅ Fetch data for editing
+  useEffect(() => {
+    setInitialValues({
+      description: room.description || "",
+      amenities: room.amenities || [],
+      sharedBath: room.sharedBath || "",
+      privateBath: room.privateBath || "",
+    });
+
+    setImagePreviews(room.media || []);
+    if (room.rulesDocument) setRulesPreviews([room.rulesDocument]);
+    //     if (room?.rulesFiles && room.rulesFiles.length > 0) {
+    //     // Example: ['https://example.com/files/rules1.pdf', 'https://example.com/files/rules2.pdf']
+    //     setRulesPreviews(room.rulesFiles);
+    //   }
+
+    setAddress({
+      address: room.address,
+      city: room.city,
+      state: room.state,
+      location: {
+        lat: room.location?.coordinates?.[1],
+        lng: room.location?.coordinates?.[0],
+      },
+    });
+
+    if (room?.bedDetails) {
+      const formattedBeds = room.bedDetails.map((b: any) => ({
+        bedType: b.type,
+        prices: {
+          dailyPrice: b.price?.toString() || "",
+          monthlyPrice: b.monthlyPrice?.toString() || "",
+        },
+        bunkPrices: {
+          top: { dailyPrice: "", monthlyPrice: "" },
+          bottom: { dailyPrice: "", monthlyPrice: "" },
+        },
+      }));
+
+      dispatch({ type: "SET_BEDS", payload: formattedBeds });
     }
+  }, [room]);
 
-    const newPreviews = imagePreviews.filter((_, i) => i !== index);
-    setImagePreviews(newPreviews);
+  const { values, setFieldValue, handleChange, handleSubmit } = useFormik({
+    enableReinitialize: true,
+    initialValues,
+    onSubmit: async (values) => {
+      if (!address) {
+        showToast("Please select an address on the map", "error");
+        return;
+      }
 
-    const currentFiles: File[] = values.images || [];
-    const newFiles = currentFiles.filter((_, i) => i !== index);
-    setFieldValue("image", newFiles);
-  };
+      const formData = new FormData();
+      formData.append("description", values.description);
+      formData.append("sharedBath", values.sharedBath);
+      formData.append("privateBath", values.privateBath);
+      formData.append("amenities", JSON.stringify(values.amenities || []));
+      formData.append("address", address.address);
+      formData.append("city", address.city);
+      formData.append("state", address.state);
+      formData.append("location", JSON.stringify(address.location));
+
+      if (values.images && values.images.length > 0) {
+        values.images.forEach((file: File) => formData.append("media", file));
+      }
+      if (values.rulesFiles && values.rulesFiles.length > 0) {
+        formData.append("rulesDocument", values.rulesFiles[0]);
+      }
+
+      try {
+        setComponentState("loading");
+        const res = await axios.put(`/rooms/${id}`, formData);
+        if (res.status === 200) {
+          showToast("Room Updated Successfully", "success");
+          setComponentState("ready");
+        }
+      } catch (error) {
+        showToast(getErrorMessage(error), "error");
+        setComponentState("error");
+      }
+    },
+  });
 
   const toggleAmenity = (option: string) => {
     const arr = values.amenities || [];
@@ -256,123 +256,9 @@ const PropertyAdd = () => {
     }
   };
 
-  const buildBedDetails = (beds: BedInfo[]): BedDetail[] => {
-    const bedDetails: BedDetail[] = [];
-
-    beds.forEach((bed) => {
-      console.log("this is rocket 🚀 ~ buildBedDetails ~ bed:", bed);
-      if (!["twin", "twin-xl", "full"].includes(bed.bedType)) {
-        // Safely destructure with fallback
-        const top = bed.bunkPrices?.top || {
-          dailyPrice: "0",
-          monthlyPrice: "0",
-        };
-        const bottom = bed.bunkPrices?.bottom || {
-          dailyPrice: "0",
-          monthlyPrice: "0",
-        };
-
-        // Add top bunk
-        bedDetails.push({
-          type: "bunk-top",
-          price: Number(top.dailyPrice),
-          monthlyPrice: Number(top.monthlyPrice),
-        });
-
-        // Add bottom bunk
-        bedDetails.push({
-          type: "bunk-bottom",
-          price: Number(bottom.dailyPrice),
-          monthlyPrice: Number(bottom.monthlyPrice),
-        });
-      } else {
-        bedDetails.push({
-          type: bed.bedType,
-          price: Number(bed?.prices?.dailyPrice),
-          monthlyPrice: Number(bed?.prices?.monthlyPrice),
-        });
-      }
-    });
-
-    return bedDetails;
+  const onLocationSelect = (data: Address) => {
+    setAddress(data);
   };
-
-  const {
-    values,
-    errors,
-    touched,
-    handleChange,
-    handleBlur,
-    handleSubmit,
-    setFieldValue,
-  } = useFormik<FormValues>({
-    initialValues: propertyValues,
-    validationSchema: addPropertySchema,
-    onSubmit: async (values) => {
-      console.log("🚀 ~ PropertyAdd ~ values:", values);
-      // prepare payload
-      const formData = new FormData();
-      console.log("state bed --->", state.beds[0]);
-      if (state.beds[0].bedType?.trim() === "") {
-        setComponentState("error");
-        showToast(
-          getErrorMessage({
-            response: { data: { message: "Select bed type and pricing" } },
-          }),
-          "error"
-        );
-        return;
-      }
-      const bedDetails = buildBedDetails(state.beds);
-      console.log("320 -- bedDetails -->", bedDetails);
-      if (!address) {
-        setComponentState("error");
-        showToast("Please select an address on the map", "error");
-        return;
-      }
-
-      formData.append("address", address.address);
-      formData.append("city", address.city);
-      formData.append("state", address.state);
-      // formData.append("country", address.country);
-      // formData.append("zipCode", address.zipCode);
-      formData.append("location", JSON.stringify(address.location));
-
-      formData.append("description", values.description || "");
-      formData.append("sharedBath", values.sharedBath || "0");
-      formData.append("privateBath", values.privateBath || "0");
-      formData.append("roomType", type === "semi" ? "semi-private" : type);
-
-      // 2️⃣ Amenities (array)
-      formData.append("amenities", JSON.stringify(values.amenities || []));
-
-      formData.append("bedDetails", JSON.stringify(bedDetails));
-
-      if (values.images && values.images.length > 0) {
-        values.images.forEach((file: File) => {
-          formData.append("media", file);
-        });
-      }
-
-      // 6️⃣ Rules document (single file)
-      if (values.rulesFiles && values.rulesFiles.length > 0) {
-        formData.append("rulesDocument", values.rulesFiles[0]);
-      }
-
-      setComponentState("loading");
-      try {
-        const response = await axios.post("/rooms", formData);
-        if (response?.status === 201 || response?.status === 200) {
-          showToast("Room Created Successfully", "success");
-          setComponentState("ready");
-        }
-      } catch (error) {
-        console.log("🚀 ~ PropertyAdd ~ error:", error);
-        setComponentState("error");
-        showToast(getErrorMessage(error), "error");
-      }
-    },
-  });
 
   return (
     <div className="max-w-[1260px] mx-auto pt-10">
@@ -382,21 +268,19 @@ const PropertyAdd = () => {
 
       <div className="flex justify-between items-center mb-2 px-4">
         <div className="flex items-center gap-3">
-          <button
-            className="cursor-pointer"
-            type="button"
-            onClick={() => navigate(-1)}
-          >
+          <button onClick={() => navigate(-1)} type="button">
             <FaArrowLeftLong size={16} />
           </button>
-          <h1 className="text-[26px] font-[600]">Add Property</h1>
+          <h1 className="text-[26px] font-[600]">Edit Property</h1>
         </div>
       </div>
+
       <form onSubmit={handleSubmit} className="grid grid-cols-1 p-4 space-y-2">
         <div className="border-[2px] border-dashed bg-gray-50 border-[#36C0EF] rounded-lg pt-2 pb-4 px-4 text-center block">
-          <div className="flex justify-start pb-4 ">
+          <div className="flex justify-start pb-4">
             <p>Upload photos/videos</p>
           </div>
+
           <div className="bg-white p-6 rounded-lg cursor-pointer">
             <label
               htmlFor="fileUpload"
@@ -404,45 +288,43 @@ const PropertyAdd = () => {
             >
               <div className="flex flex-col items-center gap-2">
                 <HiOutlinePlus className="text-[#36C0EF] text-3xl text-center" />
-                <p className="text-[#36C0EF] text-[14px]">Upload </p>
+                <p className="text-[#36C0EF] text-[14px]">Upload</p>
               </div>
 
               <input
                 type="file"
                 id="fileUpload"
-                accept="image/*"
+                accept="image/*,video/*"
                 multiple
                 onChange={handleImagesChange}
                 className="hidden"
               />
             </label>
 
-            {/* previews */}
-
-            {touched.images && errors.images && (
-              <div className="text-red-500 text-sm mt-2">
-                {errors.images as string}
-              </div>
-            )}
+            {/* {touched.images && errors.images && (
+      <div className="text-red-500 text-sm mt-2">
+        {errors.images as string}
+      </div>
+    )} */}
           </div>
+
           {imagePreviews.length > 0 && (
             <div className="mt-4 flex gap-2 overflow-x-auto">
               {imagePreviews.map((src, i) =>
                 src.endsWith(".mp4") ? (
                   <video key={i} src={src} className="h-20 rounded-md" />
                 ) : (
-                  <div className="relative ">
+                  <div className="relative" key={i}>
                     <img
-                      key={i}
                       src={src}
-                      className="h-20 rounded-md object-cover "
+                      className="h-20 w-20 rounded-md object-cover"
                     />
                     <button
                       type="button"
                       onClick={() => handleRemoveImage(i)}
-                      className="cursor-pointer"
+                      className="cursor-pointer absolute top-0 right-0"
                     >
-                      <RxCross2 className="text-red-500 absolute text-2xl bg-red-50 top-0 right-0 rounded-tr-xl" />
+                      <RxCross2 className="text-red-500 text-2xl bg-red-50 rounded-tr-xl" />
                     </button>
                   </div>
                 )
@@ -455,17 +337,10 @@ const PropertyAdd = () => {
         <textarea
           className="w-full bg-white rounded-lg p-2 mt-1"
           rows={4}
-          placeholder="Write here"
           name="description"
           value={values.description}
           onChange={handleChange}
-          onBlur={handleBlur}
         ></textarea>
-        {touched.description && errors.description && (
-          <div className="text-red-500 text-sm mt-2">
-            {errors.description as string}
-          </div>
-        )}
 
         <label className="text-[16px] font-[500]">Rules to live</label>
         <div className="border-[2px] border-dashed bg-[#ffffff] border-[#36C0EF] rounded-xl pt-2 pb-4 px-4 text-center block mb-6">
@@ -475,7 +350,7 @@ const PropertyAdd = () => {
           >
             <div className="flex flex-col items-center gap-2">
               <HiOutlinePlus className="text-[#36C0EF] text-3xl text-center" />
-              <p className="text-[#36C0EF] text-[14px]">Upload </p>
+              <p className="text-[#36C0EF] text-[14px]">Upload</p>
             </div>
 
             <input
@@ -488,28 +363,22 @@ const PropertyAdd = () => {
             />
           </label>
         </div>
-        {touched.rulesFiles && errors.rulesFiles && (
-          <div className="text-red-500 text-sm mt-2">
-            {errors.rulesFiles as string}
-          </div>
-        )}
+
+        {/* {touched.rulesFiles && errors.rulesFiles && (
+  <div className="text-red-500 text-sm mt-2">{errors.rulesFiles as string}</div>
+)} */}
 
         {rulesPreviews.length > 0 && (
-          <div className=" gap-2 overflow-x-auto">
-            {rulesPreviews.map((_, i) => (
+          <div className="gap-2 overflow-x-auto">
+            {rulesPreviews.map((src, i) => (
               <div key={i} className="bg-white rounded-lg py-4 relative my-1">
-                <div>
-                  <img
-                    key={i}
-                    src={pdfIcon}
-                    className="h-6  px-4 absolute  rounded-md object-cover"
-                  />
-                </div>
+                <img
+                  src={pdfIcon}
+                  className="h-6 px-4 absolute rounded-md object-cover"
+                />
                 <button
                   type="button"
-                  onClick={() => {
-                    handleRemoveRules(i);
-                  }}
+                  onClick={() => handleRemoveRules(i)}
                   className="cursor-pointer"
                 >
                   <RxCross2 className="text-red-500 absolute text-2xl bg-red-50 top-0 right-0 rounded-md" />
@@ -656,60 +525,23 @@ const PropertyAdd = () => {
               </div>
             ))}
 
-            {type === "multi" && (
-              <button
-                type="button"
-                onClick={() => dispatch({ type: "ADD_BED" })}
-                className="flex items-center gap-2 pt-2 cursor-pointer"
-              >
-                <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
-                <p className="text-[14px] gradient-text font-[500]">
-                  Add More Bed
-                </p>
-              </button>
-            )}
+            {/* {type === "multi" && (
+                      <button
+                        type="button"
+                        onClick={() => dispatch({ type: "ADD_BED" })}
+                        className="flex items-center gap-2 pt-2 cursor-pointer"
+                      >
+                        <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
+                        <p className="text-[14px] gradient-text font-[500]">
+                          Add More Bed
+                        </p>
+                      </button>
+                    )} */}
           </div>
         </div>
 
-        <label className="text-[16px] font-[500] pt-4">Bath Details</label>
-        <div className=" bg-[#ffffff] rounded-lg pt-2 pb-4 px-4 text-center flex items-center space-y-2 mb-6">
-          <div className="w-[310px] flex flex-col items-start mr-4">
-            <label className="block mb-1 text-[13px] font-[500]">
-              Shared Bath
-            </label>
-            <input
-              name="sharedBath"
-              value={values.sharedBath}
-              onChange={handleChange}
-              className="bg-[#29ABE21F] w-[311px] h-[54px] rounded-md px-4"
-            />
-            {touched.sharedBath && errors.sharedBath && (
-              <div className="text-red-500 text-sm mt-1">
-                {errors.sharedBath}
-              </div>
-            )}
-          </div>
-          <div className="w-[310px] flex flex-col items-start mr-4 ">
-            <label className="block mb-1 text-[13px] font-[500]">
-              Private Bath
-            </label>
-            <input
-              name="privateBath"
-              value={values.privateBath}
-              onChange={handleChange}
-              className="bg-[#29ABE21F] w-[311px] h-[54px] rounded-md px-4"
-            />
-            {touched.privateBath && errors.privateBath && (
-              <div className="text-red-500 text-sm mt-1">
-                {errors.privateBath}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <label className="text-[16px] font-[500] border-t-2 border-t-[#E3E3E3] pt-4">
-          Address
-        </label>
+        {/* Address */}
+        <label className="text-[16px] font-[500] pt-4">Address</label>
         <div className="bg-[#ffffff] rounded-lg pt-2 pb-4 px-4">
           <GoogleMapComponent
             onLocationSelect={onLocationSelect}
@@ -718,41 +550,16 @@ const PropertyAdd = () => {
             isClear={false}
           />
         </div>
-        {/* <div className=" h-[100px] bg-[#ffffff] rounded-lg pt-2 pb-4 px-4 text-center flex flex-col items-start space-y-2">
-          <textarea
-            rows={4}
-            name="address"
-            value={values.address}
-            onChange={handleChange}
-            className="w-full bg-white rounded-lg px-2"
-          ></textarea>
-        </div>
-        {touched.address && errors.address && (
-          <div className="text-red-500 text-sm mt-2">
-            {errors.address as string}
-          </div>
-        )} */}
-        {/* <div className=" mb-6">
-          <img src={map} className="h-[170px] w-full" />
-        </div> */}
 
-        {touched.amenities && errors.amenities && (
-          <div className="text-red-500 text-sm mt-2">
-            {errors.amenities as string}
-          </div>
-        )}
+        {/* Amenities */}
         <div className=" pt-4 border-t-2 border-t-[#E3E3E3]">
           <p className="text-[20px] font-semibold">Amenities</p>
-          <p className="text-[#18181899] text-[14px] font-[400]">
-            You can select multiple options for amenities:
-          </p>
           {AMENITY_GROUPS.map((group) => (
             <div key={group.title} className="mb-6">
               <p className="text-[16px] font-[500] py-3">{group.title}</p>
               <div className="grid sm:grid-cols-2 gap-4">
                 {group.items.map((item, index) => {
                   const isChecked = values.amenities.includes(item);
-
                   return (
                     <div key={index} className="flex items-center gap-2 py-1">
                       <label className="flex items-center cursor-pointer select-none gap-4">
@@ -767,7 +574,6 @@ const PropertyAdd = () => {
                           alt={isChecked ? "Checked" : "Unchecked"}
                           className="w-5 h-5 transition-transform duration-200 ease-in-out"
                         />
-
                         <span className="text-[14px]">{item}</span>
                       </label>
                     </div>
@@ -780,11 +586,11 @@ const PropertyAdd = () => {
 
         <div className="w-full flex justify-end items-center">
           <button
-            disabled={componentState === "loading" ? true : false}
+            disabled={componentState === "loading"}
             type="submit"
-            className=" rounded-[8px] gradient-color text-white text-[16px] py-3 px-6 font-medium"
+            className="rounded-[8px] gradient-color text-white text-[16px] py-3 px-6 font-medium"
           >
-            {componentState === "loading" ? "Creating..." : "Create Now"}
+            {componentState === "loading" ? "Updating..." : "Update Now"}
           </button>
         </div>
       </form>
@@ -792,4 +598,4 @@ const PropertyAdd = () => {
   );
 };
 
-export default PropertyAdd;
+export default PropertyEdit;

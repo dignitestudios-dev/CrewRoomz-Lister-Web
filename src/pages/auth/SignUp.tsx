@@ -8,9 +8,22 @@ import { NavLink, useNavigate } from "react-router";
 import AuthButton from "../../components/Auth/AuthButton";
 import SocialLogin from "../../components/Auth/SocialLogin";
 import axios from "../../axios";
-import { useToast } from "../../components/global/useToast";
+import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/global/Toast";
 import { getErrorMessage } from "../../init/appValues";
+import {
+  createUserWithEmailAndPassword,
+  getIdToken,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
+import { auth } from "../../firebase/firebase";
+
+interface SignUpValues {
+  fullName: string;
+  email: string;
+  password: string;
+  profile?: File; // optional image upload
+}
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -34,32 +47,74 @@ const SignUp = () => {
     initialValues: signUpValues,
     validationSchema: signUpSchema,
     onSubmit: async (values) => {
-      setState("loading");
-      const formData = new FormData();
-
-      formData.append("email", values.email);
-      formData.append("name", values.fullName);
-      formData.append("idToken", "xnqxqwxweo3he2he32h9328dh328d239");
-      formData.append("role", "lister");
-      formData.append("password", values.password);
-
-      if (values.profile) {
-        formData.append("profilePicture", values.profile);
-      }
       try {
-        const response = await axios.post("/auth/signUp", formData);
-        if (response.status === 200) {
-          setState("ready");
-          showToast("Login Success", "success");
-          navigate("/verify-login-otp", { state: { email: values?.email } });
+        setState("loading");
+        const newUser = await createUserWithEmailAndPassword(
+          auth,
+          values.email.toLocaleLowerCase(),
+          values.email.toLocaleLowerCase()
+        );
+        const token = await getIdToken(newUser.user);
+        if (token) {
+          handelSignUp(values as SignUpValues, token);
         }
       } catch (error) {
-        console.log("🚀 ~ SignUp ~ error:", error);
-        setState("error");
-        showToast(getErrorMessage(error), "error");
+        if (
+          (error as { message?: string })?.message?.includes(
+            "auth/email-already-in-use"
+          )
+        ) {
+          // Try to sign in the
+          try {
+            const userCredential = await signInWithEmailAndPassword(
+              auth,
+              values.email.toLocaleLowerCase(),
+              values.email.toLocaleLowerCase()
+            );
+            const user = userCredential?.user;
+            //   // Get the ID token
+            const token = await getIdToken(user);
+            if (token) {
+              handelSignUp(values as SignUpValues, token);
+            } else {
+              // ErrorToast("Token Not Found");
+              setState("ready");
+            }
+          } catch (err) {
+            console.log("🚀 ~ ~ firebase Two is ~ err:", err);
+            // ErrorToast("Email is already in use");
+            // setLoading(false);
+            setState("error");
+          }
+        }
       }
     },
   });
+
+  const handelSignUp = async (values: SignUpValues, idToken: string) => {
+    const formData = new FormData();
+
+    formData.append("email", values.email);
+    formData.append("name", values.fullName);
+    formData.append("idToken", idToken);
+    formData.append("role", "lister");
+    formData.append("password", values.password);
+
+    if (values.profile) {
+      formData.append("profilePicture", values.profile);
+    }
+    try {
+      const response = await axios.post("/auth/signUp", formData);
+      if (response.status === 200) {
+        setState("ready");
+        showToast("Login Success", "success");
+        navigate("/verify-login-otp", { state: { email: values?.email } });
+      }
+    } catch (error) {
+      setState("error");
+      showToast(getErrorMessage(error), "error");
+    }
+  };
 
   // File handler
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

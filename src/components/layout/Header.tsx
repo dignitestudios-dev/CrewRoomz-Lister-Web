@@ -1,11 +1,16 @@
 import { NavLink, useNavigate } from "react-router";
-import { logo, logout, setting, user } from "../../assets/export.ts";
+import { logo, logout, setting } from "../../assets/export.ts";
 import { headerOptions } from "../../statics/headerOptions.tsx";
 import { useEffect, useRef, useState } from "react";
 import { MdKeyboardArrowDown } from "react-icons/md";
+import useAuthStore from "../../store/authStore.ts";
+import { useAppStore } from "../../store/appStore.ts";
 
 const Header = () => {
   const navigate = useNavigate();
+  const { clearAuth } = useAuthStore();
+  const { user } = useAppStore();
+
   const userPopupRef = useRef<HTMLDivElement | null>(null);
   const notificationRef = useRef<HTMLDivElement | null>(null);
 
@@ -83,12 +88,12 @@ const Header = () => {
           >
             <div className="h-10 w-10 rounded-full overflow-hidden">
               <img
-                src={user}
+                src={user?.profilePicture}
                 alt="User Avatar"
                 className="h-full w-full object-cover"
               />
             </div>
-            <p className="text-black">Mike Smith</p>
+            <p className="text-black">{user?.name}</p>
             <MdKeyboardArrowDown className="text-black text-lg" />
           </div>
           {userPopup && (
@@ -99,14 +104,16 @@ const Header = () => {
               <div className="flex flex-col items-center">
                 <div className="h-20 w-20 rounded-full overflow-hidden mb-3">
                   <img
-                    src={user}
+                    src={user?.profilePicture}
                     alt="User Avatar"
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <p className="text-black text-[20px] font-[600]">Mike Smith</p>
+                <p className="text-black text-[20px] font-[600]">
+                  {user?.name}
+                </p>
                 <p className="text-gray-600 text-[13px] font-medium">
-                  mike@yopmail.com
+                  {user?.email}
                 </p>
               </div>
               <div className="space-y-3 mt-6">
@@ -125,7 +132,10 @@ const Header = () => {
 
                 <button
                   type="button"
-                  onClick={() => navigate("login")}
+                  onClick={() => {
+                    clearAuth();
+                    navigate("login");
+                  }}
                   className="w-full flex items-center gap-2 text-left px-1 py-1 cursor-pointer hover:text-blue-500"
                 >
                   <img

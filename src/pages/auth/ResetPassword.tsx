@@ -2,21 +2,21 @@ import { useState } from "react";
 import { signInSideImg } from "../../assets/export";
 import AuthInput from "../../components/Auth/AuthInput";
 import { useFormik } from "formik";
-// import axios from "axios";
 import { resetPasswordSchema } from "../../schema/authSchema";
 import { resetValue } from "../../init/authValues";
-// import { ErrorToast, SuccessToast } from "../components/global/Toaster";
-// import useAuthStore from "../store/authStore";
 import { useNavigate } from "react-router";
 import AuthButton from "../../components/Auth/AuthButton";
 import { CiCircleCheck } from "react-icons/ci";
+import axios from "../../axios";
+import Toast from "../../components/global/Toast";
+import { useToast } from "../../hooks/useToast";
+import { getErrorMessage } from "../../init/appValues";
 
 const ResetPassword = () => {
   const navigate = useNavigate();
+  const { toast, showToast } = useToast();
 
-  // const setAuth = useAuthStore((s) => s.setAuth);
-  const [loading, setLoading] = useState(false);
-  console.log("🚀 ~ Login ~ loading:", loading);
+  const [state, setState] = useState<LoadState>("idle");
   const [updatedSuccess, setUpdatedSuccess] = useState(false);
 
   const { values, handleBlur, handleChange, handleSubmit, errors, touched } =
@@ -26,33 +26,27 @@ const ResetPassword = () => {
       validateOnChange: true,
       validateOnBlur: true,
       onSubmit: async (values) => {
-        console.log("🚀 ~ Login ~ values:", values);
-        setUpdatedSuccess(true);
-        // const payload = {
-        //   email: values.email,
-        //   password: values.password,
-        //   role: "landlord",
-        // };
+        const payload = {
+          confirmPassword: values.cPassword,
+          password: values.password,
+        };
         try {
-          // setLoading(true);
-          // const response = await axios.post("/auth/emailSignIn", payload);
-          // if (response.status === 200) {
-          //   const data = response?.data?.data;
-          //   SuccessToast("Success");
-          //   setAuth(data.token, data.user, true);
-          // }
+          setState("loading");
+          const response = await axios.post("/auth/resetPassword", payload);
+          if (response.status === 200) {
+            setState("ready");
+            setUpdatedSuccess(true);
+          }
         } catch (error) {
-          console.log("🚀 ~ Login ~ error:", error);
-          // ErrorToast(error.response.data.message);
-          // navigate("/auth/signup-otp", { state: { email: values.email } });
-        } finally {
-          setLoading(false);
+          setState("error");
+          showToast(getErrorMessage(error), "error");
         }
       },
     });
 
   return (
     <div className="lg:min-h-screen lg:flex p-8  lg:p-0">
+      {(state === "error" || state === "ready") && <Toast {...toast} />}
       <div className="grid lg:grid-cols-2 grid-cols-1 p-0 lg:p-4">
         <div className="lg:block hidden">
           <img
@@ -124,7 +118,7 @@ const ResetPassword = () => {
                 <div className="mt-6">
                   <AuthButton
                     text="Update Password"
-                    loading={loading}
+                    loading={state === "loading" ? true : false}
                     type="submit"
                   />
                 </div>

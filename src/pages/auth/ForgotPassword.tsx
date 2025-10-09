@@ -7,7 +7,7 @@ import { forgotPasswordValue } from "../../init/authValues";
 import AuthButton from "../../components/Auth/AuthButton";
 import { useNavigate } from "react-router";
 import axios from "../../axios";
-import { useToast } from "../../components/global/useToast";
+import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/global/Toast";
 import { getErrorMessage } from "../../init/appValues";
 
@@ -32,7 +32,7 @@ const ForgotPassword = () => {
           // setLoading(true);
           setState("loading");
           const response = await axios.post("/auth/forgot", payload);
-          console.log("🚀 ~ ForgotPassword ~ response:", response);
+
           if (response.status === 200) {
             //   const data = response?.data?.data;
             setState("ready");
@@ -46,7 +46,6 @@ const ForgotPassword = () => {
             //   setAuth(data.token, data.user, true);
           }
         } catch (error) {
-          console.log("🚀 ~ Login ~ error:", error);
           setState("error");
           showToast(getErrorMessage(error), "error");
         }

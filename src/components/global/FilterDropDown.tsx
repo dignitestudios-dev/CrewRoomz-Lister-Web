@@ -2,13 +2,20 @@ import { useState } from "react";
 import { BiSolidDownArrow } from "react-icons/bi";
 import { IoFilter } from "react-icons/io5";
 
-export const HomeFilterDropDown = () => {
+interface StatusIndicatorProps {
+  selected: HomeStatus;
+  setSelected: React.Dispatch<React.SetStateAction<HomeStatus>>;
+}
+
+export const HomeFilterDropDown = ({
+  selected,
+  setSelected,
+}: StatusIndicatorProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState("All");
 
-  const options = ["All", "Active", "Inactive"];
+  const options: HomeStatus[] = ["Active", "Inactive"];
 
-  const handleSelect = (option: string) => {
+  const handleSelect = (option: HomeStatus) => {
     setSelected(option);
     setIsOpen(false);
   };

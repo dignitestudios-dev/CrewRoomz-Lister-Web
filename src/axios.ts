@@ -32,7 +32,7 @@ instance.interceptors.request.use(
       return Promise.reject(new Error("No internet connection"));
     }
 
-    const token = Cookies.get("token");
+    const token = Cookies.get("auth_token");
     const visitorId = await getDeviceFingerprint();
 
     request.headers.set("Accept", "application/json, text/plain, */*");

@@ -1,10 +1,16 @@
-import React, { useState } from "react";
+import React, { Fragment, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { homeOne, nextBtn, user } from "../../assets/export";
+import { nextBtn } from "../../assets/export";
 import BookingCalendar from "../../components/Calendar/BookingCalendar";
 import { BookingFilterDropDown } from "../../components/global/FilterDropDown";
+import Pagination from "../../components/global/Pagination";
+import { useToast } from "../../hooks/useToast";
+import axios from "../../axios";
+import { getErrorMessage } from "../../init/appValues";
+import PropertyHeaderSkeleton from "../../components/properties/PropertyHeaderSkeleton";
+import Toast from "../../components/global/Toast";
 
-type bookingStatus = "private" | "multi" | "semi";
+type bookingStatus = "private" | "multi" | "semi-private";
 type bookingStatusOption = {
   label: bookingStatus;
   isActive: boolean;
@@ -14,6 +20,34 @@ interface StatusIndicatorProps {
   statuses: bookingStatusOption[];
   onStatusChange: (index: number) => void;
   setStatus: React.Dispatch<React.SetStateAction<bookingStatus>>;
+}
+
+interface BookingDetail {
+  _id: string | number; // allow both
+  room: RoomDetail;
+  user: User;
+  totalPrice: number;
+}
+
+interface RoomDetail {
+  city: string;
+  state: string;
+  address: string;
+  bedDetails?: BedDetail[];
+  media: string[];
+}
+interface BedDetail {
+  type: string;
+  price: number;
+  monthlyPrice: number;
+  _id: string;
+}
+
+interface User {
+  email: string;
+  name: string;
+  profilePicture: string;
+  _id: string;
 }
 
 const StatusIndicator = ({
@@ -47,13 +81,22 @@ const Booking = () => {
   const navigate = useNavigate();
 
   const [activeStatus, setActiveStatus] = useState(0);
-  const [status, setStatus] = useState<bookingStatus>("private");
-  console.log("🚀 ~ Booking ~ status:", status);
+  const [bookings, setBookings] = useState<BookingDetail[]>([]);
+  console.log("🚀 ~ Booking ~ bookings:", bookings);
+  const [status, setStatus] = useState<bookingStatus>("multi");
+
+  const { toast, showToast } = useToast();
+  const [state, setState] = useState<LoadState>("idle");
+
+  const [pagination, setPagination] = useState<PaginationState>({
+    currentPage: 1,
+    totalPages: 1,
+  });
 
   const statusOptions: bookingStatusOption[] = [
-    { label: "private", isActive: activeStatus === 0 },
-    { label: "multi", isActive: activeStatus === 1 },
-    { label: "semi", isActive: activeStatus === 2 },
+    { label: "multi", isActive: activeStatus === 0 },
+    { label: "semi-private", isActive: activeStatus === 1 },
+    { label: "private", isActive: activeStatus === 2 },
   ];
 
   const bookedRanges = [
@@ -67,11 +110,40 @@ const Booking = () => {
     setActiveStatus(index);
   };
 
+  const handlePageChange = (page: number) => {
+    setPagination((prev) => ({ ...prev, currentPage: page }));
+  };
+
+  const getBookings = async () => {
+    try {
+      setState("loading");
+      const { data } = await axios.get(
+        `/booking?roomType=${status}&bookingStatus=pending&page=${
+          pagination?.currentPage ?? 1
+        }`
+      );
+      if (data.success) {
+        setState("ready");
+        setBookings(data?.data?.bookings);
+        setPagination(data?.data?.pagination);
+      }
+    } catch (error) {
+      setState("error");
+      showToast(getErrorMessage(error), "error");
+    }
+  };
+
+  useEffect(() => {
+    getBookings();
+  }, [status]);
+
   return (
     <div className="max-w-[90em] mx-auto py-6 px-[4em]">
+      {state === "error" && <Toast {...toast} />}
       <div className="flex items-center gap-3 mt-4">
         <h1 className="text-[26px] font-[600]">My Bookings</h1>
       </div>
+
       <div className="flex justify-between items-center w-full">
         <StatusIndicator
           statuses={statusOptions}
@@ -81,140 +153,116 @@ const Booking = () => {
         <BookingFilterDropDown />
       </div>
 
-      <div className="grid grid-cols-3 gap-8 py-6 space-y-1">
-        <div className=" bg-[#FFFFFF] p-4 rounded-3xl grid col-span-2 space-y-4">
-          <h2 className="text-[20px] font-[500] mb-4">Ongoing Bookings</h2>
-          <div className=" p-4 rounded-lg field-shadow">
-            <div className="grid grid-cols-2">
-              <div>
-                <p className="text-gray-700 text-[12px]">
-                  Booking ID: <span className="text-black">123456</span>
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <img
-                    src={homeOne}
-                    alt="user"
-                    className="w-20 h-20 rounded-2xl object-cover"
-                  />
-                  <div>
-                    <p className="text-[16px] font-[500]">Gaular, Norway</p>
-                    <p className="text-[15px] text-[#18181899] font-[400]">
-                      456 Maple Street, Anytown, NY 12345
-                    </p>
-                    <p className="text-[15px] text-[#18181899] font-[400]">
-                      1 King Bed, 1 Private Bath
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end mt-6">
-                <p className="text-black font-[500] text-[15px]">
-                  $100{" "}
-                  <span className="text-[#18181899] font-[400]">Per Day</span>
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 border-t border-[#E3DBDB]">
-              <div>
-                <div className="flex items-center gap-2 mt-2">
-                  <img
-                    src={user}
-                    alt="user"
-                    className="w-8 h-8 rounded-2xl object-cover"
-                  />
-                  <div>
-                    <p className="text-[16px] font-[500]">Mike Smith</p>
-                    <p className="text-[15px] text-[#18181899] font-[400]">
-                      mikesmith@yopmail.com
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end mt-2">
-                <button
-                  onClick={() => navigate(`/booking-details/123`)}
-                  className="cursor-pointer"
-                >
-                  <img
-                    src={nextBtn}
-                    alt="user"
-                    className="w-10 h-10 rounded-lg"
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
-          <div className=" p-4 rounded-lg shadow-lite">
-            <div className="grid grid-cols-2">
-              <div>
-                <p className="text-gray-700 text-[12px]">
-                  Booking ID: <span className="text-black">123456</span>
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <img
-                    src={homeOne}
-                    alt="user"
-                    className="w-20 h-20 rounded-2xl object-cover"
-                  />
-                  <div>
-                    <p className="text-[16px] font-[500]">Gaular, Norway</p>
-                    <p className="text-[15px] text-[#18181899] font-[400]">
-                      456 Maple Street, Anytown, NY 12345
-                    </p>
-                    <p className="text-[15px] text-[#18181899] font-[400]">
-                      1 King Bed, 1 Private Bath
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end mt-6">
-                <p className="text-black font-[500] text-[15px]">
-                  $100{" "}
-                  <span className="text-[#18181899] font-[400]">Per Day</span>
-                </p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 mt-4 border-t border-[#E3DBDB]">
-              <div>
-                <div className="flex items-center gap-2 mt-2">
-                  <img
-                    src={user}
-                    alt="user"
-                    className="w-8 h-8 rounded-2xl object-cover"
-                  />
-                  <div>
-                    <p className="text-[16px] font-[500]">Mike Smith</p>
-                    <p className="text-[15px] text-[#18181899] font-[400]">
-                      mikesmith@yopmail.com
-                    </p>
-                  </div>
-                </div>
-              </div>
-              <div className="flex justify-end mt-2">
-                <button
-                  onClick={() => navigate(`/booking-details/123`)}
-                  className="cursor-pointer"
-                >
-                  <img
-                    src={nextBtn}
-                    alt="user"
-                    className="w-10 h-10 rounded-lg"
-                  />
-                </button>
-              </div>
-            </div>
-          </div>
+      {state === "loading" ? (
+        <div className="mt-4">
+          <PropertyHeaderSkeleton />
         </div>
-        <BookingCalendar
-          bookedRanges={bookedRanges}
-          cancelledRanges={cancelledRanges}
-          bookedClass="bg-[#29ABE226]  border-[1px] border-[#29ABE280] rounded-xl" // uses your gradient class for booked
-          cancelledClass="bg-[#FFDCDC] text-red-700 rounded-xl"
-          onDayClick={(iso) => {
-            console.log("day clicked", iso);
-          }}
-        />
-      </div>
+      ) : (
+        <Fragment>
+          <div className="grid grid-cols-3 gap-8 py-6 space-y-1">
+            <div className=" bg-[#FFFFFF] p-4 rounded-3xl grid col-span-2">
+              <h2 className="text-[20px] font-[500] mb-4">Ongoing Bookings</h2>
+
+              {bookings && bookings.length > 0 ? (
+                bookings?.map((booking, index) => (
+                  <div key={index} className=" p-4 rounded-lg field-shadow ">
+                    <div className="grid grid-cols-2">
+                      <div>
+                        <p className="text-gray-700 text-[12px]">
+                          Booking ID:{" "}
+                          <span className="text-black">{booking?._id}</span>
+                        </p>
+                        <div className="flex items-center gap-2 mt-2">
+                          <img
+                            src={booking?.room?.media[0]}
+                            alt="user"
+                            className="w-20 h-20 rounded-2xl object-cover"
+                          />
+                          <div>
+                            <p className="text-[16px] font-[500]">
+                              {booking?.room?.state}, {booking?.room?.city}
+                            </p>
+                            <p className="truncate max-w-[310px] text-[15px] text-[#18181899] font-[400]">
+                              {booking?.room?.address}
+                            </p>
+                            <p className="w-[310px] text-[15px] text-[#18181899] font-[400]">
+                              {booking?.room?.bedDetails
+                                ?.map((item) => item.type)
+                                ?.join(", ")}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end mt-6">
+                        <p className="text-black font-[500] text-[15px]">
+                          ${booking?.totalPrice}
+                          <span className="text-[#18181899] font-[400]">
+                            Per Day
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 mt-4 border-t border-[#E3DBDB]">
+                      <div>
+                        <div className="flex items-center gap-2 mt-2">
+                          <img
+                            src={booking?.user?.profilePicture}
+                            alt="user"
+                            className="w-8 h-8 rounded-2xl object-cover"
+                          />
+                          <div>
+                            <p className="text-[16px] font-[500]">
+                              {booking?.user?.name}
+                            </p>
+                            <p className="text-[15px] text-[#18181899] font-[400]">
+                              {booking?.user?.email}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-end mt-2">
+                        <button
+                          onClick={() =>
+                            navigate(`/booking-details/${booking?._id}`, {
+                              state: { booking },
+                            })
+                          }
+                          className="cursor-pointer"
+                        >
+                          <img
+                            src={nextBtn}
+                            alt="user"
+                            className="w-10 h-10 rounded-lg"
+                          />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-6">
+                  No ongoing bookings found
+                </p>
+              )}
+            </div>
+            <BookingCalendar
+              bookedRanges={bookedRanges}
+              cancelledRanges={cancelledRanges}
+              bookedClass="bg-[#29ABE226]  border-[1px] border-[#29ABE280] rounded-xl" // uses your gradient class for booked
+              cancelledClass="bg-[#FFDCDC] text-red-700 rounded-xl"
+              onDayClick={(iso) => {
+                console.log("day clicked", iso);
+              }}
+            />
+          </div>
+        </Fragment>
+      )}
+
+      <Pagination
+        currentPage={pagination?.currentPage ?? 1}
+        totalPages={pagination?.totalPages ?? 1}
+        onPageChange={handlePageChange}
+      />
     </div>
   );
 };

@@ -24,24 +24,30 @@ const ListingCreate = () => {
       </p>
       <div className="space-y-2 mt-6">
         <div
-          onClick={() => navigate("/add-property")}
-          className=" h-[50px] bg-[#ffffff] rounded-lg px-4 text-center cursor-pointer flex items-center justify-between "
+          onClick={() => navigate("/add-property", { state: "multi" })}
+          className="h-[50px] bg-[#ffffff] rounded-lg px-4 text-center cursor-pointer flex items-center justify-between mt-5"
         >
-          <p className="text-[16px] font-[500]">Private</p>
-          <IoIosArrowForward className="text-[#18181899]" />
-        </div>
-        <p className="text-[#18181899] text-[15px] font-[400]">
-          Lorem ipsum dolor sit amet consectetur.
-        </p>
-        <div className="h-[50px] bg-[#ffffff] rounded-lg px-4 text-center flex items-center justify-between mt-5">
           <p className="text-[16px] font-[500]">Multi</p>
           <IoIosArrowForward className="text-[#18181899]" />
         </div>
         <p className="text-[#18181899] text-[15px] font-[400]">
           Lorem ipsum dolor sit amet consectetur.
         </p>
-        <div className=" h-[50px] bg-[#ffffff] rounded-lg  px-4 text-center flex items-center justify-between mt-5">
+        <div
+          onClick={() => navigate("/add-property", { state: "semi" })}
+          className=" h-[50px] bg-[#ffffff] rounded-lg px-4 text-center cursor-pointer flex items-center justify-between mt-5"
+        >
           <p className="text-[16px] font-[400]">Semi-Private</p>
+          <IoIosArrowForward className="text-[#18181899]" />
+        </div>
+        <p className="text-[#18181899] text-[15px] font-[400]">
+          Lorem ipsum dolor sit amet consectetur.
+        </p>
+        <div
+          onClick={() => navigate("/add-property", { state: "private" })}
+          className=" h-[50px] bg-[#ffffff] rounded-lg px-4 text-center cursor-pointer flex items-center justify-between "
+        >
+          <p className="text-[16px] font-[500]">Private</p>
           <IoIosArrowForward className="text-[#18181899]" />
         </div>
         <p className="text-[#18181899] text-[15px] font-[400]">
