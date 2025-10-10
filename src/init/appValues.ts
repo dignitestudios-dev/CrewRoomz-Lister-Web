@@ -26,108 +26,39 @@ export const getDateFormat = (date: Date | string | number) => {
   return moment(date).format("MM-DD-YYYY");
 };
 
-type Prices = {
-  dailyPrice: string;
-  monthlyPrice: string;
-};
+export type DateRange = { start: string; end: string };
 
-type BunkType = "top" | "bottom";
+export function convertToRanges(bookedDates: string[]): DateRange[] {
+  if (!bookedDates.length) return [];
 
-type Bed = {
-  bedType: string;
-  prices: Prices;
-  bunkPrices: Record<BunkType, Prices>;
-};
+  // Sort dates to ensure order
+  const sortedDates = bookedDates.sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime()
+  );
 
-type State = {
-  beds: Bed[];
-};
+  const ranges: DateRange[] = [];
+  let start = sortedDates[0];
+  let end = sortedDates[0];
 
-type Action =
-  | { type: "SET_BED_TYPE"; index: number; payload: string }
-  | {
-      type: "SET_PRICE";
-      index: number;
-      payload: { name: keyof Prices; value: string };
+  for (let i = 1; i < sortedDates.length; i++) {
+    const prev = new Date(end);
+    const current = new Date(sortedDates[i]);
+    const diffDays =
+      (current.getTime() - prev.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (diffDays === 1) {
+      // continuous day → extend range
+      end = sortedDates[i];
+    } else {
+      // gap → push current range and start new one
+      ranges.push({ start, end });
+      start = sortedDates[i];
+      end = sortedDates[i];
     }
-  | {
-      type: "SET_BUNK_PRICE";
-      index: number;
-      payload: { bunk: BunkType; name: keyof Prices; value: string };
-    }
-  | { type: "ADD_BED" }
-  | { type: "REMOVE_BED"; index: number }
-  | { type: "SET_BEDS"; payload: Bed[] };
-
-export const initialState: State = {
-  beds: [
-    {
-      bedType: "",
-      prices: { dailyPrice: "", monthlyPrice: "" },
-      bunkPrices: {
-        top: { dailyPrice: "", monthlyPrice: "" },
-        bottom: { dailyPrice: "", monthlyPrice: "" },
-      },
-    },
-  ],
-};
-
-export function bedReducer(state: State, action: Action): State {
-  switch (action.type) {
-    case "SET_BED_TYPE": {
-      const newBeds = [...state.beds];
-      newBeds[action.index].bedType = action.payload;
-      return { ...state, beds: newBeds };
-    }
-
-    case "SET_PRICE": {
-      const { name, value } = action.payload;
-      const newBeds = [...state.beds];
-      newBeds[action.index].prices = {
-        ...newBeds[action.index].prices,
-        [name]: value,
-      };
-      return { ...state, beds: newBeds };
-    }
-
-    case "SET_BUNK_PRICE": {
-      const { bunk, name, value } = action.payload;
-      const newBeds = [...state.beds];
-      newBeds[action.index].bunkPrices[bunk] = {
-        ...newBeds[action.index].bunkPrices[bunk],
-        [name]: value,
-      };
-      return { ...state, beds: newBeds };
-    }
-
-    case "ADD_BED": {
-      return {
-        ...state,
-        beds: [
-          ...state.beds,
-          {
-            bedType: "",
-            prices: { dailyPrice: "", monthlyPrice: "" },
-            bunkPrices: {
-              top: { dailyPrice: "", monthlyPrice: "" },
-              bottom: { dailyPrice: "", monthlyPrice: "" },
-            },
-          },
-        ],
-      };
-    }
-
-    case "REMOVE_BED": {
-      const updatedBeds = state.beds.filter((_, i) => i !== action.index);
-      return { ...state, beds: updatedBeds };
-    }
-
-    case "SET_BEDS": {
-      // For edit scenario — replace all beds with prefilled data
-      return { ...state, beds: action.payload };
-    }
-
-    default:
-      return state;
   }
+
+  // push last range
+  ranges.push({ start, end });
+
+  return ranges;
 }

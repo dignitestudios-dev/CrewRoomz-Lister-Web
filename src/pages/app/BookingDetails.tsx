@@ -89,7 +89,9 @@ const BookingDetails = () => {
               </div>
               <div className="flex justify-end mt-2 border-t border-[#E3DBDB]">
                 <button
-                  onClick={() => navigate(`/property-details/123`)}
+                  onClick={() =>
+                    navigate(`/property-details/${booking?.room?._id}`)
+                  }
                   className="cursor-pointer mt-2"
                 >
                   <img

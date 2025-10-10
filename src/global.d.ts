@@ -14,6 +14,7 @@ declare global {
     email: string;
     password: string;
     confirmPassword: string;
+    isChecked: boolean;
   }
 
   interface ForgotPasswordFormValues {
@@ -77,6 +78,7 @@ declare global {
 
   type HomeFilter = "multi" | "semi-private" | "private";
   type HomeStatus = "Active" | "Inactive";
+  type SelectedStatus = "Daily" | "Monthly";
 
   type BunkType = "top" | "bottom";
 
@@ -156,13 +158,28 @@ declare global {
     coordinates: [number, number]; // [lng, lat]
   }
 
+  export interface EditGeoLocation {
+    lat: number;
+    lng: number;
+    type?: "Point";
+    coordinates?: [number, number];
+  }
+
   // Address structure used across components
   export interface Address {
     address: string;
     city: string;
     state: string;
-    country: string;
-    zipCode: string;
+    country?: string;
+    zipCode?: string;
     location: GeoLocation;
+  }
+  export interface EditAddress {
+    address: string;
+    city: string;
+    state: string;
+    country?: string;
+    zipCode?: string;
+    location: EditGeoLocation;
   }
 }

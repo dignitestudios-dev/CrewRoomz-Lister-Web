@@ -1,11 +1,5 @@
 import * as Yup from "yup";
 
-// export const addPropertySchema = Yup.object().shape({
-//   images: Yup.mixed().required("Please upload at least one image"),
-//   rulesFiles: Yup.mixed().required("Please upload at least one rule file"),
-
-// });
-
 export const addPropertySchema = Yup.object().shape({
   images: Yup.mixed().required("Please upload at least one image"),
   rulesFiles: Yup.mixed().required("Please upload at least one rule file"),

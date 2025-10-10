@@ -167,7 +167,7 @@ const BookingCalendar: React.FC<Props> = ({
             <button
               key={idx}
               onClick={() => onDayClick && onDayClick(formatISO(day))}
-              className={`h-12 p-0 relative flex items-center justify-center text-sm ${
+              className={`h-12 p-0 relative flex items-center justify-center text-sm hover:bg-gray-50 hover:rounded-md ${
                 isCurrentMonth ? "opacity-100" : "opacity-40"
               } ${isToday ? "ring-1 ring-blue-200 rounded-md" : ""}`}
               aria-pressed={!!(bookedHit || cancelledHit)}

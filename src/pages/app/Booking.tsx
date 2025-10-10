@@ -6,7 +6,11 @@ import { BookingFilterDropDown } from "../../components/global/FilterDropDown";
 import Pagination from "../../components/global/Pagination";
 import { useToast } from "../../hooks/useToast";
 import axios from "../../axios";
-import { getErrorMessage } from "../../init/appValues";
+import {
+  convertToRanges,
+  getErrorMessage,
+  type DateRange,
+} from "../../init/appValues";
 import PropertyHeaderSkeleton from "../../components/properties/PropertyHeaderSkeleton";
 import Toast from "../../components/global/Toast";
 
@@ -84,6 +88,9 @@ const Booking = () => {
   const [bookings, setBookings] = useState<BookingDetail[]>([]);
   console.log("🚀 ~ Booking ~ bookings:", bookings);
   const [status, setStatus] = useState<bookingStatus>("multi");
+  const [selectDate, setSelectDate] = useState("");
+  const [selectedStatus, setSelectedStatus] =
+    useState<SelectedStatus>("Monthly");
 
   const { toast, showToast } = useToast();
   const [state, setState] = useState<LoadState>("idle");
@@ -99,11 +106,9 @@ const Booking = () => {
     { label: "private", isActive: activeStatus === 2 },
   ];
 
-  const bookedRanges = [
-    { start: "2025-01-03", end: "2025-01-06" },
-    { start: "2025-01-15", end: "2025-01-17" },
-    { start: "2025-02-19", end: "2025-02-21" },
-  ];
+  const today = new Date().toISOString().split("T")[0];
+
+  const [bookedRanges, setBookedRanges] = useState<DateRange[]>([]);
   const cancelledRanges = [{ start: "2025-01-11", end: "2025-01-11" }];
 
   const handleStatusChange = (index: number): void => {
@@ -118,12 +123,16 @@ const Booking = () => {
     try {
       setState("loading");
       const { data } = await axios.get(
-        `/booking?roomType=${status}&bookingStatus=pending&page=${
-          pagination?.currentPage ?? 1
-        }`
+        `/booking/bookingsByDate/list?roomType=${status}&date=${
+          selectDate || today
+        }&bookingStatus=pending&isMonthly=${
+          selectedStatus === "Monthly" ? true : false
+        }&page=${pagination?.currentPage ?? 1}`
       );
       if (data.success) {
         setState("ready");
+        const result = convertToRanges(data?.data?.bookedDates);
+        setBookedRanges(result);
         setBookings(data?.data?.bookings);
         setPagination(data?.data?.pagination);
       }
@@ -135,7 +144,7 @@ const Booking = () => {
 
   useEffect(() => {
     getBookings();
-  }, [status]);
+  }, [status, selectDate, selectedStatus]);
 
   return (
     <div className="max-w-[90em] mx-auto py-6 px-[4em]">
@@ -150,7 +159,10 @@ const Booking = () => {
           setStatus={setStatus}
           onStatusChange={handleStatusChange}
         />
-        <BookingFilterDropDown />
+        <BookingFilterDropDown
+          selected={selectedStatus}
+          setSelected={setSelectedStatus}
+        />
       </div>
 
       {state === "loading" ? (
@@ -165,7 +177,10 @@ const Booking = () => {
 
               {bookings && bookings.length > 0 ? (
                 bookings?.map((booking, index) => (
-                  <div key={index} className=" p-4 rounded-lg field-shadow ">
+                  <div
+                    key={index}
+                    className=" p-4 rounded-lg field-shadow mb-2 "
+                  >
                     <div className="grid grid-cols-2">
                       <div>
                         <p className="text-gray-700 text-[12px]">
@@ -252,6 +267,7 @@ const Booking = () => {
               cancelledClass="bg-[#FFDCDC] text-red-700 rounded-xl"
               onDayClick={(iso) => {
                 console.log("day clicked", iso);
+                setSelectDate(iso);
               }}
             />
           </div>

@@ -93,6 +93,10 @@ const BookingHistory = () => {
     useState<bookingStatusProgress>("completed");
   console.log("🚀 ~ BookingHistory ~ progressStatus:", progressStatus);
 
+  const [selectedStatus, setSelectedStatus] = useState<"Daily" | "Monthly">(
+    "Monthly"
+  );
+
   const [bookingsHistory, setBookingsHistory] = useState<
     BookingHistoryDetail[]
   >([]);
@@ -128,10 +132,11 @@ const BookingHistory = () => {
     try {
       setState("loading");
       const { data } = await axios.get(
-        `/booking?roomType=${status}&bookingStatus=${progressStatus}&page=${
-          pagination?.currentPage ?? 1
-        }`
+        `/booking?roomType=${status}&bookingStatus=${progressStatus}&isMonthly=${
+          selectedStatus === "Monthly" ? true : false
+        }&page=${pagination?.currentPage ?? 1}`
       );
+      console.log("🚀 ~ getBookingsHistory ~ data:", data);
       if (data.success) {
         setState("ready");
         setBookingsHistory(data?.data?.bookings);
@@ -145,7 +150,7 @@ const BookingHistory = () => {
 
   useEffect(() => {
     getBookingsHistory();
-  }, [status, progressStatus]);
+  }, [status, progressStatus, selectedStatus]);
   return (
     <div className="max-w-[90em] mx-auto py-6 px-[4em]">
       {state === "error" && <Toast {...toast} />}
@@ -158,7 +163,10 @@ const BookingHistory = () => {
           setStatus={setStatus}
           onStatusChange={handleStatusChange}
         />
-        <BookingFilterDropDown />
+        <BookingFilterDropDown
+          selected={selectedStatus}
+          setSelected={setSelectedStatus}
+        />
       </div>
       {state === "loading" ? (
         <div className="mt-4">

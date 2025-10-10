@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { dotBar } from "../../assets/export.ts";
 import { HomeFilterDropDown } from "../../components/global/FilterDropDown.tsx";
@@ -138,18 +138,26 @@ const Home = () => {
       {state === "loading" ? (
         <HomeSkeleton />
       ) : (
-        <Fragment>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mt-10">
-            {rooms.map((room, index) => (
-              <PropertyCard
-                key={index}
-                room={room}
-                dotBar={dotBar}
-                setUpdate={setUpdate}
-              />
-            ))}
-          </div>
-        </Fragment>
+        <div className="mt-10">
+          {rooms && rooms.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+              {rooms.map((room, index) => (
+                <PropertyCard
+                  key={index}
+                  room={room}
+                  dotBar={dotBar}
+                  setUpdate={setUpdate}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex justify-center items-center h-40">
+              <p className="text-gray-500 text-lg font-medium">
+                No records found
+              </p>
+            </div>
+          )}
+        </div>
       )}
       <Pagination
         currentPage={pagination?.currentPage ?? 1}

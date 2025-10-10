@@ -9,6 +9,7 @@ export const signUpValues: SignupFormValues = {
   email: "",
   password: "",
   confirmPassword: "",
+  isChecked: false,
 };
 
 export const forgotPasswordValue = {

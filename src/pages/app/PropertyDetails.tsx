@@ -84,7 +84,6 @@ const PropertyDetails = () => {
   const { toast, showToast } = useToast();
   const [state, setState] = useState<LoadState>("idle");
   const [roomDetails, setRoomDetails] = useState<PropertyDetail>();
-  console.log("🚀 ~ PropertyDetails ~ roomDetails:", roomDetails);
   const [roomReviews, setRoomReviews] = useState<RoomReviews>();
 
   const openDoc = (url?: string) => {
@@ -196,11 +195,11 @@ const PropertyDetails = () => {
               </div>
               {roomDetails && (
                 <p className=" font-[500] text-[16px]">
-                  {roomDetails!.sharedBath > 0
-                    ? roomDetails?.sharedBath + "Shared bath"
-                    : roomDetails!.privateBath > 0
-                    ? roomDetails?.sharedBath + "Private bath"
-                    : ""}
+                  {roomDetails!.sharedBath > 0 &&
+                    roomDetails?.sharedBath + "Shared bath"}
+                  ,{" "}
+                  {roomDetails!.privateBath > 0 &&
+                    roomDetails?.sharedBath + "Private bath"}
                 </p>
               )}
               <div className="mt-6">
@@ -311,6 +310,7 @@ const PropertyDetails = () => {
                 setIsDelete(false);
                 setDeleteSuccess(true);
               }}
+              loading="false"
             />
           )}
           {deleteSuccess && (

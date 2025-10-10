@@ -7,6 +7,11 @@ interface StatusIndicatorProps {
   setSelected: React.Dispatch<React.SetStateAction<HomeStatus>>;
 }
 
+interface SelectedStatusProps {
+  selected: SelectedStatus;
+  setSelected: React.Dispatch<React.SetStateAction<SelectedStatus>>;
+}
+
 export const HomeFilterDropDown = ({
   selected,
   setSelected,
@@ -56,13 +61,15 @@ export const HomeFilterDropDown = ({
   );
 };
 
-export const BookingFilterDropDown = () => {
+export const BookingFilterDropDown = ({
+  selected,
+  setSelected,
+}: SelectedStatusProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState("All");
 
-  const options = ["All", "Daily", "Monthly"];
+  const options: SelectedStatus[] = ["Daily", "Monthly"];
 
-  const handleSelect = (option: string) => {
+  const handleSelect = (option: SelectedStatus) => {
     setSelected(option);
     setIsOpen(false);
   };

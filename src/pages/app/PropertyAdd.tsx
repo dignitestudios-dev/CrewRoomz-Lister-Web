@@ -1,9 +1,8 @@
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { HiOutlinePlus } from "react-icons/hi";
 import { useLocation, useNavigate } from "react-router";
-import { binIcon, pdfIcon, ticked, untick } from "../../assets/export";
+import { pdfIcon, ticked, untick } from "../../assets/export";
 import { useReducer, useState } from "react";
-import { AMENITY_GROUPS } from "../../statics/amenities";
 import { addPropertySchema } from "../../schema/appSchema";
 import { useFormik } from "formik";
 import { getErrorMessage, propertyValues } from "../../init/appValues";
@@ -13,34 +12,9 @@ import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/global/Toast";
 import { bedTypeOptions } from "../../statics/bedOptions";
 import GoogleMapComponent from "../../components/global/GoogleMap";
-
-type Action =
-  | { type: "ADD_BED" }
-  | { type: "REMOVE_BED"; index: number }
-  | { type: "SET_BED_TYPE"; index: number; payload: string }
-  | {
-      type: "SET_PRICE";
-      index: number;
-      payload: { name: keyof Prices; value: string };
-    }
-  | {
-      type: "SET_BUNK_PRICE";
-      index: number;
-      payload: { bunk: BunkType; name: keyof Prices; value: string };
-    };
-
-const initialState: State = {
-  beds: [
-    {
-      bedType: "",
-      prices: { dailyPrice: "", monthlyPrice: "" },
-      bunkPrices: {
-        top: { dailyPrice: "", monthlyPrice: "" },
-        bottom: { dailyPrice: "", monthlyPrice: "" },
-      },
-    },
-  ],
-};
+import BedDetails from "../../components/properties/BedDetails";
+import { bedReducer, initialState } from "../../init/roomValues";
+import AmenitiesSection from "../../components/properties/AmenitiesSection";
 
 interface BedInfo {
   bedType: string;
@@ -66,83 +40,13 @@ interface BedDetail {
   monthlyPrice: number;
 }
 
-function reducer(state: State, action: Action) {
-  switch (action.type) {
-    case "ADD_BED":
-      return {
-        ...state,
-        beds: [
-          ...state.beds,
-          {
-            bedType: "",
-            prices: { dailyPrice: "", monthlyPrice: "" },
-            bunkPrices: {
-              top: { dailyPrice: "", monthlyPrice: "" },
-              bottom: { dailyPrice: "", monthlyPrice: "" },
-            },
-          },
-        ],
-      };
-
-    case "REMOVE_BED":
-      return {
-        ...state,
-        beds: state.beds.filter((_, i) => i !== action.index),
-      };
-
-    case "SET_BED_TYPE":
-      return {
-        ...state,
-        beds: state.beds.map((bed, i) =>
-          i === action.index ? { ...bed, bedType: action.payload } : bed
-        ),
-      };
-
-    case "SET_PRICE":
-      return {
-        ...state,
-        beds: state.beds.map((bed, i) =>
-          i === action.index
-            ? {
-                ...bed,
-                prices: {
-                  ...bed.prices,
-                  [action.payload.name]: action.payload.value,
-                },
-              }
-            : bed
-        ),
-      };
-
-    case "SET_BUNK_PRICE":
-      return {
-        ...state,
-        beds: state.beds.map((bed, i) =>
-          i === action.index
-            ? {
-                ...bed,
-                bunkPrices: {
-                  ...bed.bunkPrices,
-                  [action.payload.bunk]: {
-                    ...bed.bunkPrices[action.payload.bunk],
-                    [action.payload.name]: action.payload.value,
-                  },
-                },
-              }
-            : bed
-        ),
-      };
-
-    default:
-      return state;
-  }
-}
-
 const PropertyAdd = () => {
   const navigate = useNavigate();
 
   const location = useLocation();
   const type = location.state;
+
+  const [state] = useReducer(bedReducer, initialState);
 
   const { toast, showToast } = useToast();
   const [componentState, setComponentState] = useState<LoadState>("idle");
@@ -150,47 +54,10 @@ const PropertyAdd = () => {
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
   const [rulesPreviews, setRulesPreviews] = useState<string[]>([]);
 
-  const [state, dispatch] = useReducer(reducer, initialState);
-  console.log("🚀 ~ PropertyAdd ~ state:", state);
-
   const [address, setAddress] = useState<Address | null>(null);
 
   const onLocationSelect = (data: Address) => {
     setAddress(data);
-  };
-
-  const handleBedTypeChange = (
-    index: number,
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    dispatch({ type: "SET_BED_TYPE", index, payload: e.target.value });
-  };
-
-  const handlePriceChange = (
-    index: number,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    dispatch({
-      type: "SET_PRICE",
-      index,
-      payload: { name: e.target.name as keyof Prices, value: e.target.value },
-    });
-  };
-
-  const handleBunkPriceChange = (
-    index: number,
-    bunk: BunkType,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    dispatch({
-      type: "SET_BUNK_PRICE",
-      index,
-      payload: {
-        bunk,
-        name: e.target.name as keyof Prices,
-        value: e.target.value,
-      },
-    });
   };
 
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -260,7 +127,6 @@ const PropertyAdd = () => {
     const bedDetails: BedDetail[] = [];
 
     beds.forEach((bed) => {
-      console.log("this is rocket 🚀 ~ buildBedDetails ~ bed:", bed);
       if (!["twin", "twin-xl", "full"].includes(bed.bedType)) {
         // Safely destructure with fallback
         const top = bed.bunkPrices?.top || {
@@ -274,14 +140,14 @@ const PropertyAdd = () => {
 
         // Add top bunk
         bedDetails.push({
-          type: "bunk-top",
+          type: `${bed.bedType}-top`,
           price: Number(top.dailyPrice),
           monthlyPrice: Number(top.monthlyPrice),
         });
 
         // Add bottom bunk
         bedDetails.push({
-          type: "bunk-bottom",
+          type: `${bed.bedType}-bottom`,
           price: Number(bottom.dailyPrice),
           monthlyPrice: Number(bottom.monthlyPrice),
         });
@@ -309,10 +175,8 @@ const PropertyAdd = () => {
     initialValues: propertyValues,
     validationSchema: addPropertySchema,
     onSubmit: async (values) => {
-      console.log("🚀 ~ PropertyAdd ~ values:", values);
       // prepare payload
       const formData = new FormData();
-      console.log("state bed --->", state.beds[0]);
       if (state.beds[0].bedType?.trim() === "") {
         setComponentState("error");
         showToast(
@@ -324,7 +188,6 @@ const PropertyAdd = () => {
         return;
       }
       const bedDetails = buildBedDetails(state.beds);
-      console.log("320 -- bedDetails -->", bedDetails);
       if (!address) {
         setComponentState("error");
         showToast("Please select an address on the map", "error");
@@ -367,7 +230,6 @@ const PropertyAdd = () => {
           setComponentState("ready");
         }
       } catch (error) {
-        console.log("🚀 ~ PropertyAdd ~ error:", error);
         setComponentState("error");
         showToast(getErrorMessage(error), "error");
       }
@@ -519,157 +381,7 @@ const PropertyAdd = () => {
           </div>
         )}
 
-        <label className="text-[16px] font-[500] border-t-2 border-t-[#E3E3E3] pt-4">
-          Bed Details
-        </label>
-        <div className=" bg-[#ffffff] rounded-lg pt-2 pb-4 px-4 text-center flex flex-col items-start space-y-2">
-          <p className="text-[#18181899] text-[14px] font-[400]">
-            Choose daily or monthly booking for bed.
-          </p>
-          <div className="flex flex-col items-start w-full gap-3">
-            {state.beds.map((bed, index) => (
-              <div key={index} className="relative">
-                <div
-                  className={`flex items-center gap-3 w-[750px] ${
-                    index % 2 !== 0
-                      ? "border-t-[1px] border-t-[#E3E3E3] pt-3"
-                      : ""
-                  }`}
-                >
-                  <div className="w-[310px] flex flex-col items-start">
-                    <label className="block mb-1 text-[13px] font-[500]">
-                      Bed Type
-                    </label>
-                    <select
-                      value={bed.bedType}
-                      onChange={(e) => handleBedTypeChange(index, e)}
-                      className="w-full py-4.5 pl-3 pr-5 text-[14px] text-[#18181899] bg-[#29ABE21F] rounded-md"
-                    >
-                      <option value="">Select Bed Type</option>
-                      {bedTypeOptions.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {state.beds.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => dispatch({ type: "REMOVE_BED", index })}
-                      className="ml-auto text-red-500 text-sm font-medium hover:underline absolute top-0 right-0"
-                    >
-                      <img
-                        src={binIcon}
-                        className="h-7 w-7 p-1 hover:p-1.5 hover:bg-red-100 hover:rounded-4xl"
-                      />
-                    </button>
-                  )}
-                  {bed.bedType &&
-                    ["twin", "twin-xl", "full"].includes(bed.bedType) && (
-                      <div>
-                        <label className="block mb-1 text-[13px] font-[500] text-start">
-                          Price
-                        </label>
-                        <div className="w-[310px] flex items-start gap-2">
-                          <div className="w-full py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
-                            <label className="block mb-1 text-[13px] font-[500] text-start">
-                              Daily
-                            </label>
-                            <input
-                              name="dailyPrice"
-                              value={bed.prices.dailyPrice}
-                              onChange={(e) => handlePriceChange(index, e)}
-                              className="w-full bg-transparent"
-                              placeholder="e.g. 50"
-                            />
-                          </div>
-                          <div className="w-full py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
-                            <label className="block mb-1 text-[13px] font-[500] text-start">
-                              Monthly
-                            </label>
-                            <input
-                              name="monthlyPrice"
-                              value={bed.prices.monthlyPrice}
-                              onChange={(e) => handlePriceChange(index, e)}
-                              className="w-full bg-transparent"
-                              placeholder="e.g. 1000"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                </div>
-                {!["twin", "twin-xl", "full"].includes(bed.bedType) && (
-                  <div className="flex flex-col gap-4">
-                    {["top", "bottom"].map((bunk) => (
-                      <div key={bunk}>
-                        <label className="block mb-1 text-[13px] font-[500] text-start">
-                          {bunk === "top" ? "Top Bed" : "Bottom Bed"}
-                        </label>
-                        <div className="w-full flex items-start gap-2">
-                          <div className="w-[153px] py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
-                            <label className="block mb-1 text-[13px] font-[500] text-start">
-                              Daily
-                            </label>
-                            <input
-                              name="dailyPrice"
-                              value={
-                                bed.bunkPrices[bunk as BunkType].dailyPrice
-                              }
-                              onChange={(e) =>
-                                handleBunkPriceChange(
-                                  index,
-                                  bunk as BunkType,
-                                  e
-                                )
-                              }
-                              className="w-full bg-transparent text-[16px] text-[#181818]"
-                              placeholder="e.g. 50"
-                            />
-                          </div>
-                          <div className="w-[153px] py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
-                            <label className="block mb-1 text-[13px] font-[500] text-start">
-                              Monthly
-                            </label>
-                            <input
-                              name="monthlyPrice"
-                              value={
-                                bed.bunkPrices[bunk as BunkType].monthlyPrice
-                              }
-                              onChange={(e) =>
-                                handleBunkPriceChange(
-                                  index,
-                                  bunk as BunkType,
-                                  e
-                                )
-                              }
-                              className="w-full bg-transparent text-[16px] text-[#181818]"
-                              placeholder="e.g. 1000"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-
-            {type === "multi" && (
-              <button
-                type="button"
-                onClick={() => dispatch({ type: "ADD_BED" })}
-                className="flex items-center gap-2 pt-2 cursor-pointer"
-              >
-                <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
-                <p className="text-[14px] gradient-text font-[500]">
-                  Add More Bed
-                </p>
-              </button>
-            )}
-          </div>
-        </div>
+        <BedDetails type="multi" bedTypeOptions={bedTypeOptions} />
 
         <label className="text-[16px] font-[500] pt-4">Bath Details</label>
         <div className=" bg-[#ffffff] rounded-lg pt-2 pb-4 px-4 text-center flex items-center space-y-2 mb-6">
@@ -713,70 +425,23 @@ const PropertyAdd = () => {
         <div className="bg-[#ffffff] rounded-lg pt-2 pb-4 px-4">
           <GoogleMapComponent
             onLocationSelect={onLocationSelect}
-            editAddress={address}
+            editAddress={null}
             showRadius={true}
             isClear={false}
           />
         </div>
-        {/* <div className=" h-[100px] bg-[#ffffff] rounded-lg pt-2 pb-4 px-4 text-center flex flex-col items-start space-y-2">
-          <textarea
-            rows={4}
-            name="address"
-            value={values.address}
-            onChange={handleChange}
-            className="w-full bg-white rounded-lg px-2"
-          ></textarea>
-        </div>
-        {touched.address && errors.address && (
-          <div className="text-red-500 text-sm mt-2">
-            {errors.address as string}
-          </div>
-        )} */}
-        {/* <div className=" mb-6">
-          <img src={map} className="h-[170px] w-full" />
-        </div> */}
 
         {touched.amenities && errors.amenities && (
           <div className="text-red-500 text-sm mt-2">
             {errors.amenities as string}
           </div>
         )}
-        <div className=" pt-4 border-t-2 border-t-[#E3E3E3]">
-          <p className="text-[20px] font-semibold">Amenities</p>
-          <p className="text-[#18181899] text-[14px] font-[400]">
-            You can select multiple options for amenities:
-          </p>
-          {AMENITY_GROUPS.map((group) => (
-            <div key={group.title} className="mb-6">
-              <p className="text-[16px] font-[500] py-3">{group.title}</p>
-              <div className="grid sm:grid-cols-2 gap-4">
-                {group.items.map((item, index) => {
-                  const isChecked = values.amenities.includes(item);
-
-                  return (
-                    <div key={index} className="flex items-center gap-2 py-1">
-                      <label className="flex items-center cursor-pointer select-none gap-4">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleAmenity(item)}
-                          className="hidden"
-                        />
-                        <img
-                          src={isChecked ? ticked : untick}
-                          alt={isChecked ? "Checked" : "Unchecked"}
-                          className="w-5 h-5 transition-transform duration-200 ease-in-out"
-                        />
-
-                        <span className="text-[14px]">{item}</span>
-                      </label>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
+        <AmenitiesSection
+          values={values}
+          toggleAmenity={toggleAmenity}
+          ticked={ticked}
+          untick={untick}
+        />
 
         <div className="w-full flex justify-end items-center">
           <button

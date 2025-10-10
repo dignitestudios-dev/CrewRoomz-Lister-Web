@@ -54,6 +54,11 @@ export const signUpSchema = Yup.object({
   confirmPassword: Yup.string()
     .required("Please confirm your password")
     .oneOf([Yup.ref("password")], "Passwords must match"),
+
+  isChecked: Yup.boolean().oneOf(
+    [true],
+    "You must accept Terms & Conditions before signing up"
+  ),
 });
 
 export const forgotPasswordSchema = Yup.object({

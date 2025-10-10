@@ -30,7 +30,6 @@ const SignUp = () => {
   const { toast, showToast } = useToast();
   const [state, setState] = useState<LoadState>("idle");
 
-  const [isChecked, setIsChecked] = useState(true);
   const [files, setFiles] = useState<{ profilePreview: string | null }>({
     profilePreview: null,
   });
@@ -54,6 +53,7 @@ const SignUp = () => {
           values.email.toLocaleLowerCase(),
           values.email.toLocaleLowerCase()
         );
+        console.log("newUser --- > ", newUser);
         const token = await getIdToken(newUser.user);
         if (token) {
           handelSignUp(values as SignUpValues, token);
@@ -105,7 +105,7 @@ const SignUp = () => {
     }
     try {
       const response = await axios.post("/auth/signUp", formData);
-      if (response.status === 200) {
+      if (response.status === 201 || response.status === 200) {
         setState("ready");
         showToast("Login Success", "success");
         navigate("/verify-login-otp", { state: { email: values?.email } });
@@ -247,30 +247,48 @@ const SignUp = () => {
               </div>
 
               <div className="flex items-start gap-3 mt-4">
-                <label className="flex items-center cursor-pointer select-none">
-                  {/* Hidden real checkbox for accessibility */}
+                <div
+                  className="flex items-center cursor-pointer select-none"
+                  onClick={() => setFieldValue("isChecked", !values.isChecked)}
+                >
                   <input
                     type="checkbox"
-                    checked={isChecked}
-                    onChange={() => setIsChecked(!isChecked)}
+                    name="isChecked"
+                    checked={values.isChecked}
+                    onChange={() =>
+                      setFieldValue("isChecked", !values.isChecked)
+                    }
                     className="hidden"
                   />
-
-                  {/* Custom image instead of default checkbox */}
                   <img
-                    src={isChecked ? checked : unchecked}
-                    alt={isChecked ? "Checked" : "Unchecked"}
+                    src={values.isChecked ? checked : unchecked}
+                    alt={values.isChecked ? "Checked" : "Unchecked"}
                     className="w-5 h-5 transition-transform duration-200 ease-in-out"
                   />
+                </div>
 
-                  <span className="ml-3 text-[15px] text-[#18181899]">
-                    I accept the{" "}
-                    <span className="gradient-text">Terms & Conditions</span>{" "}
-                    and
-                    <span className="gradient-text"> Privacy Policy</span>
+                <div className="ml-1 text-[15px] text-[#18181899]">
+                  I accept the{" "}
+                  <span
+                    className="gradient-text cursor-pointer"
+                    onClick={() => console.log("Open Terms & Conditions")}
+                  >
+                    Terms & Conditions
+                  </span>{" "}
+                  and{" "}
+                  <span
+                    className="gradient-text cursor-pointer"
+                    onClick={() => console.log("Open Privacy Policy")}
+                  >
+                    Privacy Policy
                   </span>
-                </label>
+                </div>
               </div>
+              {errors.isChecked && touched.isChecked && (
+                <p className="text-red-500 text-[13px] mt-1">
+                  {errors.isChecked}
+                </p>
+              )}
               <div className="mt-6">
                 <AuthButton
                   text="Sign Up"

@@ -15,7 +15,7 @@ interface LatLng {
 
 interface GoogleMapComponentProps {
   onLocationSelect: (data: Address) => void;
-  editAddress?: Address | null;
+  editAddress?: EditAddress | null;
   distance?: number;
   showRadius?: boolean;
   isDisabled?: boolean;
@@ -48,6 +48,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   error,
   isClear = false,
 }) => {
+  console.log("🚀 ~ GoogleMapComponent ~ editAddress:", editAddress);
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
     libraries,
@@ -66,12 +67,25 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
 
   // -------- Handle edit mode pre-fill -------- //
   useEffect(() => {
-    if (editAddress?.location?.coordinates?.length === 2) {
-      const [lng, lat] = editAddress.location.coordinates;
-      const coords = { lat, lng };
-      setMapCenter(coords);
-      setMarker(coords);
-      setInputValue(editAddress.address || "");
+    if (editAddress) {
+      let lat, lng;
+
+      // ✅ Handle old format: location.coordinates = [lng, lat]
+      if (Array.isArray(editAddress.location?.coordinates)) {
+        [lng, lat] = editAddress.location.coordinates;
+      }
+
+      // ✅ Handle new format: location = { lat, lng }
+      else if (editAddress.location?.lat && editAddress.location?.lng) {
+        ({ lat, lng } = editAddress.location);
+      }
+
+      if (lat && lng) {
+        const coords = { lat, lng };
+        setMapCenter(coords);
+        setMarker(coords);
+        setInputValue(editAddress.address || "");
+      }
     }
   }, [editAddress]);
 
@@ -103,6 +117,7 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
         coordinates: [lng, lat],
       },
     };
+    console.log("🚀 ~ handlePlaceChanged ~ newAddress:", newAddress);
 
     setMapCenter({ lat, lng });
     setMarker({ lat, lng });

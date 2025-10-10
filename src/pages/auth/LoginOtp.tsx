@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { signupSideImg } from "../../assets/export";
-// import useAuthStore from "../store/authStore";
 import AuthButton from "../../components/Auth/AuthButton";
 import CountDown from "../../components/Auth/CountDown";
 import { ErrorToast } from "../../components/global/Toaster";
@@ -10,13 +9,15 @@ import axios from "../../axios";
 import { useToast } from "../../hooks/useToast";
 import { getErrorMessage } from "../../init/appValues";
 import Toast from "../../components/global/Toast";
+import useAuthStore from "../../store/authStore";
 
 const LoginOtp = () => {
-  // const setAuth = useAuthStore((s) => s.setAuth);
   const navigate = useNavigate();
+  const setAuth = useAuthStore((s) => s.setAuth);
+
   const { toast, showToast } = useToast();
   const [state, setState] = useState<LoadState>("idle");
-  const [otp, setOtp] = useState<string[]>(["", "", "", "", ""]);
+  const [otp, setOtp] = useState<string[]>(["", "", "", "", "", ""]);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const location = useLocation();
   const { email } = location.state || {};
@@ -74,8 +75,8 @@ const LoginOtp = () => {
       ErrorToast("Please enter complete OTP.");
       return;
     }
-    setIsVerified(true);
     const otpValue = parseInt(otp.join(""), 10);
+    setState("loading");
     try {
       const response = await axios.post("/auth/verifyOTP", {
         otp: otpValue,
@@ -83,8 +84,11 @@ const LoginOtp = () => {
         role: "lister",
       });
       if (response.status === 200) {
+        const data = response?.data?.data;
+        console.log("🚀 ~ handleSubmit ~ token~:", data);
+        setAuth(data.token, data.user, true);
         setState("ready");
-        showToast("Login Success", "success");
+        setIsVerified(true);
       }
     } catch (error) {
       setState("error");
@@ -101,11 +105,10 @@ const LoginOtp = () => {
         role: "lister",
       };
       const response = await axios.post("/auth/resendOtp", obj);
-      if (response.status === 201) {
-        setResendLoading(false);
+      if (response.status === 201 || response.status === 200) {
         setOtp(Array(6).fill(""));
         setState("ready");
-        showToast("Login Success", "success");
+        showToast("OTP has been resent successfully!.", "success");
       }
     } catch (err) {
       setState("error");
@@ -158,9 +161,9 @@ const LoginOtp = () => {
             <div className="flex justify-center items-center w-full ">
               <form
                 onSubmit={handleSubmit}
-                className="w-full lg:max-w-[55%] md:max-w-[60%] sm:max-w-[75%] xs:max-w-[90%]"
+                className="w-full lg:max-w-[60%] md:max-w-[60%] sm:max-w-[75%] xs:max-w-[90%]"
               >
-                <div className="flex gap-6">
+                <div className="flex gap-4">
                   {otp.map((digit, index) => (
                     <input
                       key={index}

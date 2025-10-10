@@ -6,26 +6,13 @@ import { useFormik } from "formik";
 import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/global/Toast";
 import GoogleMapComponent from "../../components/global/GoogleMap";
-import {
-  bedReducer,
-  getErrorMessage,
-  initialState,
-} from "../../init/appValues";
+import { getErrorMessage } from "../../init/appValues";
 import { AMENITY_GROUPS } from "../../statics/amenities";
 import { binIcon, pdfIcon, ticked, untick } from "../../assets/export";
 import { HiOutlinePlus } from "react-icons/hi";
 import { RxCross2 } from "react-icons/rx";
 import { bedTypeOptions } from "../../statics/bedOptions";
-
-interface Address {
-  address: string;
-  city: string;
-  state: string;
-  location: {
-    lat: number;
-    lng: number;
-  };
-}
+import { bedReducer, initialState } from "../../init/roomValues";
 
 const PropertyEdit = () => {
   const navigate = useNavigate();
@@ -38,7 +25,7 @@ const PropertyEdit = () => {
     "idle" | "loading" | "ready" | "error"
   >("idle");
 
-  const [address, setAddress] = useState<Address | null>(null);
+  const [address, setAddress] = useState<EditAddress | null>(null);
   const [state, dispatch] = useReducer(bedReducer, initialState);
 
   const [imagePreviews, setImagePreviews] = useState<string[]>([]); // URLs for preview
@@ -172,10 +159,6 @@ const PropertyEdit = () => {
 
     setImagePreviews(room.media || []);
     if (room.rulesDocument) setRulesPreviews([room.rulesDocument]);
-    //     if (room?.rulesFiles && room.rulesFiles.length > 0) {
-    //     // Example: ['https://example.com/files/rules1.pdf', 'https://example.com/files/rules2.pdf']
-    //     setRulesPreviews(room.rulesFiles);
-    //   }
 
     setAddress({
       address: room.address,
@@ -188,17 +171,52 @@ const PropertyEdit = () => {
     });
 
     if (room?.bedDetails) {
-      const formattedBeds = room.bedDetails.map((b: any) => ({
-        bedType: b.type,
-        prices: {
-          dailyPrice: b.price?.toString() || "",
-          monthlyPrice: b.monthlyPrice?.toString() || "",
-        },
-        bunkPrices: {
-          top: { dailyPrice: "", monthlyPrice: "" },
-          bottom: { dailyPrice: "", monthlyPrice: "" },
-        },
-      }));
+      const formattedBeds = Object.values(
+        room.bedDetails.reduce(
+          (
+            acc: any,
+            b: {
+              type: string;
+              price: number;
+              monthlyPrice: number;
+              _id: string;
+            }
+          ) => {
+            const baseType = b.type.replace(/-(top|bottom)$/, "");
+            if (!acc[baseType]) {
+              acc[baseType] = {
+                bedType: baseType,
+                prices: { dailyPrice: "", monthlyPrice: "" },
+                bunkPrices: {
+                  top: { dailyPrice: "", monthlyPrice: "" },
+                  bottom: { dailyPrice: "", monthlyPrice: "" },
+                },
+              };
+            }
+            // handle simple beds like twin/full (non-bunk)
+            if (["twin", "twin-xl", "full"].includes(baseType)) {
+              acc[baseType].prices = {
+                dailyPrice: b.price?.toString() || "",
+                monthlyPrice: b.monthlyPrice?.toString() || "",
+              };
+            }
+            // handle bunk beds
+            else if (b.type.includes("top")) {
+              acc[baseType].bunkPrices.top = {
+                dailyPrice: b.price?.toString() || "",
+                monthlyPrice: b.monthlyPrice?.toString() || "",
+              };
+            } else if (b.type.includes("bottom")) {
+              acc[baseType].bunkPrices.bottom = {
+                dailyPrice: b.price?.toString() || "",
+                monthlyPrice: b.monthlyPrice?.toString() || "",
+              };
+            }
+            return acc;
+          },
+          {}
+        )
+      );
 
       dispatch({ type: "SET_BEDS", payload: formattedBeds });
     }
@@ -207,6 +225,7 @@ const PropertyEdit = () => {
   const { values, setFieldValue, handleChange, handleSubmit } = useFormik({
     enableReinitialize: true,
     initialValues,
+
     onSubmit: async (values) => {
       if (!address) {
         showToast("Please select an address on the map", "error");
@@ -537,6 +556,42 @@ const PropertyEdit = () => {
                         </p>
                       </button>
                     )} */}
+          </div>
+        </div>
+
+        <label className="text-[16px] font-[500] pt-4">Bath Details</label>
+        <div className=" bg-[#ffffff] rounded-lg pt-2 pb-4 px-4 text-center flex items-center space-y-2 mb-6">
+          <div className="w-[310px] flex flex-col items-start mr-4">
+            <label className="block mb-1 text-[13px] font-[500]">
+              Shared Bath
+            </label>
+            <input
+              name="sharedBath"
+              value={values.sharedBath}
+              onChange={handleChange}
+              className="bg-[#29ABE21F] w-[311px] h-[54px] rounded-md px-4"
+            />
+            {/* {touched.sharedBath && errors.sharedBath && (
+              <div className="text-red-500 text-sm mt-1">
+                {errors.sharedBath}
+              </div>
+            )} */}
+          </div>
+          <div className="w-[310px] flex flex-col items-start mr-4 ">
+            <label className="block mb-1 text-[13px] font-[500]">
+              Private Bath
+            </label>
+            <input
+              name="privateBath"
+              value={values.privateBath}
+              onChange={handleChange}
+              className="bg-[#29ABE21F] w-[311px] h-[54px] rounded-md px-4"
+            />
+            {/* {touched.privateBath && errors.privateBath && (
+              <div className="text-red-500 text-sm mt-1">
+                {errors.privateBath}
+              </div>
+            )} */}
           </div>
         </div>
 
