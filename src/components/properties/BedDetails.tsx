@@ -1,8 +1,8 @@
 // src/components/BedDetails.tsx
-import React, { useReducer } from "react";
+import React from "react";
 import { HiOutlinePlus } from "react-icons/hi";
 import { binIcon } from "../../assets/export";
-import { bedReducer, initialState } from "../../init/roomValues";
+import { type Action } from "../../init/roomValues";
 
 interface BedTypeOption {
   value: string;
@@ -12,11 +12,16 @@ interface BedTypeOption {
 interface BedDetailsProps {
   type: string;
   bedTypeOptions: BedTypeOption[];
+  state: State;
+  dispatch: React.Dispatch<Action>;
 }
 
-const BedDetails: React.FC<BedDetailsProps> = ({ type, bedTypeOptions }) => {
-  const [state, dispatch] = useReducer(bedReducer, initialState);
-
+const BedDetails: React.FC<BedDetailsProps> = ({
+  type,
+  bedTypeOptions,
+  state,
+  dispatch,
+}) => {
   // --- Handlers ---
   const handleBedTypeChange = (
     index: number,

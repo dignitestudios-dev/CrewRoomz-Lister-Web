@@ -1,8 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { IoSend } from "react-icons/io5";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import { user } from "../../assets/export";
+import { useAppStore } from "../../store/appStore";
+import { getUserChatsWithDetails } from "../../firebase/messages";
 
 const users: User[] = [
   { id: 1, name: "Mike Smith (258496)", initials: "MS", image: user },
@@ -57,6 +59,11 @@ const Chat = () => {
   const [chats, setChats] = useState<Chats>(initialChats);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
+  const [loadingChats, setLoadingChats] = useState(true);
+  console.log("🚀 ~ Chat ~ loadingChats:", loadingChats);
+  const [chatList, setChatList] = useState<Chat[]>([]);
+  console.log("🚀 ~ Chat ~ chatList:", chatList);
+
   const selectedMessages: Message[] = selectedUserId
     ? chats[selectedUserId] || []
     : [];
@@ -65,6 +72,7 @@ const Chat = () => {
   const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   const navigate = useNavigate();
+  const { user } = useAppStore();
 
   const handleSendMessage = () => {
     if (!selectedUserId) return;
@@ -117,6 +125,22 @@ const Chat = () => {
     setInput("");
     setAttachments([]);
   };
+
+  /** ✅ Load chat list */
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const unsubscribe = getUserChatsWithDetails(
+      "lister",
+      user?.uid,
+      (chats) => {
+        setChatList(chats);
+        setLoadingChats(false);
+      }
+    );
+
+    return () => unsubscribe && unsubscribe();
+  }, [user]);
 
   // const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   // const files = Array.from(e.target.files);

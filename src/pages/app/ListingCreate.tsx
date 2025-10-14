@@ -30,9 +30,9 @@ const ListingCreate = () => {
           <p className="text-[16px] font-[500]">Multi</p>
           <IoIosArrowForward className="text-[#18181899]" />
         </div>
-        <p className="text-[#18181899] text-[15px] font-[400]">
+        {/* <p className="text-[#18181899] text-[15px] font-[400]">
           Lorem ipsum dolor sit amet consectetur.
-        </p>
+        </p> */}
         <div
           onClick={() => navigate("/add-property", { state: "semi" })}
           className=" h-[50px] bg-[#ffffff] rounded-lg px-4 text-center cursor-pointer flex items-center justify-between mt-5"
@@ -40,19 +40,19 @@ const ListingCreate = () => {
           <p className="text-[16px] font-[400]">Semi-Private</p>
           <IoIosArrowForward className="text-[#18181899]" />
         </div>
-        <p className="text-[#18181899] text-[15px] font-[400]">
+        {/* <p className="text-[#18181899] text-[15px] font-[400]">
           Lorem ipsum dolor sit amet consectetur.
-        </p>
+        </p> */}
         <div
           onClick={() => navigate("/add-property", { state: "private" })}
-          className=" h-[50px] bg-[#ffffff] rounded-lg px-4 text-center cursor-pointer flex items-center justify-between "
+          className=" h-[50px] bg-[#ffffff] rounded-lg px-4 text-center cursor-pointer flex items-center justify-between mt-5"
         >
           <p className="text-[16px] font-[500]">Private</p>
           <IoIosArrowForward className="text-[#18181899]" />
         </div>
-        <p className="text-[#18181899] text-[15px] font-[400]">
+        {/* <p className="text-[#18181899] text-[15px] font-[400]">
           Lorem ipsum dolor sit amet consectetur.
-        </p>
+        </p> */}
       </div>
     </div>
   );

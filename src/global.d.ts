@@ -111,6 +111,20 @@ declare global {
     time: string;
   }
 
+  interface Chat {
+    id: string;
+    participants: Record<string, string>; // or string[] depending on your schema
+    lastMessage?: string;
+    user?: {
+      uid: string;
+      email: string;
+      id: string;
+      name: string;
+      profilePicture?: string;
+      role: string;
+    };
+  }
+
   interface User {
     id: number;
     name: string;

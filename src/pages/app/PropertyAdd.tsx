@@ -46,7 +46,8 @@ const PropertyAdd = () => {
   const location = useLocation();
   const type = location.state;
 
-  const [state] = useReducer(bedReducer, initialState);
+  const [state, dispatch] = useReducer(bedReducer, initialState);
+  console.log("🚀 ~ PropertyAdd ~ state:", state);
 
   const { toast, showToast } = useToast();
   const [componentState, setComponentState] = useState<LoadState>("idle");
@@ -381,7 +382,12 @@ const PropertyAdd = () => {
           </div>
         )}
 
-        <BedDetails type="multi" bedTypeOptions={bedTypeOptions} />
+        <BedDetails
+          type="multi"
+          bedTypeOptions={bedTypeOptions}
+          state={state}
+          dispatch={dispatch}
+        />
 
         <label className="text-[16px] font-[500] pt-4">Bath Details</label>
         <div className=" bg-[#ffffff] rounded-lg pt-2 pb-4 px-4 text-center flex items-center space-y-2 mb-6">

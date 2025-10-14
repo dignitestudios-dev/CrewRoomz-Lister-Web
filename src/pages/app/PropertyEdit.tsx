@@ -28,14 +28,14 @@ const PropertyEdit = () => {
   const [address, setAddress] = useState<EditAddress | null>(null);
   const [state, dispatch] = useReducer(bedReducer, initialState);
 
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]); // URLs for preview
-  const [newImages, setNewImages] = useState<File[]>([]); // Files newly selected
-  const [removedImages, setRemovedImages] = useState<string[]>([]); // URLs removed
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [newImages, setNewImages] = useState<File[]>([]);
+  const [removedImages, setRemovedImages] = useState<string[]>([]);
 
   // For previews and file tracking
   const [rulesPreviews, setRulesPreviews] = useState<string[]>([]);
-  const [newRulesFiles, setNewRulesFiles] = useState<File[]>([]); // new uploads
-  const [removedRules, setRemovedRules] = useState<string[]>([]); // removed old files
+  const [newRulesFiles, setNewRulesFiles] = useState<File[]>([]);
+  const [removedRules, setRemovedRules] = useState<string[]>([]);
 
   const [initialValues, setInitialValues] = useState<any>({
     description: "",
@@ -50,7 +50,34 @@ const PropertyEdit = () => {
     index: number,
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    dispatch({ type: "SET_BED_TYPE", index, payload: e.target.value });
+    if (state?.beds[index].bedType?.includes("bunk")) {
+      console.log("bed value----> ", e.target.value);
+      if (e.target.value?.includes("bunk")) {
+        dispatch({ type: "SET_BED_TYPE", index, payload: e.target.value });
+      } else {
+        setComponentState("error");
+        showToast(
+          getErrorMessage({
+            response: { data: { message: "Only Bunk Type will Select" } },
+          }),
+          "error"
+        );
+        return;
+      }
+    } else {
+      if (e.target.value?.includes("bunk")) {
+        setComponentState("error");
+        showToast(
+          getErrorMessage({
+            response: { data: { message: "Only non-bunk type will select" } },
+          }),
+          "error"
+        );
+        return;
+      } else {
+        dispatch({ type: "SET_BED_TYPE", index, payload: e.target.value });
+      }
+    }
   };
 
   // Update regular bed prices
@@ -544,18 +571,18 @@ const PropertyEdit = () => {
               </div>
             ))}
 
-            {/* {type === "multi" && (
-                      <button
-                        type="button"
-                        onClick={() => dispatch({ type: "ADD_BED" })}
-                        className="flex items-center gap-2 pt-2 cursor-pointer"
-                      >
-                        <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
-                        <p className="text-[14px] gradient-text font-[500]">
-                          Add More Bed
-                        </p>
-                      </button>
-                    )} */}
+            {room?.roomType === "multi" && (
+              <button
+                type="button"
+                onClick={() => dispatch({ type: "ADD_BED" })}
+                className="flex items-center gap-2 pt-2 cursor-pointer"
+              >
+                <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
+                <p className="text-[14px] gradient-text font-[500]">
+                  Add More Bed
+                </p>
+              </button>
+            )}
           </div>
         </div>
 

@@ -1,16 +1,30 @@
+import axios from "../../axios";
 import { useRef, useState } from "react";
-import CountDown from "../Auth/CountDown";
+import { useToast } from "../../hooks/useToast";
+import { getErrorMessage } from "../../init/appValues";
+import Toast from "../global/Toast";
+import { RiLoader5Line } from "react-icons/ri";
+import { useAppStore } from "../../store/appStore";
+import { ErrorToast } from "../global/Toaster";
+import useAuthStore from "../../store/authStore";
+import { useNavigate } from "react-router";
+// import CountDown from "../Auth/CountDown";
 // import { ErrorToast } from "../global/Toaster";
 
 const DeleteAccount = () => {
+  const { user } = useAppStore();
+  const { clearAuth } = useAuthStore();
+  const navigate = useNavigate();
   const [isDelete, setIsDelete] = useState(false);
-  const [otp, setOtp] = useState(["", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", ""]);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
+  const { toast, showToast } = useToast();
+  const [state, setState] = useState<LoadState>("idle");
 
-  const [isActive, setIsActive] = useState(true);
-  const [seconds, setSeconds] = useState(10);
+  // const [isActive, setIsActive] = useState(true);
+  // const [seconds, setSeconds] = useState(10);
 
-  const [resendLoading, setResendLoading] = useState(false);
+  // const [resendLoading, setResendLoading] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement>,
@@ -53,39 +67,74 @@ const DeleteAccount = () => {
     inputs.current[nextIndex]?.focus();
   };
 
-  const handleResendOtp = async () => {
+  const deleteAccount = async () => {
     try {
-      handleRestart();
-
-      setResendLoading(true);
-      //   let obj = {
-      //     email: email,
-      //     role: "landlord",
-      //   };
-
-      //   const response = await axios.post("/auth/sendPassOTP", obj);
-
-      //   if (response.status === 201) {
-      //     SuccessToast(response?.data?.message);
-      //     setResendLoading(false);
-      //     setOtp(Array(5).fill("")); // Reset OTP fields
-      //     handleRestart();
-      //   }
-    } catch (err) {
-      console.log("🚀 ~ handleResendOtp ~ err:", err);
-      // ErrorToast(err?.response?.data?.message);
-    } finally {
-      setResendLoading(false);
+      setState("loading");
+      const response = await axios.delete("/user/delete");
+      if (response.status === 200) {
+        setIsDelete(true);
+        setState("ready");
+      }
+    } catch (error) {
+      setState("error");
+      showToast(getErrorMessage(error), "error");
     }
   };
 
-  const handleRestart = () => {
-    setSeconds(10);
-    setIsActive(true);
+  const submitOtp = async () => {
+    if (otp.some((digit) => digit === "")) {
+      ErrorToast("Please enter complete OTP.");
+      return;
+    }
+    const otpValue = parseInt(otp.join(""), 10);
+    setState("loading");
+    try {
+      const response = await axios.post("/user/confirmDeleteAccount", {
+        otp: otpValue,
+      });
+      if (response.status === 200) {
+        clearAuth();
+        navigate("login");
+      }
+    } catch (error) {
+      setState("error");
+      showToast(getErrorMessage(error), "error");
+    }
   };
+  // const handleResendOtp = async () => {
+  //   try {
+  //     handleRestart();
+
+  //     setResendLoading(true);
+  //     //   let obj = {
+  //     //     email: email,
+  //     //     role: "landlord",
+  //     //   };
+
+  //     //   const response = await axios.post("/auth/sendPassOTP", obj);
+
+  //     //   if (response.status === 201) {
+  //     //     SuccessToast(response?.data?.message);
+  //     //     setResendLoading(false);
+  //     //     setOtp(Array(5).fill("")); // Reset OTP fields
+  //     //     handleRestart();
+  //     //   }
+  //   } catch (err) {
+  //     console.log("🚀 ~ handleResendOtp ~ err:", err);
+  //     // ErrorToast(err?.response?.data?.message);
+  //   } finally {
+  //     setResendLoading(false);
+  //   }
+  // };
+
+  // const handleRestart = () => {
+  //   setSeconds(10);
+  //   setIsActive(true);
+  // };
 
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-custom-sm flex flex-col py-6 px-4 h-[480px]">
+      {(state === "error" || state === "ready") && <Toast {...toast} />}
       {isDelete ? (
         <div className="py-12">
           <div className="flex justify-center">
@@ -93,7 +142,7 @@ const DeleteAccount = () => {
               To permanently delete your account, please enter the 6 digit code
               send to your email{" "}
               <span className="text-[13px] text-[#181818] font-[600]">
-                mikesith@gmail.com
+                {user?.email}
               </span>
             </p>
           </div>
@@ -114,7 +163,7 @@ const DeleteAccount = () => {
               />
             ))}
           </div>
-          <div className="flex items-center justify-center gap-2 relative z-10 mt-2">
+          {/* <div className="flex items-center justify-center gap-2 relative z-10 mt-2">
             <p className=" text-[13px] leading-[21.6px] text-[#565656]">
               Didn&apos;t receive code?
               {isActive ? (
@@ -137,10 +186,10 @@ const DeleteAccount = () => {
                 </button>
               )}
             </p>
-          </div>
+          </div> */}
           <div className="flex items-center justify-center">
             <button
-              onClick={() => setIsDelete(true)}
+              onClick={submitOtp}
               type="button"
               className="w-[343px] my-4 rounded-[8px] bg-[#DC1D00] text-white text-[14px] py-3 px-6 font-semibold cursor-pointer hover:bg-[#d01c00]"
             >
@@ -157,11 +206,15 @@ const DeleteAccount = () => {
             Deleting your account will delete all your data
           </p>
           <button
-            onClick={() => setIsDelete(true)}
+            onClick={deleteAccount}
             type="button"
             className="w-[150px] my-4 rounded-[8px] bg-[#DC1D00] text-white text-[14px] py-3 px-6 font-semibold cursor-pointer hover:bg-[#d01c00]"
           >
-            Delete Now
+            {state === "loading" ? (
+              <RiLoader5Line className="animate-spin text-lg" />
+            ) : (
+              "Delete Now"
+            )}
           </button>
         </div>
       )}
