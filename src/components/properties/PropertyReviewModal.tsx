@@ -1,20 +1,55 @@
 import React from "react";
 import { FaStar } from "react-icons/fa";
-import { user } from "../../assets/export";
+import { getDateFormat } from "../../init/appValues";
 
 type Breakdown = Record<number, number>;
 
 interface ReviewProps {
   breakdown: Breakdown;
   onClose?: () => void;
+  reviews: Review[];
 }
 
-const PropertyReviewModal: React.FC<ReviewProps> = ({ breakdown, onClose }) => {
+interface Review {
+  bookingId: string;
+  createdAt: string;
+  rating: number;
+  review: string;
+  room: string;
+  updatedAt: string;
+  user: {
+    name: string;
+    email: string;
+    profilePicture?: string;
+  };
+  _id: string;
+}
+
+const PropertyReviewModal: React.FC<ReviewProps> = ({
+  breakdown,
+  reviews,
+  onClose,
+}) => {
   const stars = [5, 4, 3, 2, 1];
   const total = stars.reduce((sum, s) => sum + (breakdown[s] || 0), 0);
   const average = total
     ? stars.reduce((acc, s) => acc + s * (breakdown[s] || 0), 0) / total
     : 0;
+
+  const renderStars = (rating: number) => {
+    return Array.from({ length: 5 }).map((_, i) => (
+      <FaStar
+        key={i}
+        className={`${
+          rating >= i + 1
+            ? "opacity-100"
+            : rating >= i + 0.5
+            ? "opacity-80"
+            : "opacity-30"
+        }`}
+      />
+    ));
+  };
 
   return (
     <div className="fixed inset-0 bg-[#04080680] bg-opacity-0 z-50 flex items-center justify-center">
@@ -66,98 +101,80 @@ const PropertyReviewModal: React.FC<ReviewProps> = ({ breakdown, onClose }) => {
             </div>
           );
         })}
-        <div className="mt-4 overflow-y-auto max-h-72 text-left">
-          <div className="flex text-yellow-400">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <FaStar
-                key={i}
-                className={`${
-                  average >= i + 1
-                    ? "opacity-100"
-                    : average >= i + 0.5
-                    ? "opacity-80"
-                    : "opacity-30"
-                }`}
-              />
-            ))}
-          </div>
-          <div>
-            <p className="text-[14px]  font-[400] text-justify mt-2">
-              Amazing product. I booked on Monday and I got my order on the next
-              day. I’m highly impressed with their services. Highly recommended!
-            </p>
-            <div className="flex justify-start items-center gap-2">
-              <img
-                src={user}
-                alt="user"
-                className="h-8 w-8 rounded-full mt-2"
-              />
-              <div className="mt-2 ml-2">
-                <p className="font-[500]">Abc Xyz</p>
+
+        <div className="mt-4 overflow-y-auto max-h-72 text-left space-y-6">
+          {reviews.map((reviewItem) => (
+            <div
+              key={reviewItem._id}
+              className="pb-4 border-b border-gray-200 last:border-b-0"
+            >
+              {/* Star Rating */}
+              <div className="flex text-yellow-400">
+                {renderStars(reviewItem.rating)}
+              </div>
+
+              {/* Review Text */}
+              <div>
+                <p className="text-[14px] font-[400] text-justify mt-2">
+                  {reviewItem.review}
+                </p>
+
+                {/* User Info */}
+                <div className="flex justify-start items-center gap-2">
+                  <img
+                    src={reviewItem.user.profilePicture}
+                    alt={reviewItem.user.name}
+                    className="h-8 w-8 rounded-full mt-2 object-cover"
+                    onError={(e) => {
+                      // Fallback image if profile picture fails to load
+                      e.currentTarget.src = "https://via.placeholder.com/32";
+                    }}
+                  />
+                  <div className="mt-2 ml-2">
+                    <p className="font-[500]">{reviewItem.user.name}</p>
+                    <p className="text-[12px] text-gray-500">
+                      {getDateFormat(reviewItem.createdAt)}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="flex text-yellow-400">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <FaStar
-                key={i}
-                className={`${
-                  average >= i + 1
-                    ? "opacity-100"
-                    : average >= i + 0.5
-                    ? "opacity-80"
-                    : "opacity-30"
-                }`}
-              />
-            ))}
-          </div>
-          <div>
-            <p className="text-[14px]  font-[400] text-justify mt-2">
-              Amazing product. I booked on Monday and I got my order on the next
-              day. I’m highly impressed with their services. Highly recommended!
-            </p>
-            <div className="flex justify-start items-center gap-2">
-              <img
-                src={user}
-                alt="user"
-                className="h-8 w-8 rounded-full mt-2"
-              />
-              <div className="mt-2 ml-2">
-                <p className="font-[500]">Abc Xyz</p>
-              </div>
-            </div>
-          </div>
-          <div className="flex text-yellow-400">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <FaStar
-                key={i}
-                className={`${
-                  average >= i + 1
-                    ? "opacity-100"
-                    : average >= i + 0.5
-                    ? "opacity-80"
-                    : "opacity-30"
-                }`}
-              />
-            ))}
-          </div>
-          <div>
-            <p className="text-[14px]  font-[400] text-justify mt-2">
-              Amazing product. I booked on Monday and I got my order on the next
-              day. I’m highly impressed with their services. Highly recommended!
-            </p>
-            <div className="flex justify-start items-center gap-2">
-              <img
-                src={user}
-                alt="user"
-                className="h-8 w-8 rounded-full mt-2"
-              />
-              <div className="mt-2 ml-2">
-                <p className="font-[500]">Abc Xyz</p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
+
+        {/* <div className="mt-4 overflow-y-auto max-h-72 text-left">
+          <div className="flex text-yellow-400">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <FaStar
+                key={i}
+                className={`${
+                  average >= i + 1
+                    ? "opacity-100"
+                    : average >= i + 0.5
+                    ? "opacity-80"
+                    : "opacity-30"
+                }`}
+              />
+            ))}
+          </div>
+          <div>
+            <p className="text-[14px]  font-[400] text-justify mt-2">
+              Amazing product. I booked on Monday and I got my order on the next
+              day. I’m highly impressed with their services. Highly recommended!
+            </p>
+            <div className="flex justify-start items-center gap-2">
+              <img
+                src={user}
+                alt="user"
+                className="h-8 w-8 rounded-full mt-2"
+              />
+              <div className="mt-2 ml-2">
+                <p className="font-[500]">Abc Xyz</p>
+              </div>
+            </div>
+          </div>
+          
+        </div> */}
         <div className=" border-t border-t-gray-200 flex justify-end">
           <button
             onClick={onClose}

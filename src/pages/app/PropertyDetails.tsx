@@ -51,21 +51,28 @@ interface Location {
 }
 
 interface Review {
-  _id?: string;
-  rating: number;
-  comment: string;
-  reviewerName: string;
-  reviewerImage?: string;
+  bookingId: string;
   createdAt: string;
+  rating: number;
+  review: string;
+  room: string;
+  updatedAt: string;
+  user: {
+    name: string;
+    email: string;
+    profilePicture?: string;
+  };
+  _id: string;
 }
 
-interface RatingDistribution {
-  1: number;
-  2: number;
-  3: number;
-  4: number;
-  5: number;
-}
+// interface RatingDistribution {
+//   1: number;
+//   2: number;
+//   3: number;
+//   4: number;
+//   5: number;
+// }
+type RatingDistribution = Record<number, number>;
 interface RoomReviews {
   averageRating: number;
   totalReviews: number;
@@ -85,6 +92,7 @@ const PropertyDetails = () => {
   const [state, setState] = useState<LoadState>("idle");
   const [roomDetails, setRoomDetails] = useState<PropertyDetail>();
   const [roomReviews, setRoomReviews] = useState<RoomReviews>();
+  console.log("🚀 ~ PropertyDetails ~ roomReviews:", roomReviews);
 
   const openDoc = (url?: string) => {
     if (!url) {
@@ -271,16 +279,16 @@ const PropertyDetails = () => {
                         )}
                       </p>
 
-                      <p className="mt-1">{review.comment}</p>
+                      <p className="mt-1">{review.review}</p>
 
                       <div className="flex items-center gap-2 mt-2">
                         <img
-                          src={review.reviewerImage || user}
+                          src={review.user.profilePicture || user}
                           alt="user"
                           className="w-8 h-8 rounded-full"
                         />
                         <p className="text-[16px] font-[500]">
-                          {review.reviewerName}
+                          {review.user.name}
                         </p>
                       </div>
                     </div>
@@ -294,10 +302,15 @@ const PropertyDetails = () => {
             </div>
           </div>
           {showAllReviews && (
-            <PropertyReviewModal
-              breakdown={{ 5: 18, 4: 8, 3: 9, 2: 6, 1: 2 }}
-              onClose={() => setShowAllReviews(false)}
-            />
+            <>
+              {roomReviews?.ratingDistribution !== undefined && (
+                <PropertyReviewModal
+                  breakdown={roomReviews.ratingDistribution}
+                  reviews={roomReviews.reviews}
+                  onClose={() => setShowAllReviews(false)}
+                />
+              )}
+            </>
           )}
           {isDelete && (
             <ConfirmationModal

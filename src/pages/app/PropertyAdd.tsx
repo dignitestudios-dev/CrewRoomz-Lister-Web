@@ -47,8 +47,6 @@ const PropertyAdd = () => {
   const type = location.state;
 
   const [state, dispatch] = useReducer(bedReducer, initialState);
-  console.log("🚀 ~ PropertyAdd ~ state:", state);
-
   const { toast, showToast } = useToast();
   const [componentState, setComponentState] = useState<LoadState>("idle");
 

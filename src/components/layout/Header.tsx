@@ -21,6 +21,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { clearAuth } = useAuthStore();
   const { user } = useAppStore();
+  console.log("🚀 ~ Header ~ user:", user);
 
   const userPopupRef = useRef<HTMLDivElement | null>(null);
   const notificationRef = useRef<HTMLDivElement | null>(null);

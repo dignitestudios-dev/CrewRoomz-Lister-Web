@@ -1,5 +1,5 @@
 import { FaArrowLeftLong } from "react-icons/fa6";
-import { useEffect, useReducer, useState } from "react";
+import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 import axios from "../../axios";
 import { useFormik } from "formik";
@@ -8,11 +8,22 @@ import Toast from "../../components/global/Toast";
 import GoogleMapComponent from "../../components/global/GoogleMap";
 import { getErrorMessage } from "../../init/appValues";
 import { AMENITY_GROUPS } from "../../statics/amenities";
-import { binIcon, pdfIcon, ticked, untick } from "../../assets/export";
+import { pdfIcon, ticked, untick } from "../../assets/export";
 import { HiOutlinePlus } from "react-icons/hi";
 import { RxCross2 } from "react-icons/rx";
 import { bedTypeOptions } from "../../statics/bedOptions";
-import { bedReducer, initialState } from "../../init/roomValues";
+// import { bedReducer, initialState } from "../../init/roomValues";
+import EditBedDetails from "../../components/properties/EditBedDetails";
+import { prepareBedDataForSubmit } from "../../init/roomValues";
+
+interface InitialValues {
+  description: string;
+  amenities: string[];
+  sharedBath: string;
+  privateBath: string;
+  images: File[]; // or string[] if they’re URLs
+  rulesFiles: File[]; // same note here
+}
 
 const PropertyEdit = () => {
   const navigate = useNavigate();
@@ -26,18 +37,19 @@ const PropertyEdit = () => {
   >("idle");
 
   const [address, setAddress] = useState<EditAddress | null>(null);
-  const [state, dispatch] = useReducer(bedReducer, initialState);
+  console.log("🚀 ~ PropertyEdit ~ address:", address);
+  // const [state, dispatch] = useReducer(bedReducer, initialState);
 
+  const [bedData, setBedData] = useState<Bed[]>([]);
+  const [deletedBedIds, setDeletedBedIds] = useState<string[]>([]);
+  console.log("🚀 ~ PropertyEdit ~ deletedBedIds:", deletedBedIds);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [newImages, setNewImages] = useState<File[]>([]);
-  const [removedImages, setRemovedImages] = useState<string[]>([]);
 
   // For previews and file tracking
   const [rulesPreviews, setRulesPreviews] = useState<string[]>([]);
   const [newRulesFiles, setNewRulesFiles] = useState<File[]>([]);
-  const [removedRules, setRemovedRules] = useState<string[]>([]);
 
-  const [initialValues, setInitialValues] = useState<any>({
+  const [initialValues, setInitialValues] = useState<InitialValues>({
     description: "",
     amenities: [],
     sharedBath: "",
@@ -45,69 +57,6 @@ const PropertyEdit = () => {
     images: [],
     rulesFiles: [],
   });
-
-  const handleBedTypeChange = (
-    index: number,
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    if (state?.beds[index].bedType?.includes("bunk")) {
-      console.log("bed value----> ", e.target.value);
-      if (e.target.value?.includes("bunk")) {
-        dispatch({ type: "SET_BED_TYPE", index, payload: e.target.value });
-      } else {
-        setComponentState("error");
-        showToast(
-          getErrorMessage({
-            response: { data: { message: "Only Bunk Type will Select" } },
-          }),
-          "error"
-        );
-        return;
-      }
-    } else {
-      if (e.target.value?.includes("bunk")) {
-        setComponentState("error");
-        showToast(
-          getErrorMessage({
-            response: { data: { message: "Only non-bunk type will select" } },
-          }),
-          "error"
-        );
-        return;
-      } else {
-        dispatch({ type: "SET_BED_TYPE", index, payload: e.target.value });
-      }
-    }
-  };
-
-  // Update regular bed prices
-  const handlePriceChange = (
-    index: number,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    dispatch({
-      type: "SET_PRICE",
-      index,
-      payload: { name: e.target.name as keyof Prices, value: e.target.value },
-    });
-  };
-
-  // Update bunk bed prices
-  const handleBunkPriceChange = (
-    index: number,
-    bunk: BunkType,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    dispatch({
-      type: "SET_BUNK_PRICE",
-      index,
-      payload: {
-        bunk,
-        name: e.target.name as keyof Prices,
-        value: e.target.value,
-      },
-    });
-  };
 
   // Handle file upload
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,22 +66,21 @@ const PropertyEdit = () => {
     const selectedFiles = Array.from(files);
     const previewURLs = selectedFiles.map((file) => URL.createObjectURL(file));
 
-    setNewImages((prev) => [...prev, ...selectedFiles]);
     setImagePreviews((prev) => [...prev, ...previewURLs]);
   };
 
   // Handle removing an image
   const handleRemoveImage = (index: number) => {
-    const removed = imagePreviews[index];
+    // const removed = imagePreviews[index];
 
     // If it’s an existing image (URL from backend), track it for deletion
-    if (removed.startsWith("http")) {
-      setRemovedImages((prev) => [...prev, removed]);
-    }
+    // if (removed.startsWith("http")) {
+    //   setRemovedImages((prev) => [...prev, removed]);
+    // }
 
     // Remove from both preview and new files if needed
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
-    setNewImages((prev) => prev.filter((_, i) => i !== index));
+    // setNewImages((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleRulesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,7 +99,7 @@ const PropertyEdit = () => {
 
     // Track if user removes an existing file (from backend)
     if (preview.startsWith("http")) {
-      setRemovedRules((prev) => [...prev, preview]);
+      // setRemovedRules((prev) => [...prev, preview]);
     } else if (preview.startsWith("blob:")) {
       // Clean up blob URLs
       try {
@@ -177,12 +125,13 @@ const PropertyEdit = () => {
 
   // ✅ Fetch data for editing
   useEffect(() => {
-    setInitialValues({
+    setInitialValues((prev) => ({
+      ...prev,
       description: room.description || "",
       amenities: room.amenities || [],
       sharedBath: room.sharedBath || "",
       privateBath: room.privateBath || "",
-    });
+    }));
 
     setImagePreviews(room.media || []);
     if (room.rulesDocument) setRulesPreviews([room.rulesDocument]);
@@ -196,57 +145,6 @@ const PropertyEdit = () => {
         lng: room.location?.coordinates?.[0],
       },
     });
-
-    if (room?.bedDetails) {
-      const formattedBeds = Object.values(
-        room.bedDetails.reduce(
-          (
-            acc: any,
-            b: {
-              type: string;
-              price: number;
-              monthlyPrice: number;
-              _id: string;
-            }
-          ) => {
-            const baseType = b.type.replace(/-(top|bottom)$/, "");
-            if (!acc[baseType]) {
-              acc[baseType] = {
-                bedType: baseType,
-                prices: { dailyPrice: "", monthlyPrice: "" },
-                bunkPrices: {
-                  top: { dailyPrice: "", monthlyPrice: "" },
-                  bottom: { dailyPrice: "", monthlyPrice: "" },
-                },
-              };
-            }
-            // handle simple beds like twin/full (non-bunk)
-            if (["twin", "twin-xl", "full"].includes(baseType)) {
-              acc[baseType].prices = {
-                dailyPrice: b.price?.toString() || "",
-                monthlyPrice: b.monthlyPrice?.toString() || "",
-              };
-            }
-            // handle bunk beds
-            else if (b.type.includes("top")) {
-              acc[baseType].bunkPrices.top = {
-                dailyPrice: b.price?.toString() || "",
-                monthlyPrice: b.monthlyPrice?.toString() || "",
-              };
-            } else if (b.type.includes("bottom")) {
-              acc[baseType].bunkPrices.bottom = {
-                dailyPrice: b.price?.toString() || "",
-                monthlyPrice: b.monthlyPrice?.toString() || "",
-              };
-            }
-            return acc;
-          },
-          {}
-        )
-      );
-
-      dispatch({ type: "SET_BEDS", payload: formattedBeds });
-    }
   }, [room]);
 
   const { values, setFieldValue, handleChange, handleSubmit } = useFormik({
@@ -260,6 +158,7 @@ const PropertyEdit = () => {
       }
 
       const formData = new FormData();
+      prepareBedDataForSubmit(bedData, formData);
       formData.append("description", values.description);
       formData.append("sharedBath", values.sharedBath);
       formData.append("privateBath", values.privateBath);
@@ -276,10 +175,14 @@ const PropertyEdit = () => {
         formData.append("rulesDocument", values.rulesFiles[0]);
       }
 
+      if (deletedBedIds && deletedBedIds.length > 0) {
+        formData.append("bedDetailsToRemove", deletedBedIds.join(","));
+      }
+
       try {
         setComponentState("loading");
         const res = await axios.put(`/rooms/${id}`, formData);
-        if (res.status === 200) {
+        if (res.status === 200 || res.status === 201) {
           showToast("Room Updated Successfully", "success");
           setComponentState("ready");
         }
@@ -302,8 +205,13 @@ const PropertyEdit = () => {
     }
   };
 
-  const onLocationSelect = (data: Address) => {
+  const onLocationSelect = (data: EditAddress) => {
     setAddress(data);
+  };
+
+  const handleBedDataChange = (beds: Bed[], deletedIds: string[]) => {
+    setBedData(beds);
+    setDeletedBedIds(deletedIds);
   };
 
   return (
@@ -314,7 +222,11 @@ const PropertyEdit = () => {
 
       <div className="flex justify-between items-center mb-2 px-4">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} type="button">
+          <button
+            onClick={() => navigate(-1)}
+            type="button"
+            className="cursor-pointer"
+          >
             <FaArrowLeftLong size={16} />
           </button>
           <h1 className="text-[26px] font-[600]">Edit Property</h1>
@@ -416,7 +328,7 @@ const PropertyEdit = () => {
 
         {rulesPreviews.length > 0 && (
           <div className="gap-2 overflow-x-auto">
-            {rulesPreviews.map((src, i) => (
+            {rulesPreviews.map((_, i) => (
               <div key={i} className="bg-white rounded-lg py-4 relative my-1">
                 <img
                   src={pdfIcon}
@@ -437,154 +349,13 @@ const PropertyEdit = () => {
         <label className="text-[16px] font-[500] border-t-2 border-t-[#E3E3E3] pt-4">
           Bed Details
         </label>
-        <div className=" bg-[#ffffff] rounded-lg pt-2 pb-4 px-4 text-center flex flex-col items-start space-y-2">
-          <p className="text-[#18181899] text-[14px] font-[400]">
-            Choose daily or monthly booking for bed.
-          </p>
-          <div className="flex flex-col items-start w-full gap-3">
-            {state.beds.map((bed, index) => (
-              <div key={index} className="relative">
-                <div
-                  className={`flex items-center gap-3 w-[750px] ${
-                    index % 2 !== 0
-                      ? "border-t-[1px] border-t-[#E3E3E3] pt-3"
-                      : ""
-                  }`}
-                >
-                  <div className="w-[310px] flex flex-col items-start">
-                    <label className="block mb-1 text-[13px] font-[500]">
-                      Bed Type
-                    </label>
-                    <select
-                      value={bed.bedType}
-                      onChange={(e) => handleBedTypeChange(index, e)}
-                      className="w-full py-4.5 pl-3 pr-5 text-[14px] text-[#18181899] bg-[#29ABE21F] rounded-md"
-                    >
-                      <option value="">Select Bed Type</option>
-                      {bedTypeOptions.map((type) => (
-                        <option key={type.value} value={type.value}>
-                          {type.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  {state.beds.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => dispatch({ type: "REMOVE_BED", index })}
-                      className="ml-auto text-red-500 text-sm font-medium hover:underline absolute top-0 right-0"
-                    >
-                      <img
-                        src={binIcon}
-                        className="h-7 w-7 p-1 hover:p-1.5 hover:bg-red-100 hover:rounded-4xl"
-                      />
-                    </button>
-                  )}
-                  {bed.bedType &&
-                    ["twin", "twin-xl", "full"].includes(bed.bedType) && (
-                      <div>
-                        <label className="block mb-1 text-[13px] font-[500] text-start">
-                          Price
-                        </label>
-                        <div className="w-[310px] flex items-start gap-2">
-                          <div className="w-full py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
-                            <label className="block mb-1 text-[13px] font-[500] text-start">
-                              Daily
-                            </label>
-                            <input
-                              name="dailyPrice"
-                              value={bed.prices.dailyPrice}
-                              onChange={(e) => handlePriceChange(index, e)}
-                              className="w-full bg-transparent"
-                              placeholder="e.g. 50"
-                            />
-                          </div>
-                          <div className="w-full py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
-                            <label className="block mb-1 text-[13px] font-[500] text-start">
-                              Monthly
-                            </label>
-                            <input
-                              name="monthlyPrice"
-                              value={bed.prices.monthlyPrice}
-                              onChange={(e) => handlePriceChange(index, e)}
-                              className="w-full bg-transparent"
-                              placeholder="e.g. 1000"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                </div>
-                {!["twin", "twin-xl", "full"].includes(bed.bedType) && (
-                  <div className="flex flex-col gap-4">
-                    {["top", "bottom"].map((bunk) => (
-                      <div key={bunk}>
-                        <label className="block mb-1 text-[13px] font-[500] text-start">
-                          {bunk === "top" ? "Top Bed" : "Bottom Bed"}
-                        </label>
-                        <div className="w-full flex items-start gap-2">
-                          <div className="w-[153px] py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
-                            <label className="block mb-1 text-[13px] font-[500] text-start">
-                              Daily
-                            </label>
-                            <input
-                              name="dailyPrice"
-                              value={
-                                bed.bunkPrices[bunk as BunkType].dailyPrice
-                              }
-                              onChange={(e) =>
-                                handleBunkPriceChange(
-                                  index,
-                                  bunk as BunkType,
-                                  e
-                                )
-                              }
-                              className="w-full bg-transparent text-[16px] text-[#181818]"
-                              placeholder="e.g. 50"
-                            />
-                          </div>
-                          <div className="w-[153px] py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
-                            <label className="block mb-1 text-[13px] font-[500] text-start">
-                              Monthly
-                            </label>
-                            <input
-                              name="monthlyPrice"
-                              value={
-                                bed.bunkPrices[bunk as BunkType].monthlyPrice
-                              }
-                              onChange={(e) =>
-                                handleBunkPriceChange(
-                                  index,
-                                  bunk as BunkType,
-                                  e
-                                )
-                              }
-                              className="w-full bg-transparent text-[16px] text-[#181818]"
-                              placeholder="e.g. 1000"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
 
-            {room?.roomType === "multi" && (
-              <button
-                type="button"
-                onClick={() => dispatch({ type: "ADD_BED" })}
-                className="flex items-center gap-2 pt-2 cursor-pointer"
-              >
-                <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
-                <p className="text-[14px] gradient-text font-[500]">
-                  Add More Bed
-                </p>
-              </button>
-            )}
-          </div>
-        </div>
+        <EditBedDetails
+          roomType={room.roomType}
+          bedTypeOptions={bedTypeOptions}
+          bedDetails={room.bedDetails || []}
+          onBedDataChange={handleBedDataChange}
+        />
 
         <label className="text-[16px] font-[500] pt-4">Bath Details</label>
         <div className=" bg-[#ffffff] rounded-lg pt-2 pb-4 px-4 text-center flex items-center space-y-2 mb-6">

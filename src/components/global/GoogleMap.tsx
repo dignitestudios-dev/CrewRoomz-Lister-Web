@@ -14,8 +14,8 @@ interface LatLng {
 }
 
 interface GoogleMapComponentProps {
-  onLocationSelect: (data: Address) => void;
-  editAddress?: EditAddress | null;
+  onLocationSelect: (data: Address | EditAddress) => void;
+  editAddress?: EditAddress | Address | null;
   distance?: number;
   showRadius?: boolean;
   isDisabled?: boolean;
@@ -48,7 +48,6 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
   error,
   isClear = false,
 }) => {
-  console.log("🚀 ~ GoogleMapComponent ~ editAddress:", editAddress);
   const { isLoaded } = useLoadScript({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY as string,
     libraries,
@@ -113,11 +112,12 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
       zipCode: getComponent("postal_code"),
       address: place.formatted_address ?? "",
       location: {
+        lat,
+        lng,
         type: "Point",
         coordinates: [lng, lat],
       },
     };
-    console.log("🚀 ~ handlePlaceChanged ~ newAddress:", newAddress);
 
     setMapCenter({ lat, lng });
     setMarker({ lat, lng });
@@ -151,6 +151,8 @@ const GoogleMapComponent: React.FC<GoogleMapComponentProps> = ({
                 country: "",
                 zipCode: "",
                 location: {
+                  lat: 0,
+                  lng: 0,
                   type: "Point",
                   coordinates: [0, 0],
                 },

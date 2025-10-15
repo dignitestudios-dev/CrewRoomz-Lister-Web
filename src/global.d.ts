@@ -167,26 +167,32 @@ declare global {
     currentPage: number;
     totalPages: number;
   }
-  export interface GeoLocation {
-    type: "Point";
-    coordinates: [number, number]; // [lng, lat]
-  }
+  // export interface GeoLocation {
+  //   type: "Point";
+  //   coordinates: [number, number]; // [lng, lat]
+  // }
 
-  export interface EditGeoLocation {
+  // export interface EditGeoLocation {
+  //   lat: number;
+  //   lng: number;
+  //   type?: "Point";
+  //   coordinates?: [number, number];
+  // }
+
+  // Address structure used across components
+  export type LocationType = {
     lat: number;
     lng: number;
     type?: "Point";
     coordinates?: [number, number];
-  }
-
-  // Address structure used across components
+  };
   export interface Address {
     address: string;
     city: string;
     state: string;
     country?: string;
     zipCode?: string;
-    location: GeoLocation;
+    location: LocationType;
   }
   export interface EditAddress {
     address: string;
@@ -194,6 +200,6 @@ declare global {
     state: string;
     country?: string;
     zipCode?: string;
-    location: EditGeoLocation;
+    location: LocationType;
   }
 }

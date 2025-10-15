@@ -83,7 +83,7 @@ const Home = () => {
           pagination?.currentPage ?? 1
         }`
       );
-      console.log("🚀 ~ getRooms ~ data:", data);
+
       if (data.success) {
         setRooms(data?.data?.rooms);
         setPagination(data?.data?.pagination);
