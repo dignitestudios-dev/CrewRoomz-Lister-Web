@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { nextBtn } from "../../assets/export";
 import { useNavigate } from "react-router";
 import { BookingFilterDropDown } from "../../components/global/FilterDropDown";
@@ -7,25 +7,17 @@ import { useToast } from "../../hooks/useToast";
 import { getErrorMessage } from "../../init/appValues";
 import Toast from "../../components/global/Toast";
 import PropertyHeaderSkeleton from "../../components/properties/PropertyHeaderSkeleton";
+import StatusFilter, {
+  type bookingStatus,
+  type bookingStatusOption,
+} from "../../components/global/StatusFilter";
 
-type bookingStatus = "private" | "multi" | "semi-private";
 type bookingStatusProgress = "completed" | "cancelled";
-
-type bookingStatusOption = {
-  label: bookingStatus;
-  isActive: boolean;
-};
 
 type bookingStatusProgressOption = {
   label: "completed" | "cancelled";
   isActive: boolean;
 };
-
-interface StatusIndicatorProps {
-  statuses: bookingStatusOption[];
-  onStatusChange: (index: number) => void;
-  setStatus: React.Dispatch<React.SetStateAction<bookingStatus>>;
-}
 
 interface BookingHistoryDetail {
   _id: string | number; // allow both
@@ -55,43 +47,15 @@ interface User {
   _id: string;
 }
 
-const StatusIndicator = ({
-  statuses,
-  onStatusChange,
-  setStatus,
-}: StatusIndicatorProps) => {
-  return (
-    <div className="flex items-center justify-between w-[450px] px-3 h-[42px] bg-white rounded-full shadow-lite mt-6">
-      {statuses?.map((status, index) => (
-        <button
-          key={index}
-          onClick={() => {
-            setStatus(status?.label);
-            onStatusChange?.(index);
-          }}
-          className={`px-10 h-[34px] rounded-full text-[14px] transition-all duration-200 ease-in-out capitalize ${
-            status.isActive
-              ? "gradient-color text-white shadow-md font-[700]"
-              : "text-[#181818] hover:text-gray-800 font-[400] hover:bg-gray-50"
-          }`}
-        >
-          {status.label}
-        </button>
-      ))}
-    </div>
-  );
-};
-
 const BookingHistory = () => {
   const navigate = useNavigate();
   const [activeStatus, setActiveStatus] = useState(0);
   const [progressActiveStatus, setProgressActiveStatus] = useState(0);
 
   const [status, setStatus] = useState<bookingStatus>("multi");
-  console.log("🚀 ~ BookingHistory ~ status:", status);
+
   const [progressStatus, setProgressStatus] =
     useState<bookingStatusProgress>("completed");
-  console.log("🚀 ~ BookingHistory ~ progressStatus:", progressStatus);
 
   const [selectedStatus, setSelectedStatus] = useState<"Daily" | "Monthly">(
     "Monthly"
@@ -158,7 +122,7 @@ const BookingHistory = () => {
         <h1 className="text-[26px] font-[600]">Booking History</h1>
       </div>
       <div className="flex justify-between items-center w-full">
-        <StatusIndicator
+        <StatusFilter
           statuses={statusOptions}
           setStatus={setStatus}
           onStatusChange={handleStatusChange}
@@ -180,7 +144,7 @@ const BookingHistory = () => {
                 key={index}
                 onClick={() => {
                   setProgressStatus(status?.label);
-                  handleStatusProgressChange?.(index);
+                  handleStatusProgressChange(index);
                 }}
                 className={`mt-4 ml-2 text-[14px] transition-all duration-200 ease-in-out capitalize space-x-4 w-[80px]  ${
                   status.isActive

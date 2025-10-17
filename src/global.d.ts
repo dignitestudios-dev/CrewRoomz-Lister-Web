@@ -155,7 +155,7 @@ declare global {
   }
 
   type Message = TextMessage | ImageMessage | FileMessage;
-  type Chats = Record<number, Message[]>;
+  type Chats = Record<string, Message[]>;
 
   interface PaginationProps {
     currentPage: number;

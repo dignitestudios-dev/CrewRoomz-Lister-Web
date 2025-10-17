@@ -13,18 +13,10 @@ import {
 } from "../../init/appValues";
 import PropertyHeaderSkeleton from "../../components/properties/PropertyHeaderSkeleton";
 import Toast from "../../components/global/Toast";
-
-type bookingStatus = "private" | "multi" | "semi-private";
-type bookingStatusOption = {
-  label: bookingStatus;
-  isActive: boolean;
-};
-
-interface StatusIndicatorProps {
-  statuses: bookingStatusOption[];
-  onStatusChange: (index: number) => void;
-  setStatus: React.Dispatch<React.SetStateAction<bookingStatus>>;
-}
+import StatusFilter, {
+  type bookingStatus,
+  type bookingStatusOption,
+} from "../../components/global/StatusFilter";
 
 interface BookingDetail {
   _id: string | number; // allow both
@@ -54,39 +46,11 @@ interface User {
   _id: string;
 }
 
-const StatusIndicator = ({
-  statuses,
-  onStatusChange,
-  setStatus,
-}: StatusIndicatorProps) => {
-  return (
-    <div className="flex items-center justify-between w-[450px] px-3 h-[42px] bg-white rounded-full shadow-lite mt-6">
-      {statuses?.map((status, index) => (
-        <button
-          key={index}
-          onClick={() => {
-            setStatus(status?.label);
-            onStatusChange?.(index);
-          }}
-          className={`px-10 h-[34px] rounded-full text-[14px] transition-all duration-200 ease-in-out capitalize ${
-            status.isActive
-              ? "gradient-color text-white shadow-md font-[700]"
-              : "text-[#181818] hover:text-gray-800 font-[400] hover:bg-gray-50"
-          }`}
-        >
-          {status.label}
-        </button>
-      ))}
-    </div>
-  );
-};
-
 const Booking = () => {
   const navigate = useNavigate();
 
   const [activeStatus, setActiveStatus] = useState(0);
   const [bookings, setBookings] = useState<BookingDetail[]>([]);
-  console.log("🚀 ~ Booking ~ bookings:", bookings);
   const [status, setStatus] = useState<bookingStatus>("multi");
   const [selectDate, setSelectDate] = useState("");
   const [selectedStatus, setSelectedStatus] =
@@ -154,7 +118,7 @@ const Booking = () => {
       </div>
 
       <div className="flex justify-between items-center w-full">
-        <StatusIndicator
+        <StatusFilter
           statuses={statusOptions}
           setStatus={setStatus}
           onStatusChange={handleStatusChange}
@@ -211,9 +175,9 @@ const Booking = () => {
                       <div className="flex justify-end mt-6">
                         <p className="text-black font-[500] text-[15px]">
                           ${booking?.totalPrice}
-                          <span className="text-[#18181899] font-[400]">
+                          {/* <span className="text-[#18181899] font-[400]">
                             Per Day
-                          </span>
+                          </span> */}
                         </p>
                       </div>
                     </div>

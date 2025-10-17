@@ -10,46 +10,20 @@ import Toast from "../../components/global/Toast.tsx";
 import HomeSkeleton from "../../components/properties/HomeSkeleton.tsx";
 import Pagination from "../../components/global/Pagination.tsx";
 import { useAppStore } from "../../store/appStore.ts";
-
-interface FilterIndicatorProps {
-  filters: FilterOptions[];
-  onFilterChange: (index: number) => void;
-  setFilter: React.Dispatch<React.SetStateAction<HomeFilter>>;
-}
-
-const FilterIndicator = ({
-  filters,
-  onFilterChange,
-  setFilter,
-}: FilterIndicatorProps) => {
-  return (
-    <div className="flex items-center justify-between w-[450px] px-3 h-[42px] bg-white rounded-full shadow-lite mt-6">
-      {filters?.map((filter, index) => (
-        <button
-          key={index}
-          onClick={() => {
-            setFilter(filter?.label);
-            onFilterChange?.(index);
-          }}
-          className={`px-10 h-[34px] rounded-full text-[14px] transition-all duration-200 ease-in-out capitalize ${
-            filter.isActive
-              ? "gradient-color text-white shadow-md font-[700]"
-              : "text-[#181818] hover:text-gray-800 font-[400] hover:bg-gray-50"
-          }`}
-        >
-          {filter.label}
-        </button>
-      ))}
-    </div>
-  );
-};
+import type {
+  bookingStatus,
+  bookingStatusOption,
+} from "../../components/global/StatusFilter.tsx";
+import StatusFilter from "../../components/global/StatusFilter.tsx";
 
 const Home = () => {
   const { user } = useAppStore();
 
   const navigate = useNavigate();
-  const [activeFilter, setActiveFilter] = useState(0);
-  const [filter, setFilter] = useState<HomeFilter>("multi");
+
+  const [status, setStatus] = useState<bookingStatus>("multi");
+  const [activeStatus, setActiveStatus] = useState(0);
+
   const [selectedStatus, setSelectedStatus] = useState<HomeStatus>("Active");
   const [update, setUpdate] = useState(false);
 
@@ -61,14 +35,14 @@ const Home = () => {
     totalPages: 1,
   });
 
-  const filterOptions: FilterOptions[] = [
-    { label: "multi", isActive: activeFilter === 0 },
-    { label: "semi-private", isActive: activeFilter === 1 },
-    { label: "private", isActive: activeFilter === 2 },
+  const statusOptions: bookingStatusOption[] = [
+    { label: "multi", isActive: activeStatus === 0 },
+    { label: "semi-private", isActive: activeStatus === 1 },
+    { label: "private", isActive: activeStatus === 2 },
   ];
 
-  const handleFilterChange = (index: number): void => {
-    setActiveFilter(index);
+  const handleStatusChange = (index: number): void => {
+    setActiveStatus(index);
   };
 
   const handlePageChange = (page: number) => {
@@ -79,7 +53,7 @@ const Home = () => {
     try {
       setState("loading");
       const { data } = await axios.get(
-        `/rooms?roomType=${filter}&roomStatus=${selectedStatus?.toLocaleLowerCase()}&page=${
+        `/rooms?roomType=${status}&roomStatus=${selectedStatus?.toLocaleLowerCase()}&page=${
           pagination?.currentPage ?? 1
         }`
       );
@@ -97,7 +71,7 @@ const Home = () => {
 
   useEffect(() => {
     getRooms();
-  }, [filter, selectedStatus, update]);
+  }, [status, selectedStatus, update]);
 
   return (
     <div className="max-w-[90em] mx-auto py-6 px-[4em]">
@@ -123,10 +97,10 @@ const Home = () => {
         </button>
       </div>
       <div className="flex justify-between">
-        <FilterIndicator
-          filters={filterOptions}
-          setFilter={setFilter}
-          onFilterChange={handleFilterChange}
+        <StatusFilter
+          statuses={statusOptions}
+          setStatus={setStatus}
+          onStatusChange={handleStatusChange}
         />
         <div className="mt-3">
           <HomeFilterDropDown

@@ -65,13 +65,6 @@ interface Review {
   _id: string;
 }
 
-// interface RatingDistribution {
-//   1: number;
-//   2: number;
-//   3: number;
-//   4: number;
-//   5: number;
-// }
 type RatingDistribution = Record<number, number>;
 interface RoomReviews {
   averageRating: number;
@@ -90,9 +83,11 @@ const PropertyDetails = () => {
 
   const { toast, showToast } = useToast();
   const [state, setState] = useState<LoadState>("idle");
+  const [buttonState, setButtonState] = useState<LoadState>("idle");
+
   const [roomDetails, setRoomDetails] = useState<PropertyDetail>();
   const [roomReviews, setRoomReviews] = useState<RoomReviews>();
-  console.log("🚀 ~ PropertyDetails ~ roomReviews:", roomReviews);
+  const [isDeActivate, setIsDeActivate] = useState<boolean>(false);
 
   const openDoc = (url?: string) => {
     if (!url) {
@@ -134,6 +129,37 @@ const PropertyDetails = () => {
     }
   };
 
+  const handleDeactivate = async () => {
+    try {
+      setButtonState("loading");
+      const response = await axios.put(`/rooms/toggleRoomStatus/${id}`);
+      if (response.status === 200) {
+        setIsDeActivate(false);
+        setButtonState("idle");
+        getRooms();
+      }
+    } catch (error) {
+      console.log("🚀 ~ handleDeactivate ~ error:", error);
+      setButtonState("error");
+      showToast(getErrorMessage(error), "error");
+    }
+  };
+
+  const handleDelete = async () => {
+    try {
+      setButtonState("loading");
+      const response = await axios.delete(`/rooms/${id}`);
+      if (response.status === 200) {
+        setIsDelete(false);
+        setDeleteSuccess(true);
+        setButtonState("idle");
+      }
+    } catch (error) {
+      setButtonState("error");
+      showToast(getErrorMessage(error), "error");
+    }
+  };
+
   useEffect(() => {
     getRooms();
     getRoomReviews();
@@ -141,7 +167,7 @@ const PropertyDetails = () => {
 
   return (
     <div className="max-w-[1260px] mx-auto pt-10">
-      {state === "error" && <Toast {...toast} />}
+      {(state === "error" || buttonState === "error") && <Toast {...toast} />}
       <div className="flex justify-between items-center mb-2 px-4">
         <div className="flex items-center gap-3">
           <button
@@ -152,14 +178,22 @@ const PropertyDetails = () => {
             <FaArrowLeftLong size={16} />
           </button>
           <h1 className="text-[26px] font-[600]">Property Details</h1>
-          <div className="h-8 px-3 flex items-center text-white text-[16px] rounded-4xl bg-green-500">
-            {" "}
-            Active
+          <div
+            className={`h-8 px-3 flex items-center text-white text-[16px] rounded-4xl ${
+              roomDetails?.roomStatus === "inactive"
+                ? "bg-gray-500"
+                : "bg-green-500"
+            } `}
+          >
+            {roomDetails?.roomStatus === "inactive" ? "Deactivated" : "Active"}
           </div>
         </div>
         <div className="flex gap-4">
-          <button className="w-[97px] bg-transparent text-black border border-[#E3DBDB] text-[14px] flex items-center justify-center rounded-3xl font-medium ">
-            Deactivate
+          <button
+            onClick={() => setIsDeActivate(true)}
+            className="w-[97px] bg-transparent text-black border border-[#E3DBDB] text-[14px] flex items-center justify-center rounded-3xl font-medium "
+          >
+            {roomDetails?.roomStatus === "inactive" ? "Activate" : "Deactivate"}
           </button>
           <button
             onClick={() => setIsDelete(true)}
@@ -319,17 +353,28 @@ const PropertyDetails = () => {
               skipBtnContent="No"
               confirmBtnContent="Delete"
               onClose={() => setIsDelete(false)}
-              onSubmit={() => {
-                setIsDelete(false);
-                setDeleteSuccess(true);
-              }}
-              loading="false"
+              onSubmit={handleDelete}
+              loading={buttonState}
+            />
+          )}
+          {isDeActivate && (
+            <ConfirmationModal
+              title="Deactivate Listing"
+              content="Are you sure you want to deactivate this listing?"
+              skipBtnContent="No"
+              confirmBtnContent="Deactivate"
+              onClose={() => setIsDeActivate(false)}
+              onSubmit={handleDeactivate}
+              loading={buttonState}
             />
           )}
           {deleteSuccess && (
             <div className="fixed inset-0 bg-[#04080680] bg-opacity-0 z-50 flex items-center justify-center">
               <div
-                onClick={() => setDeleteSuccess(false)}
+                onClick={() => {
+                  setDeleteSuccess(false);
+                  navigate("/home");
+                }}
                 className="bg-white rounded-2xl p-6 w-[400px] text-center shadow-lg  flex flex-col justify-center items-center relative"
               >
                 <div className="absolute -top-10">
