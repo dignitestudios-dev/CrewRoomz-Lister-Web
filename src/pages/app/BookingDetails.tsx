@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { useToast } from "../../hooks/useToast";
 import axios from "../../axios";
 import Toast from "../../components/global/Toast";
+import CancelBookingModal from "../../components/Bookings/CancelBookingModal";
 
 interface Room {
   _id: string;
@@ -51,6 +52,7 @@ const BookingDetails = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const bookingFromState = location.state?.booking; // renamed for clarity
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
   const { toast, showToast } = useToast();
   const [state, setState] = useState<"idle" | "loading" | "ready" | "error">(
@@ -59,6 +61,12 @@ const BookingDetails = () => {
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(
     null
   );
+  const [selectedBookingId, setSelectedBookingId] = useState<string>("");
+
+  const handleCancelClick = (bookingId: string) => {
+    setSelectedBookingId(bookingId);
+    setIsCancelModalOpen(true);
+  };
 
   // ✅ Fetch booking from backend
   const getBookings = async () => {
@@ -266,8 +274,33 @@ const BookingDetails = () => {
               <p>{formatCurrency(totalAmount)}</p>
             </div>
           </div>
+          <div className="py-3 px-1">
+            <p className=" text-[14px] font-semibold">Note</p>
+            <p className="text-[#18181899] text-[13px]">
+              You can cancel a booking within 24 hours at no cost. However, if
+              you cancel after 24 hours, a 5% cancellation fee will be deducted
+              from your account.
+            </p>
+            <div className="pt-4">
+              <button
+                onClick={() => handleCancelClick(selectedBookingId)}
+                type="button"
+                className="w-full rounded-[8px] gradient-color text-white text-[13px] py-3 px-6 font-medium"
+              >
+                Cancel Booking
+              </button>
+            </div>
+          </div>
         </div>
       </div>
+      {isCancelModalOpen && (
+        <CancelBookingModal
+          isOpen={isCancelModalOpen}
+          onClose={() => setIsCancelModalOpen(false)}
+          bookingId={selectedBookingId}
+          getBookings={getBookings}
+        />
+      )}
     </div>
   );
 };
