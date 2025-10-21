@@ -198,7 +198,16 @@ const PropertyAdd = () => {
       formData.append("state", address.state);
       // formData.append("country", address.country);
       // formData.append("zipCode", address.zipCode);
-      formData.append("location", JSON.stringify(address.location));
+      if (address?.location) {
+        const { lat, lng } = address.location;
+
+        const formattedLocation = {
+          type: "Point",
+          coordinates: [lng, lat], // NOTE: lng comes first, then lat
+        };
+
+        formData.append("location", JSON.stringify(formattedLocation));
+      }
 
       formData.append("description", values.description || "");
       formData.append("sharedBath", values.sharedBath || "0");

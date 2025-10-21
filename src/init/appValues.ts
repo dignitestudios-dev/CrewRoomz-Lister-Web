@@ -62,3 +62,10 @@ export function convertToRanges(bookedDates: string[]): DateRange[] {
 
   return ranges;
 }
+
+export const formatProductId = (productId: string): string => {
+  return productId
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+};

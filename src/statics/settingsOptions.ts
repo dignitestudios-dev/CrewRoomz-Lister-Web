@@ -60,3 +60,24 @@ export const SETTINGS_OPTIONS: {
     icon: privacySetting,
   },
 ];
+
+export const subscriptionFeatures: Record<string, string[]> = {
+  premium_plan: [
+    "Create and manage property listings with detailed information.",
+    "Upload high-quality photos and videos to showcase crash pads.",
+    "Integrated calendar to track availability and manage reservations.",
+    "Easy booking management with detailed user and payment information.",
+  ],
+  annual_plan: [
+    "Create and manage property listings with detailed information.",
+    "Upload high-quality photos and videos to showcase crash pads.",
+    "Integrated calendar to track availability and manage reservations.",
+    "Easy booking management with detailed user and payment information.",
+  ],
+  lifetime_product: [
+    "Create and manage property listings with detailed information.",
+    "Upload high-quality photos and videos to showcase crash pads.",
+    "Integrated calendar to track availability and manage reservations.",
+    "Easy booking management with detailed user and payment information.",
+  ],
+};

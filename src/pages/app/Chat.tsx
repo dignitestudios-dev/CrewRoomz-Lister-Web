@@ -102,23 +102,6 @@ const Chat = () => {
   // ---------- Send Message ----------
   const handleSendMessage = (text: string) => {
     if (!currentRoom || !socket || !text.trim()) return;
-
-    const tempMessage: ChatMessage = {
-      id: Date.now().toString(),
-      content: text,
-      type: "text",
-      sender: {
-        _id: user?._id || "",
-        name: user?.name || "",
-        profilePicture: "",
-      },
-      createdAt: new Date().toISOString(),
-      chatRoom: currentRoom.id,
-    };
-
-    // Optimistic UI (add to bottom)
-    setReceivedMessages((prev) => [...prev, tempMessage]);
-
     socket.emit("sendMessage", {
       roomId: currentRoom.id,
       message: text,
@@ -211,6 +194,10 @@ const Chat = () => {
                 </div>
               ))}
             </div>
+          ) : senders.length === 0 ? (
+            <p className="text-sm text-gray-400 text-center py-4">
+              No chats yet — start a conversation!
+            </p>
           ) : (
             <div className="space-y-3">
               {senders.map((room) => (
@@ -304,7 +291,13 @@ const Chat = () => {
                         : "items-start"
                     }`}
                   >
-                    <div className="gradient-color text-white px-4 py-2 rounded-xl max-w-xs break-words">
+                    <div
+                      className={`flex flex-col px-4 py-2 rounded-xl max-w-xs break-words ${
+                        msg?.sender?._id === user?._id
+                          ? "text-white gradient-color"
+                          : "text-black bg-gray-100"
+                      }`}
+                    >
                       {msg.content}
                     </div>
                     <span className="text-xs text-gray-400 mt-1">

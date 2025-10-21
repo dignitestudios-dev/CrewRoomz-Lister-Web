@@ -15,6 +15,7 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
   bookingId,
   getBookings,
 }) => {
+  console.log("🚀 ~ CancelBookingModal ~ bookingId:", bookingId);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelDescription, setCancelDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -102,7 +103,7 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
           <button
             onClick={handleBookingStatus}
             disabled={isLoading}
-            className="w-full rounded-[8px] gradient-color text-white text-[14px] py-3 px-6 font-medium"
+            className="cursor-pointer w-full rounded-[8px] gradient-color text-white text-[14px] py-3 px-6 font-medium"
           >
             {isLoading ? "Submitting..." : "Submit"}
           </button>

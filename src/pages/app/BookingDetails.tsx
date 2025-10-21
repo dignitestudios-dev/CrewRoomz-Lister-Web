@@ -274,23 +274,25 @@ const BookingDetails = () => {
               <p>{formatCurrency(totalAmount)}</p>
             </div>
           </div>
-          <div className="py-3 px-1">
-            <p className=" text-[14px] font-semibold">Note</p>
-            <p className="text-[#18181899] text-[13px]">
-              You can cancel a booking within 24 hours at no cost. However, if
-              you cancel after 24 hours, a 5% cancellation fee will be deducted
-              from your account.
-            </p>
-            <div className="pt-4">
-              <button
-                onClick={() => handleCancelClick(selectedBookingId)}
-                type="button"
-                className="w-full rounded-[8px] gradient-color text-white text-[13px] py-3 px-6 font-medium"
-              >
-                Cancel Booking
-              </button>
+          {bookingDetails?.bookingStatus === "pending" && (
+            <div className="py-3 px-1">
+              <p className=" text-[14px] font-semibold">Note</p>
+              <p className="text-[#18181899] text-[13px]">
+                You can cancel a booking within 24 hours at no cost. However, if
+                you cancel after 24 hours, a 5% cancellation fee will be
+                deducted from your account.
+              </p>
+              <div className="pt-4">
+                <button
+                  onClick={() => handleCancelClick(bookingFromState?._id)}
+                  type="button"
+                  className="w-full rounded-[8px] gradient-color text-white text-[13px] py-3 px-6 font-medium"
+                >
+                  Cancel Booking
+                </button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
       {isCancelModalOpen && (
