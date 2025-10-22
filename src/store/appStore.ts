@@ -3,11 +3,33 @@ import { create } from "zustand";
 import axios from "../axios";
 
 interface User {
+  location: {
+    type: string;
+    coordinates: [number, number];
+  };
   _id: string;
   name: string;
   email: string;
-  profilePicture?: string;
-  uid: string | number;
+  role: string;
+  profilePicture: string;
+  phone: string | null;
+  country: string | null;
+  address: string | null;
+  apartment: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: number;
+  uid: string;
+  provider: string;
+  identityStatus: string;
+  stripeProfileStatus: string;
+  stripeCustomerId: string;
+  stripeBankId: string | null;
+  isSubscriptionPaid: boolean;
+  veriffSessionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
 
 interface AppStore {

@@ -15,6 +15,7 @@ import Toast from "./Toast";
 interface PaymentFormProps {
   planData: PackageData;
   setIsConnectAccount: React.Dispatch<React.SetStateAction<string>>;
+  fetchUser: () => Promise<void>;
 }
 
 const ELEMENT_OPTIONS = {
@@ -37,6 +38,7 @@ const ELEMENT_OPTIONS = {
 const PaymentForm: React.FC<PaymentFormProps> = ({
   planData,
   setIsConnectAccount,
+  fetchUser,
 }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -47,7 +49,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
   const [componentState, setComponentState] = useState<
     "idle" | "loading" | "ready" | "error"
   >("idle");
-  const [isCard, setIsCard] = useState(false);
+  const [isCard, setIsCard] = useState([]);
 
   const handleSubmit = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
@@ -81,27 +83,23 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         const response = await axios.post("/card", {
           paymentMethodId: paymentMethod.id,
         });
-
+        console.log("this is resp--> ", response);
         if (response.status === 200) {
-          const response = await axios.post(
-            "/subscription/createStripeSubscription",
-            {
-              productId: planData.productId,
+          const defaultResp = await axios.post("/card/makeCardDefault", {
+            cardId: response.data.data.newCard._id,
+          });
+          if (defaultResp.status === 200) {
+            const subsResponse = await axios.post(
+              "/subscription/createStripeSubscription",
+              {
+                productId: planData.productId,
+              }
+            );
+            if (subsResponse.status === 200) {
+              fetchUser();
+              setState("idle");
+              setIsConnectAccount("complete");
             }
-          );
-          console.log("🚀 ~ handleSubmit ~ response:", response);
-
-          if (response.status === 200) {
-            // try {
-            //   const res = await axios.get(`/users/me`);
-            //   if (res.status === 200) {
-            //     // loginContext({ user: res?.data?.data });
-            //     setIsConnectAccount("complete");
-            //   }
-            // } catch (error) {
-            // console.log("🚀 ~ handleSubmit ~ error:", error)
-            // //   ErrorToast(error?.response?.data?.message);
-            // }
           }
         }
       } catch (apiError) {
@@ -128,6 +126,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       console.log("🚀 ~ handleSubmit ~ response:", response);
 
       if (response.status === 200) {
+        fetchUser();
         setState("ready");
         setIsConnectAccount("complete");
       }
@@ -143,8 +142,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       setComponentState("loading");
       const response = await axios.get("/card");
       if (response.status === 200) {
+        console.log("resp--> ", response.data.data);
         setComponentState("ready");
-        setIsCard(true);
+        setIsCard(response.data.data);
       }
     } catch (error) {
       setComponentState("error");
@@ -197,7 +197,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         </div>
       ) : (
         <form>
-          {isCard ? (
+          {isCard.length > 0 ? (
             <div className="w-[480px] grid grid-cols-2 mt-4 gap-4">
               <div>
                 <button

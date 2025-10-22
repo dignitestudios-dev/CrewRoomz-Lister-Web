@@ -98,17 +98,24 @@ const BookingDetails = () => {
     );
   }
 
-  const bed = bookingDetails?.bed?.[0];
   const startDate = moment(bookingDetails?.startDate);
   const endDate = moment(bookingDetails?.endDate);
   const totalDays = endDate.diff(startDate, "days");
-  const months = Math.max(1, Math.ceil(totalDays / 30)); // ensure at least 1 month
+  const days = Math.max(1, totalDays);
 
-  // 💰 Calculations
-  const subTotal = bed?.monthlyPrice * months;
   const formatCurrency = (num: number) =>
     num ? `$${num.toFixed(2)}` : "$0.00";
 
+  // 💰 Calculate subtotal from all beds
+  const bedCharges =
+    bookingDetails?.bed?.map((bed) => {
+      return {
+        ...bed,
+      };
+    }) || [];
+  console.log("🚀 ~ BookingDetails ~ bedCharges:", bedCharges);
+
+  // 💳 Final total amount
   const totalAmount =
     (bookingDetails?.totalPrice || 0) +
     (bookingDetails?.platformFee || 0) -
@@ -162,7 +169,8 @@ const BookingDetails = () => {
             <div className="flex justify-between items-center border-t border-[#E3DBDB] py-4">
               <p className="text-gray-700 text-[13px]">Date</p>
               <p className="text-black text-[14px] font-[500]">
-                {getDateFormat(bookingDetails?.createdAt)}
+                {getDateFormat(bookingDetails?.startDate)} -{" "}
+                {getDateFormat(bookingDetails?.endDate)}
               </p>
             </div>
 
@@ -245,23 +253,32 @@ const BookingDetails = () => {
 
           <p className="text-black text-[16px] font-[600] my-4">Billing</p>
           <div className="bg-white px-4 py-4 rounded-xl space-y-4">
-            <div className="flex justify-between text-[14px] font-[500] capitalize">
-              <p>
-                {bed?.type} ({months} month{months > 1 ? "s" : ""})
-              </p>
-              <p>{formatCurrency(subTotal)}</p>
-            </div>
+            {/* Bed Charges */}
+            {bedCharges.map((bed) => (
+              <div
+                key={bed._id}
+                className="flex justify-between text-[14px] font-[500] capitalize"
+              >
+                <p>
+                  {bed.type} × {days} day{days > 1 ? "s" : ""}
+                </p>
+                <p>{formatCurrency(bed.price * days)}</p>
+              </div>
+            ))}
 
+            {/* Subtotal */}
             <div className="flex justify-between text-[14px] font-[500] text-[#18181899]">
               <p>Sub Total</p>
               <p>{formatCurrency(bookingDetails?.totalPrice)}</p>
             </div>
 
+            {/* Platform Fee */}
             <div className="flex justify-between text-[14px] font-[500] text-[#18181899]">
               <p>Platform Fee (3%)</p>
               <p>{formatCurrency(bookingDetails?.platformFee)}</p>
             </div>
 
+            {/* Admin Deduction */}
             <div className="flex justify-between text-[14px] font-[500] text-[#18181899]">
               <p>Deduction (13%)</p>
               <p className="text-red-500">
@@ -269,6 +286,7 @@ const BookingDetails = () => {
               </p>
             </div>
 
+            {/* Total */}
             <div className="flex justify-between border-t border-[#90909099] border-dashed text-[14px] font-[500] pt-4">
               <p>Total</p>
               <p>{formatCurrency(totalAmount)}</p>

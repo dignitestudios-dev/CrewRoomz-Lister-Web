@@ -88,7 +88,11 @@ const Settings = () => {
             <Wallet />
           </div>
         )}
-        {keyValue === "subscription" && <SubscriptionPlans />}
+        {keyValue === "subscription" && (
+          <div className="w-[900px] overflow-x-auto ">
+            <SubscriptionPlans />
+          </div>
+        )}
 
         {keyValue === "notifications" && <NotificationsSetting />}
         {keyValue === "change-password" && <ChangePassword />}

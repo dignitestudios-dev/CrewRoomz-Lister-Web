@@ -2,7 +2,7 @@ import { FaArrowLeftLong } from "react-icons/fa6";
 import { HiOutlinePlus } from "react-icons/hi";
 import { useLocation, useNavigate } from "react-router";
 import { pdfIcon, ticked, untick } from "../../assets/export";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { addPropertySchema } from "../../schema/appSchema";
 import { useFormik } from "formik";
 import { getErrorMessage, propertyValues } from "../../init/appValues";
@@ -15,6 +15,7 @@ import GoogleMapComponent from "../../components/global/GoogleMap";
 import BedDetails from "../../components/properties/BedDetails";
 import { bedReducer, initialState } from "../../init/roomValues";
 import AmenitiesSection from "../../components/properties/AmenitiesSection";
+import { useAppStore } from "../../store/appStore";
 
 interface BedInfo {
   bedType: string;
@@ -45,6 +46,8 @@ const PropertyAdd = () => {
 
   const location = useLocation();
   const type = location.state;
+  const { user } = useAppStore();
+  console.log("🚀 ~ PaymentForm ~ user:", user);
 
   const [state, dispatch] = useReducer(bedReducer, initialState);
   const { toast, showToast } = useToast();
@@ -54,7 +57,9 @@ const PropertyAdd = () => {
   const [rulesPreviews, setRulesPreviews] = useState<string[]>([]);
 
   const [address, setAddress] = useState<Address | null>(null);
-
+  const [stateComponent, setStateComponent] = useState<
+    "idle" | "loading" | "ready" | "error"
+  >("idle");
   const onLocationSelect = (data: Address) => {
     setAddress(data);
   };
@@ -243,6 +248,31 @@ const PropertyAdd = () => {
       }
     },
   });
+
+  const stripeConnect = async () => {
+    try {
+      setStateComponent("loading");
+      const response = await axios.get("/stripe/stripeConnectSetup");
+
+      if (response.status === 200) {
+        setStateComponent("ready");
+        window.location.href = response.data?.data?.url;
+      }
+    } catch (error) {
+      setStateComponent("error");
+      showToast(getErrorMessage(error), "error");
+    }
+  };
+
+  useEffect(() => {
+    if (user?.stripeProfileStatus === "not-provided") {
+      stripeConnect();
+    }
+  }, []);
+
+  if (stateComponent === "loading") {
+    return <div>loading...</div>;
+  }
 
   return (
     <div className="max-w-[1260px] mx-auto pt-10">

@@ -1,3 +1,25 @@
+import {
+  acIcon,
+  barbQIcon,
+  bathIcon,
+  chargeIcon,
+  cleaningIcon,
+  deskIcon,
+  dispenserIcon,
+  dryerIcon,
+  fireAlarmIcon,
+  gymIcon,
+  ironIcon,
+  matleIcon,
+  parkingIcon,
+  silencerIcon,
+  smokeIcon,
+  stoveIcon,
+  switchIcon,
+  teaIcon,
+  tvIcon,
+} from "../assets/aminities/amenitiesExport";
+
 export const AMENITY_GROUPS: { title: string; items: string[] }[] = [
   {
     title: "Essentials",
@@ -32,3 +54,27 @@ export const AMENITY_GROUPS: { title: string; items: string[] }[] = [
     items: ["Smoke Alarm", "Carbon Monoxide Alarm", "First Aid Kit"],
   },
 ];
+
+export const amenityIcons: Record<string, string> = {
+  "Smoke Alarm": smokeIcon,
+  "Carbon Monoxide Alarm": fireAlarmIcon,
+  "First Aid Kit": cleaningIcon,
+  Gym: gymIcon,
+  "EV Charger": chargeIcon,
+  "Free Parking": parkingIcon,
+  "Smoking Allowed": silencerIcon,
+  "Hot Tub": bathIcon,
+  "BBQ Grill": barbQIcon,
+  Breakfast: teaIcon,
+  Pool: matleIcon,
+  Wifi: switchIcon,
+  "Air - Conditioning": acIcon,
+  Heating: stoveIcon,
+  Kitchen: dispenserIcon,
+  Washer: cleaningIcon,
+  Dryer: dryerIcon,
+  Iron: ironIcon,
+  TV: tvIcon,
+  "Hair dryer": dryerIcon,
+  "Dedicated Workspace": deskIcon,
+};

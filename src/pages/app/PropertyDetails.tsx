@@ -13,6 +13,7 @@ import { getErrorMessage } from "../../init/appValues";
 import Toast from "../../components/global/Toast";
 import PropertyHeaderSkeleton from "../../components/properties/PropertyHeaderSkeleton";
 import BedPricing from "../../components/Bookings/BedPricing";
+import { amenityIcons } from "../../statics/amenities";
 
 interface PropertyDetail {
   _id: string | number; // allow both
@@ -252,7 +253,11 @@ const PropertyDetails = () => {
                       key={index}
                       className="bg-[#FFFFFF] w-[91px] h-[74px] rounded-lg shadow-[#F5F5F5] flex flex-col items-center justify-center p-4 gap-2 mt-0.5"
                     >
-                      <img src={setting} alt="abc" className="h-8" />
+                      <img
+                        src={amenityIcons[item] || setting} // fallback icon
+                        alt={item}
+                        className="h-8"
+                      />
                       <p className="text-center text-[12px] font-[400]">
                         {item}
                       </p>

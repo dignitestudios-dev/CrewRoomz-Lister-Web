@@ -10,6 +10,8 @@ import { subscriptionFeatures } from "../../statics/settingsOptions";
 import { Elements } from "@stripe/react-stripe-js";
 import PaymentForm from "../../components/global/PaymentForm";
 import { loadStripe } from "@stripe/stripe-js";
+import { useAppStore } from "../../store/appStore";
+import useAuthStore from "../../store/authStore";
 
 export interface PackageData {
   _id: string;
@@ -28,6 +30,16 @@ const ConnectStripeAccount = () => {
   const navigate = useNavigate();
   const stripePromise = loadStripe(import.meta.env.VITE_APP_STRIPE_KEY);
 
+  const { user, fetchUser } = useAppStore();
+  console.log("🚀 ~ PaymentForm ~ user:", user);
+  const { updateUser } = useAuthStore();
+
+  useEffect(() => {
+    if (user) {
+      updateUser(user, true);
+    }
+  }, [user]);
+
   const [isConnectAccount, setIsConnectAccount] = useState<string>("");
   const [selected, setSelected] = useState<string | null>(null);
   const { toast, showToast } = useToast();
@@ -45,7 +57,7 @@ const ConnectStripeAccount = () => {
     }
   };
 
-  const getRooms = async () => {
+  const getSubscriptions = async () => {
     try {
       setState("loading");
       const { data } = await axios.get(`/subscription`);
@@ -62,7 +74,7 @@ const ConnectStripeAccount = () => {
   };
 
   useEffect(() => {
-    getRooms();
+    getSubscriptions();
   }, []);
   return (
     <div className="lg:min-h-screen lg:flex p-8  lg:p-0">
@@ -162,6 +174,7 @@ const ConnectStripeAccount = () => {
 
             {/* Skip Button */}
             <button
+              onClick={() => navigate("/home")}
               type="button"
               className={`w-full rounded-[8px] text-[16px] px-6 font-semibold bg-transparent gradient-text cursor-pointer`}
             >
@@ -189,6 +202,7 @@ const ConnectStripeAccount = () => {
             <PaymentForm
               planData={planData}
               setIsConnectAccount={setIsConnectAccount}
+              fetchUser={fetchUser}
             />
           </Elements>
         ) : (
