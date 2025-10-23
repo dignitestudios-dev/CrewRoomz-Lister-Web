@@ -61,6 +61,7 @@ const BookingDetails = () => {
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(
     null
   );
+  console.log("🚀 ~ BookingDetails ~ bookingDetails:", bookingDetails);
   const [selectedBookingId, setSelectedBookingId] = useState<string>("");
 
   const handleCancelClick = (bookingId: string) => {
@@ -101,6 +102,7 @@ const BookingDetails = () => {
   const startDate = moment(bookingDetails?.startDate);
   const endDate = moment(bookingDetails?.endDate);
   const totalDays = endDate.diff(startDate, "days");
+  console.log("🚀 ~ BookingDetails ~ totalDays:", totalDays);
   const days = Math.max(1, totalDays);
 
   const formatCurrency = (num: number) =>
@@ -113,7 +115,6 @@ const BookingDetails = () => {
         ...bed,
       };
     }) || [];
-  console.log("🚀 ~ BookingDetails ~ bedCharges:", bedCharges);
 
   // 💳 Final total amount
   const totalAmount =
@@ -246,7 +247,10 @@ const BookingDetails = () => {
                 </p>
               </div>
             </div>
-            <div>
+            <div
+              onClick={() => navigate(`/chat/${bookingDetails?.user?._id}`)}
+              className="cursor-pointer"
+            >
               <img src={messageIcon} alt="message" className="h-12" />
             </div>
           </div>
@@ -260,7 +264,7 @@ const BookingDetails = () => {
                 className="flex justify-between text-[14px] font-[500] capitalize"
               >
                 <p>
-                  {bed.type} × {days} day{days > 1 ? "s" : ""}
+                  {bed.type} × {days} night{days > 1 ? "s" : ""}
                 </p>
                 <p>{formatCurrency(bed.price * days)}</p>
               </div>

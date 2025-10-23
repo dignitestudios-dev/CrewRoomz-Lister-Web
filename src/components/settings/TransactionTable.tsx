@@ -1,12 +1,19 @@
 import { useState } from "react";
+import type { Transaction } from "./Wallet";
 
-const TransactionsTable = ({ transactionList }) => {
+interface TransactionsTableProps {
+  transactionList?: Transaction[];
+}
+
+const TransactionsTable: React.FC<TransactionsTableProps> = ({
+  transactionList,
+}) => {
   console.log("🚀 ~ TransactionsTable ~ transactionList:", transactionList);
   const headers = ["Date", "Account Name", "Type", "Amount"];
   const [activeTab, setActiveTab] = useState("All");
 
   // Normalize tab labels to match data
-  const tabMap = {
+  const tabMap: { [key: string]: string } = {
     All: "All",
     Received: "received",
     Withdraw: "withdraw", // adjust if your API uses a different label
@@ -15,8 +22,8 @@ const TransactionsTable = ({ transactionList }) => {
   // Filter transactions based on tab
   const filteredTransactions =
     activeTab === "All"
-      ? transactionList
-      : transactionList.filter(
+      ? transactionList ?? []
+      : (transactionList ?? []).filter(
           (item) => item.type.toLowerCase() === tabMap[activeTab]
         );
 
@@ -52,7 +59,7 @@ const TransactionsTable = ({ transactionList }) => {
       </div>
 
       {/* Body Rows */}
-      {filteredTransactions.map((transaction, index) => (
+      {filteredTransactions?.map((transaction) => (
         <div
           key={transaction._id}
           className="grid grid-cols-4 gap-2 py-4 border-b-[0.5px] border-b-[#E3DBDB30] text-[12px] text-[#181818] bg-[#F9F9F980] text-center"

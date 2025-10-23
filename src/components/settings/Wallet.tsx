@@ -4,6 +4,7 @@ import { getErrorMessage } from "../../init/appValues";
 import axios from "../../axios";
 import { useToast } from "../../hooks/useToast";
 import Toast from "../global/Toast";
+import WithdrawalModal from "./WithdrawalModal";
 
 export interface Transaction {
   _id: string;
@@ -25,6 +26,21 @@ export interface Wallet {
   user: string;
 }
 
+export interface BankDetail {
+  _id: string;
+  stripeBankAccountId: string;
+  accountHolderName: string | null;
+  accountNumber: string;
+  bankName: string;
+  createdAt: string;
+  updatedAt: string;
+  last4: string;
+  routingNumber: string;
+  status: string;
+  user: string;
+  __v: number;
+}
+
 const Wallet = () => {
   const { toast, showToast } = useToast();
 
@@ -32,16 +48,18 @@ const Wallet = () => {
     "idle"
   );
   const [walletValue, setWalletValue] = useState<Wallet>();
-  const [transactionList, setTransactionList] = useState<Transaction>();
-  console.log("🚀 ~ Wallet ~ transactionList:", transactionList);
+  const [transactionList, setTransactionList] = useState<Transaction[]>();
+  const [isWithdrawal, setIsWithdrawal] = useState(false);
+  const [bankDetail, setBankDetail] = useState<BankDetail[]>();
 
   const getWalletData = async () => {
     try {
       setState("loading");
 
-      const [walletRes, transactionRes] = await Promise.all([
+      const [walletRes, transactionRes, bankDetail] = await Promise.all([
         axios.get("/stripe/myWallet"),
         axios.get("/stripe/myTransactions"),
+        axios.get("/bank"),
       ]);
 
       if (walletRes.status === 200 && transactionRes.status === 200) {
@@ -50,6 +68,7 @@ const Wallet = () => {
 
         setWalletValue(walletRes.data.data);
         setTransactionList(transactionRes.data.data.transactions);
+        setBankDetail(bankDetail.data.data);
         setState("ready");
       }
     } catch (error) {
@@ -73,7 +92,8 @@ const Wallet = () => {
         </p>
         <div className="w-full flex items-center">
           <button
-            type="submit"
+            onClick={() => setIsWithdrawal(true)}
+            type="button"
             className="w-full rounded-[8px] gradient-color text-white text-[13px] py-3 px-6 font-medium"
           >
             Withdraw Funds
@@ -91,6 +111,13 @@ const Wallet = () => {
           <TransactionsTable transactionList={transactionList} />
         </div>
       </div>
+      {isWithdrawal && walletValue && bankDetail && (
+        <WithdrawalModal
+          onClose={() => setIsWithdrawal(false)}
+          balance={walletValue.balance}
+          bankDetail={bankDetail}
+        />
+      )}
     </div>
   );
 };

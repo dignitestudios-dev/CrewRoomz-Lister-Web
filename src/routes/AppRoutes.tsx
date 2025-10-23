@@ -2,6 +2,7 @@ import Booking from "../pages/app/Booking";
 import BookingDetails from "../pages/app/BookingDetails";
 import BookingHistory from "../pages/app/BookingHistory";
 import Chat from "../pages/app/Chat";
+import ConnectStripeAccount from "../pages/app/ConnectStripeAccount";
 import Home from "../pages/app/Home";
 import ListingCreate from "../pages/app/ListingCreate";
 import Notification from "../pages/app/Notification";
@@ -11,6 +12,11 @@ import PropertyEdit from "../pages/app/PropertyEdit";
 import Settings from "../pages/app/Settings";
 
 export const AppRoutes = [
+  {
+    url: "connect-account",
+    page: <ConnectStripeAccount />,
+    isPublic: true,
+  },
   {
     url: "home",
     page: <Home />,
@@ -44,7 +50,7 @@ export const AppRoutes = [
     page: <BookingDetails />,
   },
   {
-    url: "chat",
+    url: "chat/:userId?",
     page: <Chat />,
   },
   {

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { IoSend } from "react-icons/io5";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import axios from "../../axios";
 import { createSocket } from "../../socket/socket";
 import useAuthStore from "../../store/authStore";
@@ -52,6 +52,7 @@ const Chat = () => {
   const { user } = useAppStore();
   const token = useAuthStore((state) => state.token);
   const { showToast } = useToast();
+  const { userId } = useParams();
 
   const [senders, setSenders] = useState<ChatRoom[]>([]);
   const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
@@ -61,6 +62,33 @@ const Chat = () => {
   const [state, setState] = useState<LoadState>("idle");
 
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (userId) {
+      initiateChatWithUser(userId);
+    }
+  }, [userId]);
+
+  const initiateChatWithUser = async (userId: string) => {
+    try {
+      const { data } = await axios.get(`/chat/createChat/${userId}`);
+      if (data.success) {
+        const room = data.data.chatRoom;
+        const messages = data.data.messages;
+
+        setCurrentRoom(room);
+        socket?.emit("joinRoom", { roomId: room.id });
+
+        setReceivedMessages([...messages].reverse());
+        setState("ready");
+
+        await axios.post(`/chat/markChatAsRead`, { roomId: room.id });
+      }
+    } catch (error) {
+      showToast(getErrorMessage(error), "error");
+      setState("error");
+    }
+  };
 
   // ---------- Fetch User Chat Rooms ----------
   const fetchSenders = async () => {

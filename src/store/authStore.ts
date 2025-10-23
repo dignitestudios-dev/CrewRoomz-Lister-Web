@@ -44,32 +44,46 @@ interface AuthState {
   updateUser: (user?: UpdateUserPayload, remember?: boolean) => void;
 }
 
-const useAuthStore = create<AuthState>((set) => ({
-  token: Cookies.get(TOKEN_KEY) || null,
-  user: (() => {
-    const v = Cookies.get(USER_KEY);
-    return v ? JSON.parse(v) : null;
-  })(),
+const useAuthStore = create<AuthState>((set) => {
+  const token = Cookies.get(TOKEN_KEY) || null;
+  const userRaw = Cookies.get(USER_KEY);
+  const user = userRaw ? JSON.parse(userRaw) : null;
 
-  setAuth: (token, user = undefined, remember = true) => {
-    set({ token, user });
-    const opts = remember ? { expires: 7 } : undefined;
-    Cookies.set(TOKEN_KEY, token, opts);
-    Cookies.set(USER_KEY, JSON.stringify(user || {}), opts);
-  },
+  return {
+    token,
+    user,
+    setAuth: (token, user = undefined, remember = true) => {
+      set({ token, user });
+      const opts = remember ? { expires: 7 } : undefined;
+      Cookies.set(TOKEN_KEY, token, opts);
+      Cookies.set(USER_KEY, JSON.stringify(user || {}), opts);
+    },
+    updateUser: (user = undefined, remember = true) => {
+      console.log("🚀 ~ user:", user);
+      set((state) => ({ ...state, user }));
+      const opts = remember ? { expires: 7 } : undefined;
+      Cookies.set(USER_KEY, JSON.stringify(user || {}), opts);
+    },
 
-  updateUser: (user = undefined, remember = true) => {
-    console.log("🚀 ~ user:", user);
-    set((state) => ({ ...state, user }));
-    const opts = remember ? { expires: 7 } : undefined;
-    Cookies.set(USER_KEY, JSON.stringify(user || {}), opts);
-  },
+    clearAuth: () => {
+      set({ token: null, user: null });
+      Cookies.remove(TOKEN_KEY);
+      Cookies.remove(USER_KEY);
+    },
+  };
 
-  clearAuth: () => {
-    set({ token: null, user: null });
-    Cookies.remove(TOKEN_KEY);
-    Cookies.remove(USER_KEY);
-  },
-}));
+  // token: Cookies.get(TOKEN_KEY) || null,
+  // user: (() => {
+  //   const v = Cookies.get(USER_KEY);
+  //   return v ? JSON.parse(v) : null;
+  // })(),
+
+  // setAuth: (token, user = undefined, remember = true) => {
+  //   set({ token, user });
+  //   const opts = remember ? { expires: 7 } : undefined;
+  //   Cookies.set(TOKEN_KEY, token, opts);
+  //   Cookies.set(USER_KEY, JSON.stringify(user || {}), opts);
+  // },
+});
 
 export default useAuthStore;

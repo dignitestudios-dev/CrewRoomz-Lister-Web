@@ -1,7 +1,6 @@
 // store/useUserStore.ts
 import { create } from "zustand";
 import axios from "../axios";
-
 interface User {
   location: {
     type: string;

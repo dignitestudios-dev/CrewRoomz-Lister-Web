@@ -1,5 +1,5 @@
 import Header from "../components/layout/Header";
-import { Navigate, Outlet } from "react-router";
+import { Navigate, Outlet, useLocation } from "react-router";
 import { useAppStore } from "../store/appStore";
 import { useEffect } from "react";
 
@@ -9,14 +9,20 @@ interface LayoutProps {
 
 const AppLayout = ({ token }: LayoutProps) => {
   const { fetchUser } = useAppStore();
+  const location = useLocation();
+  const path = location.pathname;
+
   useEffect(() => {
     if (token) {
       fetchUser();
     }
-  }, [fetchUser]);
+  }, []);
 
   if (!token) {
     return <Navigate to="/login" replace />;
+  }
+  if (token && path.startsWith("/verify-login-otp")) {
+    return <Navigate to="/connect-account" replace />;
   }
 
   return (

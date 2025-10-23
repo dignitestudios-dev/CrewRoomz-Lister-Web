@@ -265,10 +265,14 @@ const PropertyAdd = () => {
   };
 
   useEffect(() => {
-    if (user?.stripeProfileStatus === "not-provided") {
-      stripeConnect();
+    if (!user?.isSubscriptionPaid) {
+      navigate("/connect-account");
+    } else {
+      if (user?.stripeProfileStatus === "not-provided") {
+        stripeConnect();
+      }
     }
-  }, []);
+  }, [user]);
 
   if (stateComponent === "loading") {
     return <div>loading...</div>;
