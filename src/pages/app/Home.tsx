@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { dotBar } from "../../assets/export.ts";
 import { HomeFilterDropDown } from "../../components/global/FilterDropDown.tsx";
