@@ -1,4 +1,4 @@
-import React, { Fragment, useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { nextBtn } from "../../assets/export";
 import BookingCalendar from "../../components/Calendar/BookingCalendar";
