@@ -12,7 +12,6 @@ interface Props {
 }
 
 const WithdrawalModal: React.FC<Props> = ({ onClose, balance, bankDetail }) => {
-  console.log("🚀 ~ WithdrawalModal ~ bankDetail:", bankDetail);
   const { toast, showToast } = useToast();
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);

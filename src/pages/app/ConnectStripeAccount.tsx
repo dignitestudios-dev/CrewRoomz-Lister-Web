@@ -31,7 +31,7 @@ const ConnectStripeAccount = () => {
   const stripePromise = loadStripe(import.meta.env.VITE_APP_STRIPE_KEY);
 
   const { user, fetchUser } = useAppStore();
-  console.log("🚀 ~ PaymentForm ~ user:", user);
+
   const { updateUser } = useAuthStore();
 
   useEffect(() => {
@@ -61,7 +61,6 @@ const ConnectStripeAccount = () => {
     try {
       setState("loading");
       const { data } = await axios.get(`/subscription`);
-      console.log("🚀 ~ getRooms ~ data:", data);
 
       if (data.success) {
         setState("ready");

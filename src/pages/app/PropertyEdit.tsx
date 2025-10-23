@@ -30,19 +30,16 @@ const PropertyEdit = () => {
   const { id } = useParams();
   const location = useLocation();
   const room = location.state.room;
-  console.log("🚀 ~ PropertyEdit ~ room:", room);
   const { toast, showToast } = useToast();
   const [componentState, setComponentState] = useState<
     "idle" | "loading" | "ready" | "error"
   >("idle");
 
   const [address, setAddress] = useState<EditAddress | null>(null);
-  console.log("🚀 ~ PropertyEdit ~ address:", address);
   // const [state, dispatch] = useReducer(bedReducer, initialState);
 
   const [bedData, setBedData] = useState<Bed[]>([]);
   const [deletedBedIds, setDeletedBedIds] = useState<string[]>([]);
-  console.log("🚀 ~ PropertyEdit ~ deletedBedIds:", deletedBedIds);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   // For previews and file tracking

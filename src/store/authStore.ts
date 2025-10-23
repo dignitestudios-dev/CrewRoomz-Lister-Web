@@ -59,7 +59,6 @@ const useAuthStore = create<AuthState>((set) => {
       Cookies.set(USER_KEY, JSON.stringify(user || {}), opts);
     },
     updateUser: (user = undefined, remember = true) => {
-      console.log("🚀 ~ user:", user);
       set((state) => ({ ...state, user }));
       const opts = remember ? { expires: 7 } : undefined;
       Cookies.set(USER_KEY, JSON.stringify(user || {}), opts);

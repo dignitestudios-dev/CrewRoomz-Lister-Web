@@ -230,7 +230,6 @@ const Booking = () => {
               bookedClass="bg-[#29ABE226]  border-[1px] border-[#29ABE280] rounded-xl" // uses your gradient class for booked
               cancelledClass="bg-[#FFDCDC] text-red-700 rounded-xl"
               onDayClick={(iso) => {
-                console.log("day clicked", iso);
                 setSelectDate(iso);
               }}
             />

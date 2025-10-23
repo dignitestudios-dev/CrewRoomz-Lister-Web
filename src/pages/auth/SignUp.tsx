@@ -53,7 +53,7 @@ const SignUp = () => {
           values.email.toLocaleLowerCase(),
           values.email.toLocaleLowerCase()
         );
-        console.log("newUser --- > ", newUser);
+
         const token = await getIdToken(newUser.user);
         if (token) {
           handelSignUp(values as SignUpValues, token);

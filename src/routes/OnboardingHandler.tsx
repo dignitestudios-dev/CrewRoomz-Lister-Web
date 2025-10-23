@@ -7,8 +7,6 @@ export const OnboardingHandler = ({
   token: string | null;
   isSubscription: boolean | unknown;
 }) => {
-  console.log("🚀 ~ OnboardingHandler ~ isSubscription:", isSubscription);
-
   if (!token) {
     return <Navigate to="/login" replace />;
   }

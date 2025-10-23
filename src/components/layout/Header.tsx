@@ -41,7 +41,6 @@ const Header = () => {
     totalItems: 0,
     totalPages: 1,
   });
-  console.log("🚀 ~ Header ~ notificationData:", notificationData);
 
   const toggleUserPopup = () => {
     setUserPopup(!userPopup);
@@ -53,8 +52,6 @@ const Header = () => {
 
       // Include both limit & page in your request
       const { data } = await axios.get(`/notifications?limit=5&page=${page}`);
-
-      console.log("🚀 ~ notification ~ data:", data);
 
       if (data?.success) {
         setState("ready");
@@ -72,7 +69,6 @@ const Header = () => {
     } catch (error) {
       setState("error");
       showToast(getErrorMessage(error), "error");
-      console.log("🚀 ~ notification ~ error:", error);
     }
   };
 

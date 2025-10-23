@@ -61,7 +61,7 @@ const BookingDetails = () => {
   const [bookingDetails, setBookingDetails] = useState<BookingDetails | null>(
     null
   );
-  console.log("🚀 ~ BookingDetails ~ bookingDetails:", bookingDetails);
+
   const [selectedBookingId, setSelectedBookingId] = useState<string>("");
 
   const handleCancelClick = (bookingId: string) => {
@@ -102,7 +102,7 @@ const BookingDetails = () => {
   const startDate = moment(bookingDetails?.startDate);
   const endDate = moment(bookingDetails?.endDate);
   const totalDays = endDate.diff(startDate, "days");
-  console.log("🚀 ~ BookingDetails ~ totalDays:", totalDays);
+
   const days = Math.max(1, totalDays);
 
   const formatCurrency = (num: number) =>

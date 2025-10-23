@@ -55,7 +55,6 @@ const Wallet = () => {
   const getWalletData = async () => {
     try {
       setState("loading");
-
       const [walletRes, transactionRes, bankDetail] = await Promise.all([
         axios.get("/stripe/myWallet"),
         axios.get("/stripe/myTransactions"),
@@ -63,16 +62,12 @@ const Wallet = () => {
       ]);
 
       if (walletRes.status === 200 && transactionRes.status === 200) {
-        console.log("Wallet:", walletRes.data.data);
-        console.log("Transactions:", transactionRes.data.data);
-
         setWalletValue(walletRes.data.data);
         setTransactionList(transactionRes.data.data.transactions);
         setBankDetail(bankDetail.data.data);
         setState("ready");
       }
     } catch (error) {
-      console.error("getWalletData error:", error);
       setState("error");
       showToast(getErrorMessage(error), "error");
     }
@@ -100,17 +95,24 @@ const Wallet = () => {
           </button>
         </div>
       </div>
-      <div className="bg-[#ffffff] p-6 w-full rounded-3xl">
-        <div className="flex justify-between items-center">
-          <p className="text-[#000000] text-[18px] font-semibold">
-            Transactions
-          </p>
-          {/* <div className="p-4 bg-[#fff] px-10">All</div> */}
+      {state === "loading" ? (
+        <div className="mt-4">
+          <p className="text-center text-gray-500">Loading transactions...</p>
         </div>
-        <div className="w-full mt-2">
-          <TransactionsTable transactionList={transactionList} />
+      ) : (
+        <div className="bg-[#ffffff] p-6 w-full rounded-3xl">
+          <div className="flex justify-between items-center">
+            <p className="text-[#000000] text-[18px] font-semibold">
+              Transactions
+            </p>
+            {/* <div className="p-4 bg-[#fff] px-10">All</div> */}
+          </div>
+          <div className="w-full mt-2">
+            <TransactionsTable transactionList={transactionList} />
+          </div>
         </div>
-      </div>
+      )}
+
       {isWithdrawal && walletValue && bankDetail && (
         <WithdrawalModal
           onClose={() => setIsWithdrawal(false)}

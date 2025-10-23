@@ -75,7 +75,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     });
 
     if (error) {
-      console.log("🚀 ~ handleSubmit ~ error:", error);
       setState("error");
       showToast(getErrorMessage(error), "error");
     } else {
@@ -83,7 +82,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         const response = await axios.post("/card", {
           paymentMethodId: paymentMethod.id,
         });
-        console.log("this is resp--> ", response);
+
         if (response.status === 200) {
           const defaultResp = await axios.post("/card/makeCardDefault", {
             cardId: response.data.data.newCard._id,
@@ -103,8 +102,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           }
         }
       } catch (apiError) {
-        console.log("🚀 ~ handleSubmit ~ apiError:", apiError);
-
         setState("error");
         showToast(getErrorMessage(apiError), "error");
       }
@@ -123,7 +120,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           productId: planData.productId,
         }
       );
-      console.log("🚀 ~ handleSubmit ~ response:", response);
 
       if (response.status === 200) {
         fetchUser();
@@ -133,7 +129,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     } catch (error) {
       setState("error");
       showToast(getErrorMessage(error), "error");
-      console.log("🚀 ~ handleSubscription ~ error:", error);
     }
   };
 
@@ -142,7 +137,6 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
       setComponentState("loading");
       const response = await axios.get("/card");
       if (response.status === 200) {
-        console.log("resp--> ", response.data.data);
         setComponentState("ready");
         setIsCard(response.data.data);
       }

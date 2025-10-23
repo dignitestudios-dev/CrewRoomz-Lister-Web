@@ -85,7 +85,6 @@ const LoginOtp = () => {
       });
       if (response.status === 200) {
         const data = response?.data?.data;
-        console.log("🚀 ~ handleSubmit ~ token~:", data);
         setAuth(data.token, data.user, true);
         setState("ready");
         setIsVerified(true);

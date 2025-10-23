@@ -50,7 +50,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const [componentState, setComponentState] = useState<LoadState>("idle");
 
   const handleOptionSelect = (action: string) => {
-    console.log(`Action on ${room._id}:`, action);
     if (action === "delete") {
       setIsDelete(true);
     }
@@ -78,7 +77,6 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
         setDeleteSuccess(true);
       }
     } catch (error) {
-      console.log("🚀 ~ handleDelete ~ error:", error);
       setComponentState("error");
       showToast(getErrorMessage(error), "error");
     }

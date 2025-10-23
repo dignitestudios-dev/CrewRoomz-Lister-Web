@@ -8,7 +8,6 @@ interface TransactionsTableProps {
 const TransactionsTable: React.FC<TransactionsTableProps> = ({
   transactionList,
 }) => {
-  console.log("🚀 ~ TransactionsTable ~ transactionList:", transactionList);
   const headers = ["Date", "Account Name", "Type", "Amount"];
   const [activeTab, setActiveTab] = useState("All");
 

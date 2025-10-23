@@ -15,7 +15,6 @@ const CancelBookingModal: React.FC<CancelBookingModalProps> = ({
   bookingId,
   getBookings,
 }) => {
-  console.log("🚀 ~ CancelBookingModal ~ bookingId:", bookingId);
   const [cancelReason, setCancelReason] = useState("");
   const [cancelDescription, setCancelDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);

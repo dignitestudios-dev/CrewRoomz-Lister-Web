@@ -47,7 +47,6 @@ const PropertyAdd = () => {
   const location = useLocation();
   const type = location.state;
   const { user } = useAppStore();
-  console.log("🚀 ~ PaymentForm ~ user:", user);
 
   const [state, dispatch] = useReducer(bedReducer, initialState);
   const { toast, showToast } = useToast();
