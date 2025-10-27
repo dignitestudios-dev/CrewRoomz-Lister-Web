@@ -26,6 +26,15 @@ export const getDateFormat = (date: Date | string | number) => {
   return moment(date).format("MM-DD-YYYY");
 };
 
+export const getDateTimeFormat = (date: Date | string | number) => {
+  const msgMoment = moment(date);
+  const today = moment();
+
+  return msgMoment.isSame(today, "day")
+    ? msgMoment.format("hh:mm A") // e.g., 01:50 PM
+    : msgMoment.format("MM-DD-YYYY"); // e.g., 10-21-2025
+};
+
 export type DateRange = { start: string; end: string };
 
 export function convertToRanges(bookedDates: string[]): DateRange[] {

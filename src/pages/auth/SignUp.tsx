@@ -271,14 +271,20 @@ const SignUp = () => {
                   I accept the{" "}
                   <span
                     className="gradient-text cursor-pointer"
-                    onClick={() => console.log("Open Terms & Conditions")}
+                    onClick={() =>
+                      (window.location.href =
+                        "https://crew-roomz-admin-panel.vercel.app/terms-and-conditions")
+                    }
                   >
                     Terms & Conditions
                   </span>{" "}
                   and{" "}
                   <span
                     className="gradient-text cursor-pointer"
-                    onClick={() => console.log("Open Privacy Policy")}
+                    onClick={() =>
+                      (window.location.href =
+                        "https://crew-roomz-admin-panel.vercel.app/privacy-policy")
+                    }
                   >
                     Privacy Policy
                   </span>

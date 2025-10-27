@@ -1,7 +1,7 @@
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { HiOutlinePlus } from "react-icons/hi";
 import { useLocation, useNavigate } from "react-router";
-import { pdfIcon, ticked, untick } from "../../assets/export";
+import { checkIcon, pdfIcon, ticked, untick } from "../../assets/export";
 import { useEffect, useReducer, useState } from "react";
 import { addPropertySchema } from "../../schema/appSchema";
 import { useFormik } from "formik";
@@ -63,18 +63,40 @@ const PropertyAdd = () => {
     setAddress(data);
   };
 
+  const [isCreated, setIsCreated] = useState(false);
+
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    setFieldValue("images", files);
-    const previews = files.map((f) => URL.createObjectURL(f));
-    setImagePreviews(previews);
+    const newFiles = e.target.files ? Array.from(e.target.files) : [];
+
+    // Get current files and previews
+    const currentFiles: File[] = values.images || [];
+    const currentPreviews: string[] = imagePreviews;
+
+    // Combine and limit to 5
+    const combinedFiles = [...currentFiles, ...newFiles].slice(0, 5);
+    const newPreviews = newFiles.map((f) => URL.createObjectURL(f));
+    const combinedPreviews = [...currentPreviews, ...newPreviews].slice(0, 5);
+
+    // Update Formik and local preview state
+    setFieldValue("images", combinedFiles);
+    setImagePreviews(combinedPreviews);
   };
 
   const handleRulesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files ? Array.from(e.target.files) : [];
-    setFieldValue("rulesFiles", files);
-    const previews = files.map((f) => URL.createObjectURL(f));
-    setRulesPreviews(previews);
+    const newFiles = e.target.files ? Array.from(e.target.files) : [];
+
+    // Get current files and previews
+    const currentFiles: File[] = values.rulesFiles || [];
+    const currentPreviews: string[] = rulesPreviews;
+
+    // Combine and limit to 5
+    const combinedFiles = [...currentFiles, ...newFiles].slice(0, 3);
+    const newPreviews = newFiles.map((f) => URL.createObjectURL(f));
+    const combinedPreviews = [...currentPreviews, ...newPreviews].slice(0, 3);
+
+    // Update Formik and local preview state
+    setFieldValue("rulesFiles", combinedFiles);
+    setRulesPreviews(combinedPreviews);
   };
 
   const handleRemoveRules = (index: number) => {
@@ -238,8 +260,7 @@ const PropertyAdd = () => {
       try {
         const response = await axios.post("/rooms", formData);
         if (response?.status === 201 || response?.status === 200) {
-          showToast("Room Created Successfully", "success");
-          setComponentState("ready");
+          setIsCreated(true);
         }
       } catch (error) {
         setComponentState("error");
@@ -264,17 +285,20 @@ const PropertyAdd = () => {
   };
 
   useEffect(() => {
-    if (!user?.isSubscriptionPaid) {
-      navigate("/connect-account");
-    } else {
-      if (user?.stripeProfileStatus === "not-provided") {
-        stripeConnect();
-      }
+    // if (!user?.isSubscriptionPaid) {
+    //   navigate("/connect-account");
+    // }
+    if (user?.stripeProfileStatus === "not-provided") {
+      stripeConnect();
     }
   }, [user]);
 
   if (stateComponent === "loading") {
-    return <div>loading...</div>;
+    return (
+      <div className="max-w-[1260px] mx-auto pt-10">
+        <p className="text-center text-gray-600">Loading booking...</p>
+      </div>
+    );
   }
 
   return (
@@ -370,7 +394,7 @@ const PropertyAdd = () => {
           </div>
         )}
 
-        <label className="text-[16px] font-[500]">Rules to live</label>
+        <label className="text-[16px] font-[500]">Rules to stay</label>
         <div className="border-[2px] border-dashed bg-[#ffffff] border-[#36C0EF] rounded-xl pt-2 pb-4 px-4 text-center block mb-6">
           <label
             htmlFor="rulesUpload"
@@ -405,8 +429,9 @@ const PropertyAdd = () => {
                   <img
                     key={i}
                     src={pdfIcon}
-                    className="h-6  px-4 absolute  rounded-md object-cover"
+                    className="h-6 px-4 absolute  rounded-md object-cover"
                   />
+                  <p className="pl-12">Rules_Document_{i + 1}.pdf</p>
                 </div>
                 <button
                   type="button"
@@ -423,7 +448,7 @@ const PropertyAdd = () => {
         )}
 
         <BedDetails
-          type="multi"
+          type={type}
           bedTypeOptions={bedTypeOptions}
           state={state}
           dispatch={dispatch}
@@ -436,6 +461,7 @@ const PropertyAdd = () => {
               Shared Bath
             </label>
             <input
+              placeholder="00"
               name="sharedBath"
               value={values.sharedBath}
               onChange={handleChange}
@@ -452,6 +478,7 @@ const PropertyAdd = () => {
               Private Bath
             </label>
             <input
+              placeholder="00"
               name="privateBath"
               value={values.privateBath}
               onChange={handleChange}
@@ -499,6 +526,26 @@ const PropertyAdd = () => {
           </button>
         </div>
       </form>
+      {isCreated && (
+        <div
+          onClick={() => navigate("/home")}
+          className="fixed inset-0 bg-[#04080680] bg-opacity-0 flex justify-center items-center z-50"
+        >
+          <div className="bg-white rounded-2xl p-6 w-full max-w-[26em] text-center relative shadow-lg">
+            <div className="flex justify-between absolute -top-10 right-40">
+              <img src={checkIcon} alt="Success" className="h-24 w-24" />
+            </div>
+            <div className="mt-8 flex flex-col items-center">
+              <h2 className="text-2xl font-semibold mb-4 mt-6">
+                Listing Published!!
+              </h2>
+              <p className="text-[#18181899] text-[15px] mb-6">
+                Your listing is live and ready for bookings..
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

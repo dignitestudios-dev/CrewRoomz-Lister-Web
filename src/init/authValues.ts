@@ -20,3 +20,9 @@ export const resetValue = {
   password: "",
   cPassword: "",
 };
+
+export const verifValues = {
+  facePic: "",
+  idFront: "",
+  idBack: "",
+};

@@ -77,7 +77,7 @@ declare global {
   };
 
   type HomeFilter = "multi" | "semi-private" | "private";
-  type HomeStatus = "Active" | "Inactive";
+  type HomeStatus = "All" | "Active" | "Inactive";
   type SelectedStatus = "Daily" | "Monthly";
 
   type BunkType = "top" | "bottom";

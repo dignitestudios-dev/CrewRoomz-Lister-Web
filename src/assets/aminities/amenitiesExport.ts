@@ -17,6 +17,8 @@ import stoveIcon from "./stoveIcon.png";
 import switchIcon from "./switchIcon.png";
 import teaIcon from "./teaIcon.png";
 import tvIcon from "./tvIcon.png";
+import wifiIcon from "./wifiIcon.png";
+import washingIcon from "./washingIcon.png";
 export {
   acIcon,
   barbQIcon,
@@ -37,4 +39,6 @@ export {
   switchIcon,
   teaIcon,
   tvIcon,
+  wifiIcon,
+  washingIcon,
 };

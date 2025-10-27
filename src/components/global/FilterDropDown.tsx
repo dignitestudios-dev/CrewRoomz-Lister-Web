@@ -18,7 +18,7 @@ export const HomeFilterDropDown = ({
 }: StatusIndicatorProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const options: HomeStatus[] = ["Active", "Inactive"];
+  const options: HomeStatus[] = ["All", "Active", "Inactive"];
 
   const handleSelect = (option: HomeStatus) => {
     setSelected(option);
@@ -43,7 +43,7 @@ export const HomeFilterDropDown = ({
 
       {/* Options */}
       {isOpen && (
-        <div className="absolute mt-2 w-full bg-white rounded-xl shadow-md z-10">
+        <div className="absolute mt-2 w-full bg-white rounded-xl  z-10">
           {options.map((option) => (
             <div
               key={option}
@@ -75,10 +75,10 @@ export const BookingFilterDropDown = ({
   };
 
   return (
-    <div className="relative w-28">
+    <div className="">
       {/* Selected Option */}
       <div
-        className="flex items-center justify-center rounded-full gradient-image gap-4 py-2 cursor-pointer shadow-sm"
+        className="flex items-center justify-center rounded-full gradient-image gap-4 py-2 px-6 text-[15px] cursor-pointer "
         onClick={() => setIsOpen(!isOpen)}
       >
         <span>{selected}</span>

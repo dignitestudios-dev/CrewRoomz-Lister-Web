@@ -9,6 +9,7 @@ import axios from "../../axios.ts";
 import Toast from "../global/Toast.tsx";
 import { useToast } from "../../hooks/useToast.ts";
 import { getDateFormat, getErrorMessage } from "../../init/appValues.ts";
+import ConfirmationModal from "../global/ConfirmationModal.tsx";
 
 interface notificationsData {
   _id: string | number; // allow both
@@ -31,10 +32,12 @@ const Header = () => {
   const { toast, showToast } = useToast();
 
   const [state, setState] = useState<LoadState>("idle");
+  const [isLogout, setIsLogout] = useState(false);
 
   const [notificationData, setNotificationData] = useState<notificationsData[]>(
     []
   );
+
   const [pagination, setPagination] = useState({
     itemsPerPage: 15,
     currentPage: 1,
@@ -188,10 +191,7 @@ const Header = () => {
 
                 <button
                   type="button"
-                  onClick={() => {
-                    clearAuth();
-                    navigate("login");
-                  }}
+                  onClick={() => setIsLogout(true)}
                   className="w-full flex items-center gap-2 text-left px-1 py-1 cursor-pointer hover:text-blue-500"
                 >
                   <img
@@ -267,6 +267,22 @@ const Header = () => {
           </div>
         )}
       </div>
+      {isLogout && (
+        <ConfirmationModal
+          title="Want to logout?"
+          content="You will be redirected to the login page."
+          skipBtnContent="No"
+          confirmBtnContent="Logout"
+          onClose={() => setIsLogout(false)}
+          onSubmit={() => {
+            {
+              clearAuth();
+              navigate("login");
+            }
+          }}
+          loading={"idle"}
+        />
+      )}
     </div>
   );
 };

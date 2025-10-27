@@ -40,6 +40,7 @@ interface BookingDetails {
   totalPrice: number;
   platformFee: number;
   adminCommissionAmount: number;
+  adminCommission: number;
   startDate: string;
   endDate: string;
   createdAt: string;
@@ -118,8 +119,7 @@ const BookingDetails = () => {
 
   // 💳 Final total amount
   const totalAmount =
-    (bookingDetails?.totalPrice || 0) +
-    (bookingDetails?.platformFee || 0) -
+    (bookingDetails?.totalPrice || 0) -
     (bookingDetails?.adminCommissionAmount || 0);
 
   return (
@@ -163,7 +163,7 @@ const BookingDetails = () => {
             <div className="flex justify-between items-center border-t border-[#E3DBDB] py-4">
               <p className="text-gray-700 text-[13px]">Bed Type</p>
               <p className="text-black text-[14px] font-[500] capitalize">
-                {bookingDetails?.bed?.map((b) => b.type).join(", ")}
+                {bookingDetails?.bed?.map((b) => b.type).join(", ")} Bed
               </p>
             </div>
 
@@ -258,33 +258,45 @@ const BookingDetails = () => {
           <p className="text-black text-[16px] font-[600] my-4">Billing</p>
           <div className="bg-white px-4 py-4 rounded-xl space-y-4">
             {/* Bed Charges */}
-            {bedCharges.map((bed) => (
-              <div
-                key={bed._id}
-                className="flex justify-between text-[14px] font-[500] capitalize"
-              >
-                <p>
-                  {bed.type} × {days} night{days > 1 ? "s" : ""}
-                </p>
-                <p>{formatCurrency(bed.price * days)}</p>
-              </div>
-            ))}
+            {bedCharges.map((bed) => {
+              const extraDays = days > 30 ? days - 30 : 0;
+              const basePrice = days > 30 ? bed.monthlyPrice : bed.price * days;
+              const extraPrice = extraDays > 0 ? bed.price * extraDays : 0;
+              const totalPrice = basePrice + extraPrice;
+
+              const caption =
+                days > 30
+                  ? `${bed.type} (${Math.floor(days / 30)} month${
+                      Math.floor(days / 30) > 1 ? "s" : ""
+                    } + ${extraDays} night${extraDays > 1 ? "s" : ""})`
+                  : `${bed.type} (${days} night${days > 1 ? "s" : ""})`;
+
+              return (
+                <div
+                  key={bed._id}
+                  className="flex justify-between text-[14px] font-[500] capitalize"
+                >
+                  <p>{caption}</p>
+                  <p>{formatCurrency(totalPrice)}</p>
+                </div>
+              );
+            })}
 
             {/* Subtotal */}
             <div className="flex justify-between text-[14px] font-[500] text-[#18181899]">
-              <p>Sub Total</p>
+              <p>Total Amount</p>
               <p>{formatCurrency(bookingDetails?.totalPrice)}</p>
             </div>
 
             {/* Platform Fee */}
-            <div className="flex justify-between text-[14px] font-[500] text-[#18181899]">
+            {/* <div className="flex justify-between text-[14px] font-[500] text-[#18181899]">
               <p>Platform Fee (3%)</p>
               <p>{formatCurrency(bookingDetails?.platformFee)}</p>
-            </div>
+            </div> */}
 
             {/* Admin Deduction */}
             <div className="flex justify-between text-[14px] font-[500] text-[#18181899]">
-              <p>Deduction (13%)</p>
+              <p>Deduction ({bookingDetails?.adminCommission} %)</p>
               <p className="text-red-500">
                 -{formatCurrency(bookingDetails?.adminCommissionAmount)}
               </p>
@@ -292,7 +304,7 @@ const BookingDetails = () => {
 
             {/* Total */}
             <div className="flex justify-between border-t border-[#90909099] border-dashed text-[14px] font-[500] pt-4">
-              <p>Total</p>
+              <p>Final Total</p>
               <p>{formatCurrency(totalAmount)}</p>
             </div>
           </div>

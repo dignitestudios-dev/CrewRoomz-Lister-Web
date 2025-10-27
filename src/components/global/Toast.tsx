@@ -19,7 +19,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, visible }) => {
 
   return (
     <div
-      className={`fixed top-5 right-5 text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-500 ${bgColor} ${
+      className={`fixed top-12 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-500 ${bgColor} ${
         visible ? "opacity-100" : "opacity-0"
       }`}
     >

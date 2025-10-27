@@ -12,6 +12,7 @@ import PaymentForm from "../../components/global/PaymentForm";
 import { loadStripe } from "@stripe/stripe-js";
 import { useAppStore } from "../../store/appStore";
 import useAuthStore from "../../store/authStore";
+import { ErrorToast } from "../../components/global/Toaster";
 
 export interface PackageData {
   _id: string;
@@ -54,6 +55,18 @@ const ConnectStripeAccount = () => {
     if (selectedPlan) {
       setPlanData(selectedPlan);
       setIsConnectAccount("stripe"); // move to stripe screen
+    }
+  };
+
+  const stripeConnect = async () => {
+    try {
+      const response = await axios.get("/stripe/stripeConnectSetup");
+
+      if (response.status === 200) {
+        window.location.href = response.data?.data?.url;
+      }
+    } catch (error) {
+      ErrorToast(getErrorMessage(error));
     }
   };
 
@@ -182,7 +195,7 @@ const ConnectStripeAccount = () => {
           </div>
         ) : isConnectAccount === "complete" ? (
           <div
-            onClick={() => navigate("/home")}
+            onClick={() => stripeConnect()}
             className="flex flex-col items-center justify-center lg:p-6 h-[800px] space-y-4 col-span-2"
           >
             <div className="py-2">

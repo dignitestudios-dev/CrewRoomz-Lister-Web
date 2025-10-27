@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { dotBar } from "../../assets/export.ts";
+import { dotBar, homeIcon } from "../../assets/export.ts";
 import { HomeFilterDropDown } from "../../components/global/FilterDropDown.tsx";
 import PropertyCard from "../../components/properties/PropertyCard.tsx";
 import axios from "../../axios.ts";
@@ -52,11 +52,16 @@ const Home = () => {
   const getRooms = async () => {
     try {
       setState("loading");
-      const { data } = await axios.get(
-        `/rooms?roomType=${status}&roomStatus=${selectedStatus?.toLocaleLowerCase()}&page=${
-          pagination?.currentPage ?? 1
-        }`
-      );
+      const queryParams = new URLSearchParams({
+        roomType: status,
+        page: String(pagination?.currentPage ?? 1),
+      });
+
+      if (selectedStatus?.toLowerCase() !== "all") {
+        queryParams.append("roomStatus", selectedStatus.toLowerCase());
+      }
+
+      const { data } = await axios.get(`/rooms?${queryParams.toString()}`);
 
       if (data.success) {
         setRooms(data?.data?.rooms);
@@ -125,19 +130,37 @@ const Home = () => {
               ))}
             </div>
           ) : (
-            <div className="flex justify-center items-center h-40">
-              <p className="text-gray-500 text-lg font-medium">
-                No records found
+            <div className="flex flex-col justify-center items-center h-[350px] space-y-2 ">
+              <div>
+                <img src={homeIcon} alt="No records" className="h-20 w-20" />
+              </div>
+              <p className="text-[#000000] text-lg font-semibold">
+                No Listings Yet!
               </p>
+              <p className="text-[#18181899] w-[420px] text-center text-[14px]">
+                Start by creating your first Crash Pad and connect with flight
+                attendants looking for accommodations
+              </p>
+
+              <button
+                onClick={() => navigate("/add-listing")}
+                type="button"
+                className="w-[320px] rounded-[8px] gradient-color text-white text-[16px] py-3 px-6 font-medium"
+              >
+                Create Listing
+              </button>
             </div>
           )}
         </div>
       )}
-      <Pagination
-        currentPage={pagination?.currentPage ?? 1}
-        totalPages={pagination?.totalPages ?? 1}
-        onPageChange={handlePageChange}
-      />
+
+      {rooms && rooms.length > 0 && (
+        <Pagination
+          currentPage={pagination?.currentPage ?? 1}
+          totalPages={pagination?.totalPages ?? 1}
+          onPageChange={handlePageChange}
+        />
+      )}
     </div>
   );
 };

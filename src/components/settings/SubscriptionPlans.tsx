@@ -167,20 +167,32 @@ const SubscriptionPlans = () => {
                 </div>
                 <div className="w-full">
                   {isSubscription?.productId === pkg.productId ? (
-                    <button
-                      onClick={() => {
-                        setPendingSubscriptionId(
-                          isSubscription?.subscriptionId
-                        );
-                        setIsDelete(true);
-                      }}
-                      type="button"
-                      className="w-full my-6 cursor-pointer rounded-[8px] gradient-color text-white text-[16px] py-3 px-6 font-medium"
-                    >
-                      {state === "loading"
-                        ? "Canceling..."
-                        : "Cancel Subscription"}
-                    </button>
+                    <>
+                      {isSubscription.productId === "lifetime_product" ? (
+                        <button
+                          disabled={true}
+                          type="button"
+                          className="w-full my-6 rounded-[8px] gradient-color text-white text-[16px] py-3 px-6 font-medium"
+                        >
+                          Subscribed
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            setPendingSubscriptionId(
+                              isSubscription?.subscriptionId
+                            );
+                            setIsDelete(true);
+                          }}
+                          type="button"
+                          className="w-full my-6 cursor-pointer rounded-[8px] gradient-color text-white text-[16px] py-3 px-6 font-medium"
+                        >
+                          {state === "loading"
+                            ? "Canceling..."
+                            : "Cancel Subscription"}
+                        </button>
+                      )}
+                    </>
                   ) : (
                     <button
                       onClick={() => handleSubscription(pkg.productId)}

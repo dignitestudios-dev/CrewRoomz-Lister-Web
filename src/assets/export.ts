@@ -32,6 +32,8 @@ import unToggled from "./unToggled.png";
 import toggled from "./toggled.png";
 import bgChecked from "./bgChecked.png";
 import walletConnect from "./walletConnect.png";
+import homeIcon from "./homeIcon.png";
+import checkIcon from "./checkIcon.png";
 
 export {
   signupSideImg,
@@ -68,4 +70,6 @@ export {
   unToggled,
   bgChecked,
   walletConnect,
+  homeIcon,
+  checkIcon,
 };

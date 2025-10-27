@@ -22,6 +22,7 @@ const BedDetails: React.FC<BedDetailsProps> = ({
   state,
   dispatch,
 }) => {
+  console.log("🚀 ~ BedDetails ~ state:", state);
   // --- Handlers ---
   const handleBedTypeChange = (
     index: number,
@@ -34,10 +35,17 @@ const BedDetails: React.FC<BedDetailsProps> = ({
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
+    const rawValue = e.target.value;
+
+    // Allow only positive integers (no letters, symbols, decimals, or negatives)
+    const isValid = /^\d+$/.test(rawValue);
+
+    if (!isValid && rawValue !== "") return; // Ignore invalid input unless it's empty (to allow clearing)
+
     dispatch({
       type: "SET_PRICE",
       index,
-      payload: { name: e.target.name as keyof Prices, value: e.target.value },
+      payload: { name: e.target.name as keyof Prices, value: rawValue },
     });
   };
 
@@ -46,13 +54,19 @@ const BedDetails: React.FC<BedDetailsProps> = ({
     bunk: BunkType,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
+    const rawValue = e.target.value;
+
+    // Allow only positive integers (no letters, symbols, decimals, or negatives)
+    const isValid = /^\d+$/.test(rawValue);
+
+    if (!isValid && rawValue !== "") return;
     dispatch({
       type: "SET_BUNK_PRICE",
       index,
       payload: {
         bunk,
         name: e.target.name as keyof Prices,
-        value: e.target.value,
+        value: rawValue,
       },
     });
   };
@@ -89,12 +103,25 @@ const BedDetails: React.FC<BedDetailsProps> = ({
                     onChange={(e) => handleBedTypeChange(index, e)}
                     className="w-full py-4.5 pl-3 pr-5 text-[14px] text-[#18181899] bg-[#29ABE21F] rounded-md"
                   >
-                    <option value="">Select Bed Type</option>
-                    {bedTypeOptions.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
+                    <option value="" disabled hidden style={{ color: "#999" }}>
+                      Select Bed Type
+                    </option>
+
+                    {type === "multi" || type === "semi"
+                      ? bedTypeOptions.map((type) => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))
+                      : [
+                          { label: "Full", value: "full" },
+                          { label: "Twin", value: "twin" },
+                          { label: "Twin XL", value: "twin-xl" },
+                        ].map((type) => (
+                          <option key={type.value} value={type.value}>
+                            {type.label}
+                          </option>
+                        ))}
                   </select>
                 </div>
 
@@ -126,11 +153,14 @@ const BedDetails: React.FC<BedDetailsProps> = ({
                             Daily
                           </label>
                           <input
+                            maxLength={4}
                             name="dailyPrice"
+                            inputMode="numeric"
+                            pattern="\d*"
                             value={bed.prices.dailyPrice}
                             onChange={(e) => handlePriceChange(index, e)}
-                            className="w-full bg-transparent"
-                            placeholder="e.g. 50"
+                            className="w-full bg-transparent outline-0"
+                            placeholder="00"
                           />
                         </div>
                         <div className="w-full py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
@@ -140,9 +170,12 @@ const BedDetails: React.FC<BedDetailsProps> = ({
                           <input
                             name="monthlyPrice"
                             value={bed.prices.monthlyPrice}
+                            maxLength={4}
+                            inputMode="numeric"
+                            pattern="\d*"
                             onChange={(e) => handlePriceChange(index, e)}
-                            className="w-full bg-transparent"
-                            placeholder="e.g. 1000"
+                            className="w-full bg-transparent outline-0"
+                            placeholder="00"
                           />
                         </div>
                       </div>
@@ -150,49 +183,69 @@ const BedDetails: React.FC<BedDetailsProps> = ({
                   )}
               </div>
 
-              {/* --- Bunk Beds --- */}
-              {!["twin", "twin-xl", "full"].includes(bed.bedType) && (
-                <div className="flex flex-col gap-4">
-                  {["top", "bottom"].map((bunk) => (
-                    <div key={bunk}>
-                      <label className="block mb-1 text-[13px] font-[500] text-start">
-                        {bunk === "top" ? "Top Bed" : "Bottom Bed"}
-                      </label>
-                      <div className="w-full flex items-start gap-2">
-                        <div className="w-[153px] py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
+              {(type === "multi" || type === "semi") && (
+                <>
+                  {/* --- Bunk Beds --- */}
+                  {!["twin", "twin-xl", "full"].includes(bed.bedType) && (
+                    <div className="flex flex-col gap-4">
+                      {["top", "bottom"].map((bunk) => (
+                        <div key={bunk}>
                           <label className="block mb-1 text-[13px] font-[500] text-start">
-                            Daily
+                            {bunk === "top" ? "Top Bed" : "Bottom Bed"}
                           </label>
-                          <input
-                            name="dailyPrice"
-                            value={bed.bunkPrices[bunk as BunkType].dailyPrice}
-                            onChange={(e) =>
-                              handleBunkPriceChange(index, bunk as BunkType, e)
-                            }
-                            className="w-full bg-transparent text-[16px] text-[#181818]"
-                            placeholder="e.g. 50"
-                          />
+                          <div className="w-full flex items-start gap-2">
+                            <div className="w-[153px] py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
+                              <label className="block mb-1 text-[13px] font-[500] text-start">
+                                Daily
+                              </label>
+                              <input
+                                name="dailyPrice"
+                                value={
+                                  bed.bunkPrices[bunk as BunkType].dailyPrice
+                                }
+                                onChange={(e) =>
+                                  handleBunkPriceChange(
+                                    index,
+                                    bunk as BunkType,
+                                    e
+                                  )
+                                }
+                                maxLength={4}
+                                inputMode="numeric"
+                                pattern="\d*"
+                                className="w-full bg-transparent outline-0"
+                                placeholder="00"
+                              />
+                            </div>
+                            <div className="w-[153px] py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
+                              <label className="block mb-1 text-[13px] font-[500] text-start">
+                                Monthly
+                              </label>
+                              <input
+                                name="monthlyPrice"
+                                value={
+                                  bed.bunkPrices[bunk as BunkType].monthlyPrice
+                                }
+                                onChange={(e) =>
+                                  handleBunkPriceChange(
+                                    index,
+                                    bunk as BunkType,
+                                    e
+                                  )
+                                }
+                                maxLength={4}
+                                inputMode="numeric"
+                                pattern="\d*"
+                                className="w-full bg-transparent outline-0"
+                                placeholder="00"
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <div className="w-[153px] py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
-                          <label className="block mb-1 text-[13px] font-[500] text-start">
-                            Monthly
-                          </label>
-                          <input
-                            name="monthlyPrice"
-                            value={
-                              bed.bunkPrices[bunk as BunkType].monthlyPrice
-                            }
-                            onChange={(e) =>
-                              handleBunkPriceChange(index, bunk as BunkType, e)
-                            }
-                            className="w-full bg-transparent text-[16px] text-[#181818]"
-                            placeholder="e.g. 1000"
-                          />
-                        </div>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  )}
+                </>
               )}
             </div>
           ))}

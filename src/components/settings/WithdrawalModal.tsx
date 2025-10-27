@@ -4,6 +4,7 @@ import { useToast } from "../../hooks/useToast";
 import Toast from "../global/Toast";
 import { RxCross2 } from "react-icons/rx";
 import type { BankDetail } from "./Wallet";
+import { getErrorMessage } from "../../init/appValues";
 
 interface Props {
   onClose: () => void;
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const WithdrawalModal: React.FC<Props> = ({ onClose, balance, bankDetail }) => {
+  console.log("🚀 ~ WithdrawalModal ~ bankDetail:", bankDetail);
   const { toast, showToast } = useToast();
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -39,7 +41,7 @@ const WithdrawalModal: React.FC<Props> = ({ onClose, balance, bankDetail }) => {
       }
     } catch (error) {
       console.error("Withdrawal error:", error);
-      showToast("Failed to withdraw funds", "error");
+      showToast(getErrorMessage(error), "error");
     } finally {
       setLoading(false);
     }
@@ -58,22 +60,31 @@ const WithdrawalModal: React.FC<Props> = ({ onClose, balance, bankDetail }) => {
           </button>
           <h2 className="text-[20px] font-semibold mb-4">Withdraw Funds</h2>
         </div>
-        {/* <p className="text-[14px] text-gray-500 mb-4">Attached bank account</p> */}
-        {/* <div className="flex gap-4 justify-center mb-4">
+        <p className="text-[14px] text-gray-500 mb-1">Attached bank account</p>
+        <div className=" wallet-gradient w-[150px] h-[80px] rounded-xl relative">
+          <p className="text-white text-[12px] absolute top-2 left-4">
+            {bankDetail[0]?.bankName}
+          </p>
+          <p className="text-white text-[12px] absolute bottom-2 right-4">
+            ****{bankDetail[0]?.last4}
+          </p>
+        </div>
+        {/* <div className="flex gap-4 justify-center mb-1 relative">
           <img
-            src="/path/to/card1.png"
+            src={stripeCard}
             alt="Card 1"
-            className="h-[80px] rounded-lg shadow-md"
+            className="h-[120px] w-[240px] rounded-lg"
           />
+          
           <img
             src="/path/to/card2.png"
             alt="Card 2"
             className="h-[80px] rounded-lg shadow-md"
           />
         </div> */}
-        <div className="flex justify-between items-center h-[100px]">
-          <p className="text-[14px] text-gray-500 mb-4">Available balance</p>
-          <p className="text-[20px] font-semibold text-[#36C0EF] mb-4">
+        <div className="flex justify-between items-center h-[60px]">
+          <p className="text-[14px] text-gray-500 mb-1">Available balance</p>
+          <p className="text-[20px] font-semibold text-[#36C0EF] mb-1">
             ${balance.toFixed(2)}
           </p>
         </div>

@@ -11,6 +11,7 @@ import type { PackageData } from "../../pages/app/ConnectStripeAccount";
 import { formatProductId, getErrorMessage } from "../../init/appValues";
 import { useToast } from "../../hooks/useToast";
 import Toast from "./Toast";
+import { ErrorToast } from "./Toaster";
 
 interface PaymentFormProps {
   planData: PackageData;
@@ -75,8 +76,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
     });
 
     if (error) {
-      setState("error");
-      showToast(getErrorMessage(error), "error");
+      ErrorToast(getErrorMessage(error));
     } else {
       try {
         const response = await axios.post("/card", {
@@ -102,8 +102,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
           }
         }
       } catch (apiError) {
-        setState("error");
-        showToast(getErrorMessage(apiError), "error");
+        ErrorToast(getErrorMessage(apiError));
       }
     }
   };
@@ -127,8 +126,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         setIsConnectAccount("complete");
       }
     } catch (error) {
-      setState("error");
-      showToast(getErrorMessage(error), "error");
+      ErrorToast(getErrorMessage(error));
     }
   };
 
@@ -141,8 +139,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
         setIsCard(response.data.data);
       }
     } catch (error) {
-      setComponentState("error");
-      showToast(getErrorMessage(error), "error");
+      ErrorToast(getErrorMessage(error));
     }
   };
 

@@ -158,7 +158,7 @@ const BookingHistory = () => {
           </div>
           <div className="grid grid-cols-1 gap-8 py-6 space-y-1">
             <div className="bg-[#FFFFFF] p-4 rounded-3xl space-y-4">
-              <h2 className="text-[20px] font-[500] mb-4">Ongoing Bookings</h2>
+              <h2 className="text-[20px] font-[500] mb-4"> Bookings</h2>
 
               {bookingsHistory && bookingsHistory.length > 0 ? (
                 bookingsHistory.map((booking, index) => (

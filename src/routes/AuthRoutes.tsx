@@ -4,8 +4,14 @@ import LoginOtp from "../pages/auth/LoginOtp";
 import PasswordOtp from "../pages/auth/PasswordOtp";
 import ResetPassword from "../pages/auth/ResetPassword";
 import SignUp from "../pages/auth/SignUp";
+// import Verif from "../pages/auth/Verif";
 
 export const AuthRoute = [
+  // {
+  //   url: "verif",
+  //   page: <Verif />,
+  //   isPublic: true,
+  // },
   {
     url: "login",
     page: <Login />,

@@ -203,7 +203,9 @@ const PropertyDetails = () => {
             Delete
           </button>
           <button
-            onClick={() => navigate("/add-property")}
+            onClick={() =>
+              navigate(`/edit-property/${id}`, { state: { room: roomDetails } })
+            }
             className="w-[97px] gradient-color text-white text-[14px] flex items-center justify-center gap-3 rounded-3xl px-6 py-1 font-medium"
           >
             Edit
@@ -230,19 +232,31 @@ const PropertyDetails = () => {
                   {roomDetails?.address}
                 </p>
               </div>
-              <div className="flex gap-1 items-start cursor-pointer ">
-                <img src={locate} alt="location" className="h-6" />
-                <p className="text-[#006AFF] text-[16px] underline">
-                  Show on google map
-                </p>
-              </div>
+              {roomDetails?.location?.coordinates && (
+                <div
+                  onClick={() => {
+                    const coords = roomDetails.location.coordinates;
+                    if (Array.isArray(coords) && coords.length === 2) {
+                      const [lng, lat] = coords;
+                      const url = `https://www.google.com/maps?q=${lat},${lng}`;
+                      window.open(url, "_blank");
+                    }
+                  }}
+                  className="flex gap-1 items-start cursor-pointer"
+                >
+                  <img src={locate} alt="location" className="h-6" />
+                  <p className="text-[#006AFF] text-[16px] underline">
+                    Show on google map
+                  </p>
+                </div>
+              )}
               {roomDetails && (
                 <p className=" font-[500] text-[16px]">
                   {roomDetails!.sharedBath > 0 &&
-                    roomDetails?.sharedBath + "Shared bath"}
+                    roomDetails?.sharedBath + " Shared bath"}
                   ,{" "}
                   {roomDetails!.privateBath > 0 &&
-                    roomDetails?.sharedBath + "Private bath"}
+                    roomDetails?.sharedBath + " Private bath"}
                 </p>
               )}
               <div className="mt-6">
@@ -259,7 +273,7 @@ const PropertyDetails = () => {
                         className="h-8"
                       />
                       <p className="text-center text-[12px] font-[400]">
-                        {item}
+                        {item.length > 10 ? `${item.slice(0, 7)}...` : item}
                       </p>
                     </div>
                   ))}
@@ -272,7 +286,7 @@ const PropertyDetails = () => {
                 </p>
               </div>
               <div className="mt-6 border-t pt-4 border-[#18181829]">
-                <h2 className="text-[20px] font-[500] mb-2">Rules to live</h2>
+                <h2 className="text-[20px] font-[500] mb-2">Rules to stay</h2>
                 <div
                   onClick={() => openDoc(roomDetails?.rulesDocument)}
                   className="cursor-pointer flex items-center gap-2 bg-white w-[280px] h-[50px] rounded-lg shadow-[#F5F5F5] p-2 mt-0.5"

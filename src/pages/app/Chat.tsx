@@ -7,7 +7,7 @@ import { createSocket } from "../../socket/socket";
 import useAuthStore from "../../store/authStore";
 import { useAppStore } from "../../store/appStore";
 import { useToast } from "../../hooks/useToast";
-import { getDateFormat, getErrorMessage } from "../../init/appValues";
+import { getDateTimeFormat, getErrorMessage } from "../../init/appValues";
 import type { Socket } from "socket.io-client";
 
 // ---------- Interfaces ----------
@@ -57,6 +57,7 @@ const Chat = () => {
   const [senders, setSenders] = useState<ChatRoom[]>([]);
   const [currentRoom, setCurrentRoom] = useState<ChatRoom | null>(null);
   const [receivedMessages, setReceivedMessages] = useState<ChatMessage[]>([]);
+  console.log("🚀 ~ Chat ~ receivedMessages:", receivedMessages);
   const [input, setInput] = useState("");
   const [socket, setSocket] = useState<Socket | null>(null);
   const [state, setState] = useState<LoadState>("idle");
@@ -223,11 +224,9 @@ const Chat = () => {
               ))}
             </div>
           ) : senders.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">
-              No chats yet — start a conversation!
-            </p>
+            <></>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-3 max-h-[480px] overflow-y-auto pr-1">
               {senders.map((room) => (
                 <div
                   key={room.id}
@@ -249,7 +248,7 @@ const Chat = () => {
                       {room.lastMessage?.content}
                     </small>
                     {room.unreadCount > 0 && (
-                      <span className="ml-2 text-xs bg-red-500 text-white px-2 py-1 rounded-full">
+                      <span className="text-xs bg-red-500 text-white px-2 py-1 rounded-full absolute top-2 right-4">
                         {room.unreadCount}
                       </span>
                     )}
@@ -261,104 +260,112 @@ const Chat = () => {
         </div>
 
         {/* ---------- CHAT WINDOW ---------- */}
-        <div className="col-span-2 flex flex-col justify-between border border-[#CACED738] rounded-t-xl">
-          {/* Header */}
-          <div className="flex items-center gap-3  pb-3 p-3 bg-white rounded-t-xl">
-            {currentRoom ? (
-              <>
-                <img
-                  src={
-                    senders.find((u) => u.id === currentRoom.id)?.image || ""
-                  }
-                  alt="User"
-                  className="w-10 h-10 rounded-full object-cover"
-                />
-                <h4 className="text-sm font-semibold">
-                  {senders.find((u) => u.id === currentRoom.id)?.name}
-                </h4>
-              </>
-            ) : (
-              <h4 className="text-sm font-semibold text-gray-400">
-                Select a chat to start messaging
-              </h4>
-            )}
+        {senders.length === 0 ? (
+          <div className="w-full flex justify-center ">
+            <p className="text-sm text-gray-400 text-center py-4">
+              No chats yet — to start a conversation!
+            </p>
           </div>
+        ) : (
+          <div className="col-span-2 flex flex-col justify-between border border-[#CACED738] rounded-t-xl">
+            {/* Header */}
+            <div className="flex items-center gap-3  pb-3 p-3 bg-white rounded-t-xl">
+              {currentRoom ? (
+                <>
+                  <img
+                    src={
+                      senders.find((u) => u.id === currentRoom.id)?.image || ""
+                    }
+                    alt="User"
+                    className="w-10 h-10 rounded-full object-cover"
+                  />
+                  <h4 className="text-sm font-semibold">
+                    {senders.find((u) => u.id === currentRoom.id)?.name}
+                  </h4>
+                </>
+              ) : (
+                <h4 className="text-sm font-semibold text-gray-400">
+                  Select a chat to start messaging
+                </h4>
+              )}
+            </div>
 
-          {/* Messages */}
-          <div className="px-6 py-6 space-y-6 overflow-y-auto h-[500px] bg-transparent text-sm text-gray-800">
-            {state === "loading" ? (
-              <div className="space-y-4">
-                {[1, 2, 3, 4].map((i) => (
-                  <div
-                    key={i}
-                    className={`flex flex-col ${
-                      i % 2 === 0 ? "items-start" : "items-end"
-                    } space-y-1`}
-                  >
+            {/* Messages */}
+            <div className="px-6 py-6 space-y-6 overflow-y-auto h-[500px] bg-transparent text-sm text-gray-800">
+              {state === "loading" ? (
+                <div className="space-y-4">
+                  {[1, 2, 3, 4].map((i) => (
                     <div
-                      className={`${
-                        i % 2 === 0 ? "bg-blue-200" : "bg-gray-200"
-                      } animate-pulse rounded-xl px-4 py-2`}
-                      style={{
-                        width: `${60 + Math.random() * 40}%`,
-                        height: "20px",
-                      }}
-                    ></div>
-                    <div className="h-3 w-10 bg-gray-200 rounded animate-pulse"></div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <>
-                {receivedMessages.map((msg, idx) => (
-                  <div
-                    key={msg._id || msg.id || idx}
-                    className={`flex flex-col ${
-                      msg?.sender?._id === user?._id
-                        ? "items-end"
-                        : "items-start"
-                    }`}
-                  >
+                      key={i}
+                      className={`flex flex-col ${
+                        i % 2 === 0 ? "items-start" : "items-end"
+                      } space-y-1`}
+                    >
+                      <div
+                        className={`${
+                          i % 2 === 0 ? "bg-blue-200" : "bg-gray-200"
+                        } animate-pulse rounded-xl px-4 py-2`}
+                        style={{
+                          width: `${60 + Math.random() * 40}%`,
+                          height: "20px",
+                        }}
+                      ></div>
+                      <div className="h-3 w-10 bg-gray-200 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  {receivedMessages.map((msg, idx) => (
                     <div
-                      className={`flex flex-col px-4 py-2 rounded-xl max-w-xs break-words ${
+                      key={msg._id || msg.id || idx}
+                      className={`flex flex-col ${
                         msg?.sender?._id === user?._id
-                          ? "text-white gradient-color"
-                          : "text-black bg-gray-100"
+                          ? "items-end"
+                          : "items-start"
                       }`}
                     >
-                      {msg.content}
+                      <div
+                        className={`flex flex-col px-4 py-2 rounded-xl max-w-xs break-words ${
+                          msg?.sender?._id === user?._id
+                            ? "text-white gradient-color"
+                            : "text-black bg-gray-100"
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                      <span className="text-xs text-gray-400 mt-1">
+                        {getDateTimeFormat(msg.createdAt)}
+                      </span>
                     </div>
-                    <span className="text-xs text-gray-400 mt-1">
-                      {getDateFormat(msg.createdAt)}
-                    </span>
-                  </div>
-                ))}
-                <div ref={messagesEndRef} />
-              </>
-            )}
-          </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </>
+              )}
+            </div>
 
-          {/* Input */}
-          <div className="flex items-center gap-3 py-4 bg-white px-4 border-t">
-            <input
-              type="text"
-              placeholder="Type a message..."
-              className="flex-1 px-4 py-2 rounded-full border text-sm bg-[#CACED738]"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleSendMessage(input)}
-            />
-            <button
-              className={`text-[#36C0EF] ${
-                !input.trim() && "opacity-50 cursor-not-allowed"
-              }`}
-              onClick={() => handleSendMessage(input)}
-              disabled={!input.trim()}
-            >
-              <IoSend size={24} />
-            </button>
+            {/* Input */}
+            <div className="flex items-center gap-3 py-4 bg-white px-4 border-t">
+              <input
+                type="text"
+                placeholder="Type a message..."
+                className="flex-1 px-4 py-2 rounded-full outline-neutral-50 text-sm bg-[#CACED738]"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSendMessage(input)}
+              />
+              <button
+                className={`text-[#36C0EF] ${
+                  !input.trim() && "opacity-50 cursor-not-allowed"
+                }`}
+                onClick={() => handleSendMessage(input)}
+                disabled={!input.trim()}
+              >
+                <IoSend size={24} />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

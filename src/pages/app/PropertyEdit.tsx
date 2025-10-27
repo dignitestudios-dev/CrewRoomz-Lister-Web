@@ -29,6 +29,7 @@ const PropertyEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
+  console.log("🚀 ~ PropertyEdit ~ location:", location);
   const room = location.state.room;
   const { toast, showToast } = useToast();
   const [componentState, setComponentState] = useState<
@@ -159,7 +160,7 @@ const PropertyEdit = () => {
       formData.append("description", values.description);
       formData.append("sharedBath", values.sharedBath);
       formData.append("privateBath", values.privateBath);
-      formData.append("amenities", JSON.stringify(values.amenities || []));
+      formData.append("addAmenities", (values.amenities || []).join(","));
       formData.append("address", address.address);
       formData.append("city", address.city);
       formData.append("state", address.state);
@@ -297,7 +298,7 @@ const PropertyEdit = () => {
           onChange={handleChange}
         ></textarea>
 
-        <label className="text-[16px] font-[500]">Rules to live</label>
+        <label className="text-[16px] font-[500]">Rules to stay</label>
         <div className="border-[2px] border-dashed bg-[#ffffff] border-[#36C0EF] rounded-xl pt-2 pb-4 px-4 text-center block mb-6">
           <label
             htmlFor="rulesUpload"

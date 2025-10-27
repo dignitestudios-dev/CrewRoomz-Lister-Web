@@ -16,7 +16,7 @@ const DeleteAccount = () => {
   const { clearAuth } = useAuthStore();
   const navigate = useNavigate();
   const [isDelete, setIsDelete] = useState(false);
-  const [otp, setOtp] = useState(["", "", "", "", ""]);
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
   const { toast, showToast } = useToast();
   const [state, setState] = useState<LoadState>("idle");
