@@ -48,7 +48,6 @@ const Verif = () => {
   const navigate = useNavigate();
   const setAuth = useAuthStore((s) => s.setAuth);
   const { user } = useAppStore();
-  console.log("🚀 ~ Verif ~ user:", user);
 
   const { toast, showToast } = useToast();
   const [CompState, setCompState] = useState<LoadState>("idle");
@@ -60,7 +59,6 @@ const Verif = () => {
     validateOnChange: true,
     validateOnBlur: true,
     onSubmit: async (values) => {
-      console.log("🚀 ~ Verif ~ values:", values.facePic);
       setCompState("loading");
       const formData = new FormData();
       formData.append("front", values.idFront);

@@ -26,15 +26,12 @@ const AppLayout = ({ token, identityStatus }: LayoutProps) => {
   }, []);
 
   if (!token) {
-    console.log("29 in not token");
     return <Navigate to="/login" replace />;
   }
   if (token && path.startsWith("/login") && identityStatus !== "approved") {
-    console.log("33 for verif");
     return <Navigate to="/verif" replace />;
   }
   if (token && path.startsWith("/verify-login-otp")) {
-    console.log("37 for connet-account");
     return <Navigate to="/connect-account" replace />;
   }
 
