@@ -220,7 +220,7 @@ const Booking = () => {
                 ))
               ) : (
                 <p className="text-gray-500 text-center py-6">
-                  No ongoing bookings found
+                  No bookings yet. Once a bed is booked, it will appear here.
                 </p>
               )}
             </div>

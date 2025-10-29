@@ -121,7 +121,7 @@ const ProfileEdit = () => {
       {/* Email Field */}
       <div className="w-[384px] pt-8">
         <label className="block text-[13px] font-medium text-gray-800 mb-2">
-          Work Email
+          Email
         </label>
         <input
           type="email"

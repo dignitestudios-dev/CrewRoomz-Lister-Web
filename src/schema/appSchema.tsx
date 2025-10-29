@@ -11,7 +11,7 @@ export const addPropertySchema = Yup.object().shape({
 
   amenities: Yup.array()
     .of(Yup.string())
-    .min(3, "Select at least three amenities")
+    .min(1, "Select at least one amenity")
     .required("Amenities are required"),
 
   sharedBath: Yup.number()

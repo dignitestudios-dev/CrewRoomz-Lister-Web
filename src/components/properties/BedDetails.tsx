@@ -22,7 +22,6 @@ const BedDetails: React.FC<BedDetailsProps> = ({
   state,
   dispatch,
 }) => {
-  console.log("🚀 ~ BedDetails ~ state:", state);
   // --- Handlers ---
   const handleBedTypeChange = (
     index: number,
@@ -259,7 +258,7 @@ const BedDetails: React.FC<BedDetailsProps> = ({
             >
               <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
               <p className="text-[14px] gradient-text font-[500]">
-                Add More Bed
+                Add More Beds
               </p>
             </button>
           )}

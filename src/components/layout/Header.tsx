@@ -10,6 +10,7 @@ import Toast from "../global/Toast.tsx";
 import { useToast } from "../../hooks/useToast.ts";
 import { getDateFormat, getErrorMessage } from "../../init/appValues.ts";
 import ConfirmationModal from "../global/ConfirmationModal.tsx";
+import { useNotificationStore } from "../../store/useNotificationStore.ts";
 
 interface notificationsData {
   _id: string | number; // allow both
@@ -22,6 +23,7 @@ const Header = () => {
   const navigate = useNavigate();
   const { clearAuth } = useAuthStore();
   const { user } = useAppStore();
+  const { unreadCount, markAsRead } = useNotificationStore();
 
   const userPopupRef = useRef<HTMLDivElement | null>(null);
   const notificationRef = useRef<HTMLDivElement | null>(null);
@@ -78,6 +80,7 @@ const Header = () => {
   useEffect(() => {
     if (isNotificationDropdownOpen) {
       fetchNotifications(1);
+      markAsRead("");
     }
   }, [isNotificationDropdownOpen]);
 
@@ -114,16 +117,39 @@ const Header = () => {
         {headerOptions.map((item: HeaderOption, index: number) => (
           <div
             key={index}
-            className="text-start pt-2 py-2 text-[16px] text-nowrap "
+            className="text-start pt-2 py-2 text-[16px] text-nowrap relative"
           >
             {item.path === "notification" ? (
-              <button
-                type="button"
-                onClick={() => setIsNotificationDropdownOpen((prev) => !prev)}
-                className="block px-2 py-1 transition text-black hover:text-[#29ABE2]"
-              >
-                {item.label}
-              </button>
+              <>
+                {unreadCount > 0 && (
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      right: 2,
+                      background: "red",
+                      color: "white",
+                      borderRadius: "50%",
+                      width: "17px",
+                      height: "17px",
+                      fontSize: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {unreadCount > 99 ? "99+" : unreadCount}
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => setIsNotificationDropdownOpen((prev) => !prev)}
+                  className="block px-2 py-1 transition text-black hover:text-[#29ABE2]"
+                >
+                  {item.label}
+                </button>
+              </>
             ) : (
               <NavLink
                 to={item.path}

@@ -34,7 +34,7 @@ if ("serviceWorker" in navigator) {
       return messaging.getToken();
     })
     .then((token) => {
-      console.log("FCM Token:", token);
+      console.log("-->", token);
     })
     .catch((error) => {
       console.error("Error getting FCM token:", error);

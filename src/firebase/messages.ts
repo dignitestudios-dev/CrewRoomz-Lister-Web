@@ -10,6 +10,9 @@ import {
   where,
 } from "firebase/firestore";
 
+import { getToken, onMessage, type MessagePayload } from "firebase/messaging";
+import { messaging } from "./firebase";
+
 type ChatCallback = (chats: Chat[]) => void;
 
 export function getUserChatsWithDetails(
@@ -82,3 +85,30 @@ export async function sendMessage(
     timestamp: serverTimestamp(),
   });
 }
+
+export const onMessageListener = (): Promise<MessagePayload> =>
+  new Promise((resolve) => {
+    const unsubscribe = onMessage(messaging, (payload) => {
+      resolve(payload);
+      unsubscribe(); // Optional: if you want one-time
+    });
+  });
+
+// Request permission and get FCM token
+export const requestNotificationPermission = async (): Promise<
+  string | null
+> => {
+  try {
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      const token = await getToken(messaging, {
+        vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+      });
+      return token;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting FCM token:", error);
+    return null;
+  }
+};

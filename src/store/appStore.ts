@@ -36,6 +36,7 @@ interface AppStore {
   loading: boolean;
   fetchUser: () => Promise<void>;
   updateUser: (data: Partial<User> | FormData) => Promise<void>;
+  updateFcmToken: (fcmToken: string) => Promise<void>;
 }
 
 export const useAppStore = create<AppStore>((set) => ({
@@ -51,6 +52,19 @@ export const useAppStore = create<AppStore>((set) => ({
     } catch (error) {
       console.error("Error fetching user:", error);
       set({ loading: false });
+    }
+  },
+
+  updateFcmToken: async (fcmToken: string) => {
+    set({ loading: true });
+    try {
+      const { data } = await axios.post("/user/updateFCM", { fcmToken });
+      console.log("🚀 ~ data:", data);
+      set({ loading: false });
+    } catch (error) {
+      console.error("Error updating FCM token:", error);
+      set({ loading: false });
+      // Optionally show toast
     }
   },
 

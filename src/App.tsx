@@ -7,13 +7,39 @@ import { onboardRoute } from "./routes/OnboardingRoutes";
 import useAuthStore from "./store/authStore";
 import PublicRoute from "./routes/PublicRoutes";
 import { OnboardingHandler } from "./routes/OnboardingHandler";
+import { useNotificationStore } from "./store/useNotificationStore";
+import { useEffect, useState } from "react";
+import { requestNotificationPermission } from "./firebase/messages";
 
 function App() {
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
+  const [, setFcmToke] = useState<string>();
+
+  const initListener = useNotificationStore((s) => s.initForegroundListener);
+
+  useEffect(() => {
+    // Request permission
+    requestNotificationPermission().then((token) => {
+      if (token) {
+        setFcmToke(token);
+      }
+    });
+
+    // Start foreground listener
+    const cleanup = initListener();
+
+    return cleanup; // Cleanup on unmount
+  }, [initListener]);
+
   return (
     <Routes>
-      <Route path="/" element={<PublicRoute token={token} />}>
+      <Route
+        path="/"
+        element={
+          <PublicRoute token={token} identityStatus={user?.identityStatus} />
+        }
+      >
         {AuthRoute.map((route, idx) => (
           <Route key={idx} path={route.url} element={route.page} />
         ))}
@@ -43,7 +69,12 @@ function App() {
         />
       </Route>
 
-      <Route path="/" element={<AppLayout token={token} />}>
+      <Route
+        path="/"
+        element={
+          <AppLayout token={token} identityStatus={user?.identityStatus} />
+        }
+      >
         {AppRoutes.map((route, idx) => (
           <Route key={idx} path={route.url} element={route.page} />
         ))}

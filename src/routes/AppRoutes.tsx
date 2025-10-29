@@ -10,8 +10,14 @@ import PropertyAdd from "../pages/app/PropertyAdd";
 import PropertyDetails from "../pages/app/PropertyDetails";
 import PropertyEdit from "../pages/app/PropertyEdit";
 import Settings from "../pages/app/Settings";
+import Verif from "../pages/auth/Verif";
 
 export const AppRoutes = [
+  {
+    url: "verif",
+    page: <Verif />,
+    isPublic: true,
+  },
   {
     url: "connect-account",
     page: <ConnectStripeAccount />,

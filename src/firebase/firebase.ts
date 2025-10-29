@@ -2,6 +2,7 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider, OAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
+import { getMessaging } from "firebase/messaging";
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -24,5 +25,7 @@ export const appleProvider = new OAuthProvider("apple.com");
 export const db = getFirestore(app);
 // export const firestore = getFirestore(app);
 // export const storage = getStorage(app);
+
+export const messaging = getMessaging(app);
 
 export default app;

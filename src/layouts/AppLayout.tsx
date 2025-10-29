@@ -2,26 +2,39 @@ import Header from "../components/layout/Header";
 import { Navigate, Outlet, useLocation } from "react-router";
 import { useAppStore } from "../store/appStore";
 import { useEffect } from "react";
+import { requestNotificationPermission } from "../firebase/messages";
 
 interface LayoutProps {
   token: string | null;
+  identityStatus: string | unknown;
 }
 
-const AppLayout = ({ token }: LayoutProps) => {
-  const { fetchUser } = useAppStore();
+const AppLayout = ({ token, identityStatus }: LayoutProps) => {
+  const { fetchUser, updateFcmToken } = useAppStore();
   const location = useLocation();
   const path = location.pathname;
 
   useEffect(() => {
     if (token) {
       fetchUser();
+      requestNotificationPermission().then((fcmToken) => {
+        if (fcmToken) {
+          updateFcmToken(fcmToken);
+        }
+      });
     }
   }, []);
 
   if (!token) {
+    console.log("29 in not token");
     return <Navigate to="/login" replace />;
   }
+  if (token && path.startsWith("/login") && identityStatus !== "approved") {
+    console.log("33 for verif");
+    return <Navigate to="/verif" replace />;
+  }
   if (token && path.startsWith("/verify-login-otp")) {
+    console.log("37 for connet-account");
     return <Navigate to="/connect-account" replace />;
   }
 

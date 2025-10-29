@@ -140,7 +140,6 @@ const PropertyDetails = () => {
         getRooms();
       }
     } catch (error) {
-      console.log("🚀 ~ handleDeactivate ~ error:", error);
       setButtonState("error");
       showToast(getErrorMessage(error), "error");
     }
@@ -253,10 +252,10 @@ const PropertyDetails = () => {
               {roomDetails && (
                 <p className=" font-[500] text-[16px]">
                   {roomDetails!.sharedBath > 0 &&
-                    roomDetails?.sharedBath + " Shared bath"}
+                    roomDetails?.sharedBath + " Shared Bath"}
                   ,{" "}
                   {roomDetails!.privateBath > 0 &&
-                    roomDetails?.sharedBath + " Private bath"}
+                    roomDetails?.sharedBath + " Private Bath"}
                 </p>
               )}
               <div className="mt-6">
@@ -265,7 +264,7 @@ const PropertyDetails = () => {
                   {roomDetails?.amenities?.map((item, index) => (
                     <div
                       key={index}
-                      className="bg-[#FFFFFF] w-[91px] h-[74px] rounded-lg shadow-[#F5F5F5] flex flex-col items-center justify-center p-4 gap-2 mt-0.5"
+                      className="bg-[#FFFFFF] w-[92px] h-[80px] rounded-lg shadow-[#F5F5F5] flex flex-col items-center justify-center p-4 gap-2 mt-0.5"
                     >
                       <img
                         src={amenityIcons[item] || setting} // fallback icon
@@ -378,10 +377,22 @@ const PropertyDetails = () => {
           )}
           {isDeActivate && (
             <ConfirmationModal
-              title="Deactivate Listing"
-              content="Are you sure you want to deactivate this listing?"
+              title={
+                roomDetails?.roomStatus === "inactive"
+                  ? "Activate Listing"
+                  : "Deactivate Listing"
+              }
+              content={
+                roomDetails?.roomStatus === "inactive"
+                  ? "Are you sure you want to activate this listing?"
+                  : "Are you sure you want to deactivate this listing?"
+              }
               skipBtnContent="No"
-              confirmBtnContent="Deactivate"
+              confirmBtnContent={
+                roomDetails?.roomStatus === "inactive"
+                  ? "Activate"
+                  : "Deactivate"
+              }
               onClose={() => setIsDeActivate(false)}
               onSubmit={handleDeactivate}
               loading={buttonState}

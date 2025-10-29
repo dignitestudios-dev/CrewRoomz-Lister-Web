@@ -100,7 +100,7 @@ const BookingHistory = () => {
           selectedStatus === "Monthly" ? true : false
         }&page=${pagination?.currentPage ?? 1}`
       );
-      console.log("🚀 ~ getBookingsHistory ~ data:", data);
+
       if (data.success) {
         setState("ready");
         setBookingsHistory(data?.data?.bookings);
@@ -197,7 +197,7 @@ const BookingHistory = () => {
 
                       <div className="flex justify-end mt-6">
                         <p className="text-black font-[500] text-[15px]">
-                          ${booking?.totalPrice}
+                          ${booking?.totalPrice}{" "}
                           <span className="text-[#18181899] font-[400]">
                             Per Day
                           </span>
@@ -246,7 +246,7 @@ const BookingHistory = () => {
                 ))
               ) : (
                 <p className="text-gray-500 text-center py-6">
-                  No ongoing bookings found
+                  No booking found
                 </p>
               )}
             </div>

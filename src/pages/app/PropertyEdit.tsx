@@ -17,19 +17,23 @@ import EditBedDetails from "../../components/properties/EditBedDetails";
 import { prepareBedDataForSubmit } from "../../init/roomValues";
 
 interface InitialValues {
-  description: string;
   amenities: string[];
+  description: string;
   sharedBath: string;
   privateBath: string;
   images: File[]; // or string[] if they’re URLs
   rulesFiles: File[]; // same note here
 }
 
+type MediaPreview = {
+  src: string;
+  type: "image" | "video" | "audio" | "other";
+};
+
 const PropertyEdit = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const location = useLocation();
-  console.log("🚀 ~ PropertyEdit ~ location:", location);
   const room = location.state.room;
   const { toast, showToast } = useToast();
   const [componentState, setComponentState] = useState<
@@ -41,7 +45,9 @@ const PropertyEdit = () => {
 
   const [bedData, setBedData] = useState<Bed[]>([]);
   const [deletedBedIds, setDeletedBedIds] = useState<string[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<MediaPreview[]>([]);
+
+  const [removedImages, setRemovedImages] = useState<string[]>([]);
 
   // For previews and file tracking
   const [rulesPreviews, setRulesPreviews] = useState<string[]>([]);
@@ -49,12 +55,14 @@ const PropertyEdit = () => {
 
   const [initialValues, setInitialValues] = useState<InitialValues>({
     description: "",
-    amenities: [],
     sharedBath: "",
     privateBath: "",
     images: [],
     rulesFiles: [],
+    amenities: [],
   });
+
+  const [initialAmenities, setInitialAmenities] = useState<string[]>([]);
 
   // Handle file upload
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -62,19 +70,30 @@ const PropertyEdit = () => {
     if (!files) return;
 
     const selectedFiles = Array.from(files);
-    const previewURLs = selectedFiles.map((file) => URL.createObjectURL(file));
+    const previews: MediaPreview[] = selectedFiles.map((file) => {
+      const url = URL.createObjectURL(file);
+      let type: MediaPreview["type"];
 
-    setImagePreviews((prev) => [...prev, ...previewURLs]);
+      if (file.type.startsWith("video")) type = "video";
+      else if (file.type.startsWith("image")) type = "image";
+      else if (file.type.startsWith("audio")) type = "audio";
+      else type = "other";
+
+      return { src: url, type };
+    });
+
+    setImagePreviews((prev) => [...prev, ...previews]);
+    setFieldValue("images", [...(values.images || []), ...selectedFiles]);
   };
 
   // Handle removing an image
-  const handleRemoveImage = (index: number) => {
+  const handleRemoveImage = (index: number, removed: string) => {
     // const removed = imagePreviews[index];
 
     // If it’s an existing image (URL from backend), track it for deletion
-    // if (removed.startsWith("http")) {
-    //   setRemovedImages((prev) => [...prev, removed]);
-    // }
+    if (removed.startsWith("http")) {
+      setRemovedImages((prev) => [...prev, removed]);
+    }
 
     // Remove from both preview and new files if needed
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
@@ -126,12 +145,26 @@ const PropertyEdit = () => {
     setInitialValues((prev) => ({
       ...prev,
       description: room.description || "",
-      amenities: room.amenities || [],
       sharedBath: room.sharedBath || "",
       privateBath: room.privateBath || "",
+      amenities: room.amenities || [],
     }));
 
-    setImagePreviews(room.media || []);
+    if (room?.amenities) {
+      setInitialAmenities(room.amenities);
+    }
+
+    const backendPreviews: MediaPreview[] = room.media.map((url: string) => {
+      let type: MediaPreview["type"];
+      if (url.endsWith(".mp4")) type = "video";
+      else if (url.endsWith(".mp3")) type = "audio";
+      else type = "image"; // assume image if not video/audio
+
+      return { src: url, type };
+    });
+
+    setImagePreviews(backendPreviews);
+
     if (room.rulesDocument) setRulesPreviews([room.rulesDocument]);
 
     setAddress({
@@ -155,22 +188,42 @@ const PropertyEdit = () => {
         return;
       }
 
+      const addedAmenities = (values.amenities || []).filter(
+        (amenity) => !initialAmenities.includes(amenity)
+      );
+
+      // Get removed amenities (in initial but not in current)
+      const removedAmenities = initialAmenities.filter(
+        (amenity) => !(values.amenities || []).includes(amenity)
+      );
+
       const formData = new FormData();
       prepareBedDataForSubmit(bedData, formData);
       formData.append("description", values.description);
       formData.append("sharedBath", values.sharedBath);
       formData.append("privateBath", values.privateBath);
-      formData.append("addAmenities", (values.amenities || []).join(","));
+      // formData.append("addAmenities", (values.amenities || []).join(","));
       formData.append("address", address.address);
       formData.append("city", address.city);
       formData.append("state", address.state);
       formData.append("location", JSON.stringify(address.location));
+
+      if (addedAmenities.length > 0) {
+        formData.append("addAmenities", addedAmenities.join(","));
+      }
+
+      if (removedAmenities.length > 0) {
+        formData.append("removeAmenities", removedAmenities.join(","));
+      }
 
       if (values.images && values.images.length > 0) {
         values.images.forEach((file: File) => formData.append("media", file));
       }
       if (values.rulesFiles && values.rulesFiles.length > 0) {
         formData.append("rulesDocument", values.rulesFiles[0]);
+      }
+      if (removedImages && removedImages.length > 0) {
+        formData.append("removeMedia", removedImages.join(","));
       }
 
       if (deletedBedIds && deletedBedIds.length > 0) {
@@ -192,17 +245,17 @@ const PropertyEdit = () => {
   });
 
   const toggleAmenity = (option: string) => {
-    const arr = values.amenities || [];
-    if (arr.includes(option)) {
-      setFieldValue(
-        "amenities",
-        arr.filter((a) => a !== option)
-      );
+    const currentAmenities = values.amenities || [];
+
+    if (currentAmenities.includes(option)) {
+      // Removing an amenity
+      const updatedAmenities = currentAmenities.filter((a) => a !== option);
+      setFieldValue("amenities", updatedAmenities);
     } else {
-      setFieldValue("amenities", [...arr, option]);
+      // Adding an amenity
+      setFieldValue("amenities", [...currentAmenities, option]);
     }
   };
-
   const onLocationSelect = (data: EditAddress) => {
     setAddress(data);
   };
@@ -263,30 +316,60 @@ const PropertyEdit = () => {
       </div>
     )} */}
           </div>
-
-          {imagePreviews.length > 0 && (
-            <div className="mt-4 flex gap-2 overflow-x-auto">
-              {imagePreviews.map((src, i) =>
-                src.endsWith(".mp4") ? (
-                  <video key={i} src={src} className="h-20 rounded-md" />
-                ) : (
+          <div className="mt-4 flex flex-wrap gap-4">
+            {imagePreviews.map((preview, i) => {
+              if (preview.type === "video") {
+                return (
                   <div className="relative" key={i}>
-                    <img
-                      src={src}
-                      className="h-20 w-20 rounded-md object-cover"
+                    <video
+                      key={i}
+                      src={preview.src}
+                      className="h-20 w-40 rounded-md"
+                      controls
                     />
                     <button
                       type="button"
-                      onClick={() => handleRemoveImage(i)}
+                      onClick={() => handleRemoveImage(i, preview.src)}
                       className="cursor-pointer absolute top-0 right-0"
                     >
                       <RxCross2 className="text-red-500 text-2xl bg-red-50 rounded-tr-xl" />
                     </button>
                   </div>
-                )
-              )}
-            </div>
-          )}
+                );
+              }
+
+              if (preview.type === "image") {
+                return (
+                  <div className="relative" key={i}>
+                    <img
+                      src={preview.src}
+                      className="h-20 w-20 rounded-md object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(i, preview.src)}
+                      className="cursor-pointer absolute top-0 right-0"
+                    >
+                      <RxCross2 className="text-red-500 text-2xl bg-red-50 rounded-tr-xl" />
+                    </button>
+                  </div>
+                );
+              }
+
+              if (preview.type === "audio") {
+                return (
+                  <div key={i} className="rounded-md p-2 bg-gray-100">
+                    <audio controls className="w-full">
+                      <source src={preview.src} type="audio/mpeg" />
+                      Your browser does not support the audio element.
+                    </audio>
+                  </div>
+                );
+              }
+
+              return null;
+            })}
+          </div>
         </div>
 
         <label className="text-[16px] font-[500]">Description</label>
@@ -328,10 +411,14 @@ const PropertyEdit = () => {
           <div className="gap-2 overflow-x-auto">
             {rulesPreviews.map((_, i) => (
               <div key={i} className="bg-white rounded-lg py-4 relative my-1">
-                <img
-                  src={pdfIcon}
-                  className="h-6 px-4 absolute rounded-md object-cover"
-                />
+                <div>
+                  <img
+                    key={i}
+                    src={pdfIcon}
+                    className="h-6 px-4 absolute  rounded-md object-cover"
+                  />
+                  <p className="pl-12">Rules_Document_{i + 1}.pdf</p>
+                </div>
                 <button
                   type="button"
                   onClick={() => handleRemoveRules(i)}
@@ -362,10 +449,12 @@ const PropertyEdit = () => {
               Shared Bath
             </label>
             <input
+              maxLength={2}
               name="sharedBath"
               value={values.sharedBath}
               onChange={handleChange}
               className="bg-[#29ABE21F] w-[311px] h-[54px] rounded-md px-4"
+              placeholder="00"
             />
             {/* {touched.sharedBath && errors.sharedBath && (
               <div className="text-red-500 text-sm mt-1">
@@ -378,10 +467,12 @@ const PropertyEdit = () => {
               Private Bath
             </label>
             <input
+              maxLength={2}
               name="privateBath"
               value={values.privateBath}
               onChange={handleChange}
               className="bg-[#29ABE21F] w-[311px] h-[54px] rounded-md px-4"
+              placeholder="00"
             />
             {/* {touched.privateBath && errors.privateBath && (
               <div className="text-red-500 text-sm mt-1">

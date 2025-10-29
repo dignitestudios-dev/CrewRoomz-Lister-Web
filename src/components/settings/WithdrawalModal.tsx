@@ -13,7 +13,6 @@ interface Props {
 }
 
 const WithdrawalModal: React.FC<Props> = ({ onClose, balance, bankDetail }) => {
-  console.log("🚀 ~ WithdrawalModal ~ bankDetail:", bankDetail);
   const { toast, showToast } = useToast();
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -61,13 +60,15 @@ const WithdrawalModal: React.FC<Props> = ({ onClose, balance, bankDetail }) => {
           <h2 className="text-[20px] font-semibold mb-4">Withdraw Funds</h2>
         </div>
         <p className="text-[14px] text-gray-500 mb-1">Attached bank account</p>
-        <div className=" wallet-gradient w-[150px] h-[80px] rounded-xl relative">
-          <p className="text-white text-[12px] absolute top-2 left-4">
-            {bankDetail[0]?.bankName}
-          </p>
-          <p className="text-white text-[12px] absolute bottom-2 right-4">
-            ****{bankDetail[0]?.last4}
-          </p>
+        <div className="flex justify-center items-center">
+          <div className=" wallet-gradient w-[180px] h-[100px] rounded-xl relative">
+            <p className="text-white text-[12px] absolute top-2 left-4">
+              {bankDetail[0]?.bankName}
+            </p>
+            <p className="text-white text-[12px] absolute bottom-2 right-4">
+              ****{bankDetail[0]?.last4}
+            </p>
+          </div>
         </div>
         {/* <div className="flex gap-4 justify-center mb-1 relative">
           <img

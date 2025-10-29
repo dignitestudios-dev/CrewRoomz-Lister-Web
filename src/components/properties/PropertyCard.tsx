@@ -44,6 +44,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const cardRef = useRef<HTMLDivElement | null>(null);
   const navigate = useNavigate();
   const [isDelete, setIsDelete] = useState(false);
+  const [isDeactivate, setISDeactivate] = useState(false);
+
   const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   const { toast, showToast } = useToast();
@@ -52,6 +54,8 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
   const handleOptionSelect = (action: string) => {
     if (action === "delete") {
       setIsDelete(true);
+    } else if (action === "deactivate") {
+      setISDeactivate(true);
     }
     setIsOptionDropdownOpen(false);
     // You can later expand: call API, open modal, etc.
@@ -82,6 +86,21 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
     }
   };
 
+  const handleDeactivate = async () => {
+    try {
+      setComponentState("loading");
+      const response = await axios.put(`/rooms/toggleRoomStatus/${room._id}`);
+      if (response.status === 200) {
+        setComponentState("ready");
+        setISDeactivate(false);
+        setUpdate((prev) => !prev);
+      }
+    } catch (error) {
+      setComponentState("error");
+      showToast(getErrorMessage(error), "error");
+    }
+  };
+
   return (
     <div
       ref={cardRef}
@@ -92,11 +111,22 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
       )}
       {/* room Image */}
       <div className="relative">
-        <img
-          src={room?.media[0]}
-          alt="room"
-          className="w-full h-[13em] object-cover rounded-xl"
-        />
+        {room.media[0].endsWith(".mp4") ? (
+          <video
+            src={room.media[0]}
+            className="w-full h-[13em] object-cover rounded-xl"
+            autoPlay
+            loop
+            muted
+          />
+        ) : (
+          <img
+            src={room?.media[0]}
+            alt="room"
+            className="w-full h-[13em] object-cover rounded-xl"
+          />
+        )}
+
         <div className="absolute top-3 left-2 px-2 py-1 text-white text-[12px] rounded-full bg-green-500 capitalize">
           {room.roomStatus}
         </div>
@@ -127,7 +157,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
               onClick={() => handleOptionSelect("deactivate")}
               className="block w-full text-left px-4 py-2 hover:bg-gray-100 hover:rounded-b-lg"
             >
-              Deactivate
+              {room.roomStatus === "active" ? "Deactivate" : "Activate"}
             </button>
           </div>
         )}
@@ -166,6 +196,27 @@ const PropertyCard: React.FC<PropertyCardProps> = ({
           confirmBtnContent="Delete"
           onClose={() => setIsDelete(false)}
           onSubmit={handleDelete}
+          loading={componentState}
+        />
+      )}
+      {isDeactivate && (
+        <ConfirmationModal
+          title={
+            room.roomStatus === "active"
+              ? "Deactivate Listing"
+              : "Activate Listing"
+          }
+          content={
+            room.roomStatus === "active"
+              ? "Are you sure you want to deactivate this listing?"
+              : "Are you sure you want to activate this listing?"
+          }
+          skipBtnContent="No"
+          confirmBtnContent={
+            room.roomStatus === "active" ? "Deactivate" : "Activate"
+          }
+          onClose={() => setISDeactivate(false)}
+          onSubmit={handleDeactivate}
           loading={componentState}
         />
       )}

@@ -319,10 +319,14 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
+    const rawValue = e.target.value;
+    const isValid = /^\d+$/.test(rawValue);
+
+    if (!isValid && rawValue !== "") return;
     dispatch({
       type: "SET_PRICE",
       index,
-      payload: { name: e.target.name as keyof Prices, value: e.target.value },
+      payload: { name: e.target.name as keyof Prices, value: rawValue },
     });
   };
 
@@ -331,13 +335,18 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
     bunk: BunkType,
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
+    const rawValue = e.target.value;
+    const isValid = /^\d+$/.test(rawValue);
+
+    if (!isValid && rawValue !== "") return;
+
     dispatch({
       type: "SET_BUNK_PRICE",
       index,
       payload: {
         bunk,
         name: e.target.name as keyof Prices,
-        value: e.target.value,
+        value: rawValue,
       },
     });
   };
@@ -360,9 +369,9 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
   // ============================================
   return (
     <div className="w-full">
-      <label className="text-[16px] font-[500] border-t-2 border-t-[#E3E3E3] pt-4">
+      {/* <label className="text-[16px] font-[500] border-t-2 border-t-[#E3E3E3] pt-4">
         Bed Details
-      </label>
+      </label> */}
 
       <div className="bg-[#ffffff] rounded-lg pt-2 pb-4 px-4 text-center flex flex-col items-start space-y-2">
         <p className="text-[#18181899] text-[14px] font-[400]">
@@ -432,12 +441,14 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
                             Daily
                           </label>
                           <input
-                            type="number"
                             name="dailyPrice"
+                            inputMode="numeric"
+                            pattern="\d*"
                             value={bed.prices.dailyPrice}
                             onChange={(e) => handlePriceChange(index, e)}
-                            className="w-full bg-transparent"
-                            placeholder="e.g. 50"
+                            className="w-full bg-transparent outline-0"
+                            placeholder="00"
+                            maxLength={4}
                           />
                         </div>
                         <div className="w-full py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
@@ -445,12 +456,14 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
                             Monthly
                           </label>
                           <input
-                            type="number"
                             name="monthlyPrice"
+                            inputMode="numeric"
+                            pattern="\d*"
                             value={bed.prices.monthlyPrice}
                             onChange={(e) => handlePriceChange(index, e)}
-                            className="w-full bg-transparent"
-                            placeholder="e.g. 1000"
+                            className="w-full bg-transparent outline-0"
+                            placeholder="00"
+                            maxLength={4}
                           />
                         </div>
                       </div>
@@ -473,7 +486,6 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
                               Daily
                             </label>
                             <input
-                              type="number"
                               name="dailyPrice"
                               value={
                                 bed.bunkPrices[bunk as BunkType].dailyPrice
@@ -485,8 +497,11 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
                                   e
                                 )
                               }
-                              className="w-full bg-transparent text-[16px] text-[#181818]"
-                              placeholder="e.g. 50"
+                              maxLength={4}
+                              inputMode="numeric"
+                              pattern="\d*"
+                              className="w-full bg-transparent outline-0"
+                              placeholder="00"
                             />
                           </div>
                           <div className="w-[153px] py-1 pl-3 pr-5 bg-[#29ABE21F] rounded-md">
@@ -494,7 +509,6 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
                               Monthly
                             </label>
                             <input
-                              type="number"
                               name="monthlyPrice"
                               value={
                                 bed.bunkPrices[bunk as BunkType].monthlyPrice
@@ -506,8 +520,11 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
                                   e
                                 )
                               }
-                              className="w-full bg-transparent text-[16px] text-[#181818]"
-                              placeholder="e.g. 1000"
+                              maxLength={4}
+                              inputMode="numeric"
+                              pattern="\d*"
+                              className="w-full bg-transparent outline-0"
+                              placeholder="00"
                             />
                           </div>
                         </div>
@@ -532,7 +549,7 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
             >
               <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
               <p className="text-[14px] gradient-text font-[500]">
-                Add More Bed
+                Add More Beds
               </p>
             </button>
           )}

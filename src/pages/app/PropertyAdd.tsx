@@ -41,6 +41,11 @@ interface BedDetail {
   monthlyPrice: number;
 }
 
+type MediaPreview = {
+  src: string;
+  type: "image" | "video" | "audio" | "other";
+};
+
 const PropertyAdd = () => {
   const navigate = useNavigate();
 
@@ -52,7 +57,7 @@ const PropertyAdd = () => {
   const { toast, showToast } = useToast();
   const [componentState, setComponentState] = useState<LoadState>("idle");
 
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<MediaPreview[]>([]);
   const [rulesPreviews, setRulesPreviews] = useState<string[]>([]);
 
   const [address, setAddress] = useState<Address | null>(null);
@@ -66,20 +71,24 @@ const PropertyAdd = () => {
   const [isCreated, setIsCreated] = useState(false);
 
   const handleImagesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newFiles = e.target.files ? Array.from(e.target.files) : [];
+    const files = e.target.files;
+    if (!files) return;
 
-    // Get current files and previews
-    const currentFiles: File[] = values.images || [];
-    const currentPreviews: string[] = imagePreviews;
+    const selectedFiles = Array.from(files);
+    const previews: MediaPreview[] = selectedFiles.map((file) => {
+      const url = URL.createObjectURL(file);
+      let type: MediaPreview["type"];
 
-    // Combine and limit to 5
-    const combinedFiles = [...currentFiles, ...newFiles].slice(0, 5);
-    const newPreviews = newFiles.map((f) => URL.createObjectURL(f));
-    const combinedPreviews = [...currentPreviews, ...newPreviews].slice(0, 5);
+      if (file.type.startsWith("video")) type = "video";
+      else if (file.type.startsWith("image")) type = "image";
+      else if (file.type.startsWith("audio")) type = "audio";
+      else type = "other";
 
-    // Update Formik and local preview state
-    setFieldValue("images", combinedFiles);
-    setImagePreviews(combinedPreviews);
+      return { src: url, type };
+    });
+
+    setImagePreviews((prev) => [...prev, ...previews]);
+    setFieldValue("images", [...(values.images || []), ...selectedFiles]);
   };
 
   const handleRulesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -120,9 +129,9 @@ const PropertyAdd = () => {
 
   const handleRemoveImage = (index: number) => {
     const preview = imagePreviews[index];
-    if (preview && preview.startsWith("blob:")) {
+    if (preview && preview.src.startsWith("blob:")) {
       try {
-        URL.revokeObjectURL(preview);
+        URL.revokeObjectURL(preview.src);
       } catch {
         console.log("Error ~ 57 ~");
       }
@@ -133,7 +142,7 @@ const PropertyAdd = () => {
 
     const currentFiles: File[] = values.images || [];
     const newFiles = currentFiles.filter((_, i) => i !== index);
-    setFieldValue("image", newFiles);
+    setFieldValue("images", newFiles); // 🔁 also fix typo here: "image" → "images"
   };
 
   const toggleAmenity = (option: string) => {
@@ -337,7 +346,7 @@ const PropertyAdd = () => {
               <input
                 type="file"
                 id="fileUpload"
-                accept="image/*"
+                accept="image/*,video/*"
                 multiple
                 onChange={handleImagesChange}
                 className="hidden"
@@ -354,26 +363,58 @@ const PropertyAdd = () => {
           </div>
           {imagePreviews.length > 0 && (
             <div className="mt-4 flex gap-2 overflow-x-auto">
-              {imagePreviews.map((src, i) =>
-                src.endsWith(".mp4") ? (
-                  <video key={i} src={src} className="h-20 rounded-md" />
-                ) : (
-                  <div className="relative ">
-                    <img
-                      key={i}
-                      src={src}
-                      className="h-20 rounded-md object-cover "
-                    />
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveImage(i)}
-                      className="cursor-pointer"
-                    >
-                      <RxCross2 className="text-red-500 absolute text-2xl bg-red-50 top-0 right-0 rounded-tr-xl" />
-                    </button>
-                  </div>
-                )
-              )}
+              {imagePreviews.map((preview, i) => {
+                if (preview.type === "video") {
+                  return (
+                    <div className="relative" key={i}>
+                      <video
+                        key={i}
+                        src={preview.src}
+                        className="h-20 w-40 rounded-md"
+                        controls
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(i)}
+                        className="cursor-pointer absolute top-0 right-0"
+                      >
+                        <RxCross2 className="text-red-500 text-2xl bg-red-50 rounded-tr-xl" />
+                      </button>
+                    </div>
+                  );
+                }
+
+                if (preview.type === "image") {
+                  return (
+                    <div className="relative" key={i}>
+                      <img
+                        src={preview.src}
+                        className="h-20 w-20 rounded-md object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveImage(i)}
+                        className="cursor-pointer absolute top-0 right-0"
+                      >
+                        <RxCross2 className="text-red-500 text-2xl bg-red-50 rounded-tr-xl" />
+                      </button>
+                    </div>
+                  );
+                }
+
+                if (preview.type === "audio") {
+                  return (
+                    <div key={i} className="rounded-md p-2 bg-gray-100">
+                      <audio controls className="w-full">
+                        <source src={preview.src} type="audio/mpeg" />
+                        Your browser does not support the audio element.
+                      </audio>
+                    </div>
+                  );
+                }
+
+                return null;
+              })}
             </div>
           )}
         </div>
@@ -461,6 +502,7 @@ const PropertyAdd = () => {
               Shared Bath
             </label>
             <input
+              maxLength={2}
               placeholder="00"
               name="sharedBath"
               value={values.sharedBath}
@@ -478,6 +520,7 @@ const PropertyAdd = () => {
               Private Bath
             </label>
             <input
+              maxLength={2}
               placeholder="00"
               name="privateBath"
               value={values.privateBath}
