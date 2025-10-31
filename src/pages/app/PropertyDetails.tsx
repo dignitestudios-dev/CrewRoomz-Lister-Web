@@ -33,6 +33,7 @@ interface PropertyDetail {
 }
 
 interface BedDetail {
+  roomName: string;
   type: string;
   price: number;
   monthlyPrice: number;

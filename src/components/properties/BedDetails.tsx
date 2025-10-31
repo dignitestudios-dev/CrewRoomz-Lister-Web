@@ -30,6 +30,17 @@ const BedDetails: React.FC<BedDetailsProps> = ({
     dispatch({ type: "SET_BED_TYPE", index, payload: e.target.value });
   };
 
+  const handleNameChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    dispatch({
+      type: "SET_NAME",
+      index,
+      payload: e.target.value,
+    });
+  };
+
   const handlePriceChange = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -92,6 +103,19 @@ const BedDetails: React.FC<BedDetailsProps> = ({
                     : ""
                 }`}
               >
+                <div className="w-[310px] flex flex-col items-start">
+                  <label className="block mb-1 text-[13px] font-[500]">
+                    Room Name
+                  </label>
+                  <input
+                    name="roomName"
+                    value={bed.roomName}
+                    onChange={(e) => handleNameChange(index, e)}
+                    className="w-full bg-[#29ABE21F] outline-0 py-3.5 rounded-md px-2"
+                    placeholder="Room Name"
+                  />
+                </div>
+
                 {/* --- Bed Type --- */}
                 <div className="w-[310px] flex flex-col items-start">
                   <label className="block mb-1 text-[13px] font-[500]">

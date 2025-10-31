@@ -3,6 +3,7 @@ interface BedDetail {
   type: string;
   price: number; // daily price
   monthlyPrice: number;
+  roomName: string;
 }
 
 interface Props {
@@ -17,6 +18,10 @@ const BedPricing: React.FC<Props> = ({ bedDetails }) => {
       {bedDetails && bedDetails.length > 0 ? (
         bedDetails.map((bed) => (
           <div key={bed._id} className="mb-4">
+            <p className="font-semibold text-[16px]">
+              {" "}
+              Room Name: <span className="font-[500]">{bed.roomName}</span>
+            </p>
             <p className="text-[16px] font-[500] capitalize">
               {bed.type.replace("-", " ")}
             </p>

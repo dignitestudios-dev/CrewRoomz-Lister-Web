@@ -12,6 +12,7 @@ interface BedTypeOption {
 }
 
 interface BackendBedDetail {
+  roomName: string;
   type: string;
   price: number;
   monthlyPrice: number;
@@ -26,6 +27,7 @@ interface Prices {
 type BunkType = "top" | "bottom";
 
 interface Bed {
+  roomName: string;
   bedType: string;
   _id?: string;
   isFromBackend: boolean;
@@ -53,6 +55,7 @@ type EditBedAction =
       index: number;
       payload: { name: keyof Prices; value: string };
     }
+  | { type: "SET_NAME"; index: number; payload: string }
   | {
       type: "SET_BUNK_PRICE";
       index: number;
@@ -84,6 +87,7 @@ const transformBackendToState = (backendBeds: BackendBedDetail[]): Bed[] => {
       if (!bedMap.has(baseType)) {
         bedMap.set(baseType, {
           bedType: baseType,
+          roomName: bed.roomName,
           isFromBackend: true,
           prices: { dailyPrice: "", monthlyPrice: "" },
           bunkPrices: {
@@ -103,6 +107,7 @@ const transformBackendToState = (backendBeds: BackendBedDetail[]): Bed[] => {
     } else {
       bedMap.set(bed._id, {
         bedType: bed.type,
+        roomName: bed.roomName,
         _id: bed._id,
         isFromBackend: true,
         prices: {
@@ -189,6 +194,14 @@ const editBedReducer = (
         ),
       };
 
+    case "SET_NAME":
+      return {
+        ...state,
+        beds: state.beds.map((bed, i) =>
+          i === action.index ? { ...bed, roomName: action.payload } : bed
+        ),
+      };
+
     case "SET_PRICE":
       return {
         ...state,
@@ -231,6 +244,7 @@ const editBedReducer = (
           ...state.beds,
           {
             bedType: "",
+            roomName: "",
             isFromBackend: false,
             prices: { dailyPrice: "", monthlyPrice: "" },
             bunkPrices: {
@@ -315,6 +329,17 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
     dispatch({ type: "SET_BED_TYPE", index, payload: e.target.value });
   };
 
+  const handleNameChange = (
+    index: number,
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    dispatch({
+      type: "SET_NAME",
+      index,
+      payload: e.target.value,
+    });
+  };
+
   const handlePriceChange = (
     index: number,
     e: React.ChangeEvent<HTMLInputElement>
@@ -386,6 +411,18 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
                   index > 0 ? "border-t-[1px] border-t-[#E3E3E3] pt-3" : ""
                 }`}
               >
+                <div className="w-[310px] flex flex-col items-start">
+                  <label className="block mb-1 text-[13px] font-[500]">
+                    Room Name
+                  </label>
+                  <input
+                    name="roomName"
+                    value={bed.roomName}
+                    onChange={(e) => handleNameChange(index, e)}
+                    className="w-full bg-[#29ABE21F] outline-0 py-3.5 rounded-md px-2"
+                    placeholder="Room Name"
+                  />
+                </div>
                 {/* --- Bed Type --- */}
                 <div className="w-[310px] flex flex-col items-start">
                   <label className="block mb-1 text-[13px] font-[500]">

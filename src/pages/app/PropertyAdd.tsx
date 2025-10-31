@@ -16,9 +16,11 @@ import BedDetails from "../../components/properties/BedDetails";
 import { bedReducer, initialState } from "../../init/roomValues";
 import AmenitiesSection from "../../components/properties/AmenitiesSection";
 import { useAppStore } from "../../store/appStore";
+import { ErrorToast } from "../../components/global/Toaster";
 
 interface BedInfo {
   bedType: string;
+  roomName: string;
   prices: {
     dailyPrice: string;
     monthlyPrice: string;
@@ -36,6 +38,7 @@ interface BedInfo {
 }
 
 interface BedDetail {
+  roomName: string;
   type: string;
   price: number;
   monthlyPrice: number;
@@ -172,8 +175,19 @@ const PropertyAdd = () => {
           monthlyPrice: "0",
         };
 
+        if (
+          top.dailyPrice === "0" ||
+          top.monthlyPrice === "0" ||
+          bottom.dailyPrice === "0" ||
+          bottom.monthlyPrice === "0"
+        ) {
+          ErrorToast("Price should not be 0");
+          return;
+        }
+
         // Add top bunk
         bedDetails.push({
+          roomName: bed.roomName,
           type: `${bed.bedType}-top`,
           price: Number(top.dailyPrice),
           monthlyPrice: Number(top.monthlyPrice),
@@ -181,16 +195,27 @@ const PropertyAdd = () => {
 
         // Add bottom bunk
         bedDetails.push({
+          roomName: bed.roomName,
           type: `${bed.bedType}-bottom`,
           price: Number(bottom.dailyPrice),
           monthlyPrice: Number(bottom.monthlyPrice),
         });
       } else {
-        bedDetails.push({
-          type: bed.bedType,
-          price: Number(bed?.prices?.dailyPrice),
-          monthlyPrice: Number(bed?.prices?.monthlyPrice),
-        });
+        console.log("bed price --> ", bed?.prices);
+        if (
+          bed?.prices?.dailyPrice === "0" ||
+          bed?.prices?.monthlyPrice === "0"
+        ) {
+          ErrorToast("Price should not be 0");
+          return;
+        } else {
+          bedDetails.push({
+            roomName: bed.roomName,
+            type: bed.bedType,
+            price: Number(bed?.prices?.dailyPrice),
+            monthlyPrice: Number(bed?.prices?.monthlyPrice),
+          });
+        }
       }
     });
 
@@ -228,6 +253,13 @@ const PropertyAdd = () => {
         return;
       }
 
+      if (bedDetails?.length === 0) {
+        ErrorToast("Price should not be 0");
+        return;
+      } else {
+        formData.append("bedDetails", JSON.stringify(bedDetails));
+      }
+
       formData.append("address", address.address);
       formData.append("city", address.city);
       formData.append("state", address.state);
@@ -251,8 +283,6 @@ const PropertyAdd = () => {
 
       // 2️⃣ Amenities (array)
       formData.append("amenities", JSON.stringify(values.amenities || []));
-
-      formData.append("bedDetails", JSON.stringify(bedDetails));
 
       if (values.images && values.images.length > 0) {
         values.images.forEach((file: File) => {

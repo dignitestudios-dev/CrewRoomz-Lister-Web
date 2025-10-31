@@ -96,6 +96,7 @@ declare global {
 
   // A single bed entry
   interface Bed {
+    roomName: string;
     bedType: string;
     prices: Prices;
     bunkPrices: BunkPrices;

@@ -8,6 +8,7 @@ export interface Prices {
 }
 
 export interface Bed {
+  roomName: string;
   bedType: string;
   prices: Prices;
   bunkPrices: Record<BunkType, Prices>;
@@ -21,6 +22,7 @@ export type Action =
   | { type: "ADD_BED" }
   | { type: "REMOVE_BED"; index: number }
   | { type: "SET_BED_TYPE"; index: number; payload: string }
+  | { type: "SET_NAME"; index: number; payload: string }
   | {
       type: "SET_PRICE";
       index: number;
@@ -36,6 +38,7 @@ export type Action =
 export const initialState: State = {
   beds: [
     {
+      roomName: "",
       bedType: "",
       prices: { dailyPrice: "", monthlyPrice: "" },
       bunkPrices: {
@@ -55,6 +58,7 @@ export function bedReducer(state: State, action: Action): State {
           ...state.beds,
           {
             bedType: "",
+            roomName: "",
             prices: { dailyPrice: "", monthlyPrice: "" },
             bunkPrices: {
               top: { dailyPrice: "", monthlyPrice: "" },
@@ -94,6 +98,14 @@ export function bedReducer(state: State, action: Action): State {
         ),
       };
 
+    case "SET_NAME":
+      return {
+        ...state,
+        beds: state.beds.map((bed, i) =>
+          i === action.index ? { ...bed, roomName: action.payload } : bed
+        ),
+      };
+
     case "SET_BUNK_PRICE":
       return {
         ...state,
@@ -129,6 +141,7 @@ export const editInitialState: State = {
   beds: [
     {
       bedType: "",
+      roomName: "",
       prices: { dailyPrice: "", monthlyPrice: "" },
       bunkPrices: {
         top: { dailyPrice: "", monthlyPrice: "" },
@@ -147,6 +160,7 @@ export function editBedReducer(state: State, action: Action): State {
           ...state.beds,
           {
             bedType: "",
+            roomName: "",
             prices: { dailyPrice: "", monthlyPrice: "" },
             bunkPrices: {
               top: { dailyPrice: "", monthlyPrice: "" },
@@ -233,6 +247,7 @@ interface BunkIds {
 interface BedData {
   _id?: string;
   bedType: string;
+  roomName: string;
   prices: BedPrice;
   bunkPrices?: BunkPrices;
   bunkIds?: BunkIds;
@@ -240,12 +255,14 @@ interface BedData {
 }
 interface ExistingBedDetails {
   _id: string;
+  roomName: string;
   price: number;
   monthlyPrice: number;
 }
 
 interface NewBedDetails {
   type: string;
+  roomName: string;
   price?: number;
   monthlyPrice?: number;
   topPrice?: number;
@@ -270,6 +287,7 @@ export const prepareBedDataForSubmit = (
     if (bed._id) {
       bedDetails.push({
         _id: bed._id,
+        roomName: bed.roomName,
         price: dailyPrice,
         monthlyPrice,
       });
@@ -285,6 +303,7 @@ export const prepareBedDataForSubmit = (
       if (bed.bunkIds.top) {
         bedDetails.push({
           _id: bed.bunkIds.top,
+          roomName: bed.roomName,
           price: topDaily,
           monthlyPrice: topMonthly,
         });
@@ -293,6 +312,7 @@ export const prepareBedDataForSubmit = (
       if (bed.bunkIds.bottom) {
         bedDetails.push({
           _id: bed.bunkIds.bottom,
+          roomName: bed.roomName,
           price: bottomDaily,
           monthlyPrice: bottomMonthly,
         });
@@ -304,6 +324,7 @@ export const prepareBedDataForSubmit = (
       // Bunk beds added newly
       if (bed.bedType.includes("bunk") && bed.bunkPrices) {
         bedDetailsToAdd.push({
+          roomName: bed.roomName,
           type: bed.bedType,
           topPrice: Number(bed.bunkPrices.top.dailyPrice || 0),
           topMonthlyPrice: Number(bed.bunkPrices.top.monthlyPrice || 0),
@@ -314,6 +335,7 @@ export const prepareBedDataForSubmit = (
       // Normal single bed
       else {
         bedDetailsToAdd.push({
+          roomName: bed.roomName,
           type: bed.bedType,
           price: dailyPrice,
           monthlyPrice,
