@@ -121,7 +121,7 @@ export const subscriptionPlans = [
   },
   {
     _id: "68e7516f46fbd78935eea732",
-    name: "Life Time",
+    name: "Lifetime",
     price: "999.99",
     productId: "lifetime_product",
     subscriptionId: "lifetime_product",

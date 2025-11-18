@@ -573,23 +573,24 @@ const EditBedDetails: React.FC<EditBedDetailsProps> = ({
           ))}
 
           {/* --- Add More --- */}
-          {roomType === "multi" && (
-            <button
-              type="button"
-              disabled={state.beds.length >= 4}
-              onClick={() => dispatch({ type: "ADD_BED" })}
-              className={`flex items-center gap-2 pt-2 ${
-                state.beds.length >= 4
-                  ? "opacity-50 cursor-auto"
-                  : "cursor-pointer"
-              }`}
-            >
-              <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
-              <p className="text-[14px] gradient-text font-[500]">
-                Add More Beds
-              </p>
-            </button>
-          )}
+          {(roomType === "multi" || roomType === "semi") && (
+  <button
+    type="button"
+    disabled={state.beds.length >= 4}
+    onClick={() => dispatch({ type: "ADD_BED" })}
+    className={`flex items-center gap-2 pt-2 ${
+      state.beds.length >= 4
+        ? "opacity-50 cursor-auto"
+        : "cursor-pointer"
+    }`}
+  >
+    <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
+    <p className="text-[14px] gradient-text font-[500]">
+      Add More Beds
+    </p>
+  </button>
+)}
+
         </div>
       </div>
     </div>

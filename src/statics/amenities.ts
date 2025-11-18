@@ -19,6 +19,13 @@ import {
   tvIcon,
   washingIcon,
   wifiIcon,
+  dishwasher,
+  freezer,
+  fridge,
+  towels,
+  airfryer,
+  steamer,
+
 } from "../assets/aminities/amenitiesExport";
 
 export const AMENITY_GROUPS: { title: string; items: string[] }[] = [
@@ -35,6 +42,13 @@ export const AMENITY_GROUPS: { title: string; items: string[] }[] = [
       "TV",
       "Hair dryer",
       "Dedicated Workspace",
+      "Dishwasher",
+       "Bed Linens", 
+       "Towels",
+       "Steamer",
+       "Multiple Fridges",
+       "Deep Freezer",
+       "Multiple Fridges",
     ],
   },
   {
@@ -46,7 +60,7 @@ export const AMENITY_GROUPS: { title: string; items: string[] }[] = [
       "Cleaning Service",
       "Hot Tub",
       "BBQ Grill",
-      "Breakfast",
+      // "Breakfast",
       "Pool",
     ],
   },
@@ -66,7 +80,7 @@ export const amenityIcons: Record<string, string> = {
   "Water Dispenser": dispenserIcon,
   "Hot Tub": bathIcon,
   "BBQ Grill": barbQIcon,
-  Breakfast: teaIcon,
+  // Breakfast: teaIcon,
   Pool: "",
   Wifi: wifiIcon,
   "Air - Conditioning": acIcon,
@@ -78,4 +92,10 @@ export const amenityIcons: Record<string, string> = {
   TV: tvIcon,
   "Hair dryer": dryerIcon,
   "Dedicated Workspace": deskIcon,
+  Dishwasher: dishwasher,
+  "Air Fryer": airfryer,
+  Towels: towels,
+  Steamer: steamer,
+  "Multiple Fridges": fridge,
+  "Deep Freezer": freezer,
 };

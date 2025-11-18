@@ -19,6 +19,13 @@ import teaIcon from "./teaIcon.png";
 import tvIcon from "./tvIcon.png";
 import wifiIcon from "./wifiIcon.png";
 import washingIcon from "./washingIcon.png";
+import dishwasher from "./dishwasher.png";
+import freezer from "./freezer.png";
+import fridge from "./fridge.png";
+import towels from "./towels.png";
+import airfryer from "./airfryer.png";
+import steamer from "./steamer.png";
+
 export {
   acIcon,
   barbQIcon,
@@ -41,4 +48,10 @@ export {
   tvIcon,
   wifiIcon,
   washingIcon,
+  dishwasher,
+  freezer,
+  fridge,
+  towels,
+  airfryer,
+  steamer,
 };
