@@ -274,18 +274,19 @@ const BedDetails: React.FC<BedDetailsProps> = ({
           ))}
 
           {/* --- Add More --- */}
-          {type === "multi" && (
-            <button
-              type="button"
-              onClick={() => dispatch({ type: "ADD_BED" })}
-              className="flex items-center gap-2 pt-2 cursor-pointer"
-            >
-              <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
-              <p className="text-[14px] gradient-text font-[500]">
-                Add More Beds
-              </p>
-            </button>
-          )}
+         {(type === "multi" || type === "semi") && (
+  <button
+    type="button"
+    onClick={() => dispatch({ type: "ADD_BED" })}
+    className="flex items-center gap-2 pt-2 cursor-pointer"
+  >
+    <HiOutlinePlus className="text-[18px] text-[#36C0EF]" />
+    <p className="text-[14px] gradient-text font-[500]">
+      Add More Beds
+    </p>
+  </button>
+)}
+
         </div>
       </div>
     </div>
