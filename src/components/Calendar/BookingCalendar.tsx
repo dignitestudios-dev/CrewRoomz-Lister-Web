@@ -106,7 +106,7 @@ const BookingCalendar: React.FC<Props> = ({
     setCurrentMonth((m) => new Date(m.getFullYear(), m.getMonth() + 1, 1));
 
   return (
-    <div className="w-full max-w-[480px] h-[420px] bg-white rounded-3xl p-4 shadow-custom-sm">
+    <div className="order-1 md:order-2 w-full max-w-[480px] h-[420px] bg-white rounded-3xl p-4 shadow-custom-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium">
           {currentMonth.toLocaleString(undefined, { month: "long" })}{" "}

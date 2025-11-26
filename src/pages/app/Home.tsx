@@ -79,7 +79,7 @@ const Home = () => {
   }, [status, selectedStatus, update]);
 
   return (
-    <div className="max-w-[90em] mx-auto py-6 px-[4em]">
+    <div className="max-w-[90em] mx-auto py-6 lg:px-[4em] md:px-[4em] px-[2em]">
       {state === "error" && <Toast {...toast} />}
       <div className="flex flex-wrap justify-between items-center gap-6 p-0">
         <h1 className="text-[32px] font-[400]">
@@ -101,13 +101,13 @@ const Home = () => {
           + Add Property
         </button>
       </div>
-      <div className="flex justify-between">
+      <div className="flex flex-col sm:flex-row md:justify-between">
         <StatusFilter
           statuses={statusOptions}
           setStatus={setStatus}
           onStatusChange={handleStatusChange}
         />
-        <div className="mt-3">
+        <div className="lg:mt-3 md:mt-5 mt-4">
           <HomeFilterDropDown
             selected={selectedStatus}
             setSelected={setSelectedStatus}

@@ -116,12 +116,12 @@ const BookingHistory = () => {
     getBookingsHistory();
   }, [status, progressStatus, selectedStatus]);
   return (
-    <div className="max-w-[90em] mx-auto py-6 px-[4em]">
+    <div className="max-w-[90em] mx-auto py-6 md:px-[4em] px-[1em]">
       {state === "error" && <Toast {...toast} />}
       <div className="flex items-center gap-3 mt-4">
         <h1 className="text-[26px] font-[600]">Booking History</h1>
       </div>
-      <div className="flex justify-between items-center w-full">
+      <div className="flex flex-col items-start md:flex-row md:justify-between md:items-center md:w-full md:space-y-0 space-y-2">
         <StatusFilter
           statuses={statusOptions}
           setStatus={setStatus}
@@ -170,7 +170,7 @@ const BookingHistory = () => {
                           <span className="text-black">{booking?._id}</span>
                         </p>
 
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 mt-2">
                           <img
                             src={booking?.room?.media[0]}
                             alt="user"

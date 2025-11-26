@@ -1,7 +1,7 @@
 import { SETTINGS_OPTIONS } from "../../statics/settingsOptions";
 
 import ProfileEdit from "../../components/settings/ProfileEdit";
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import Wallet from "../../components/settings/Wallet";
 import SubscriptionPlans from "../../components/settings/SubscriptionPlans";
 import TermsAndConditions from "../../components/settings/TermsAndConditions";
@@ -23,8 +23,9 @@ const Settings = () => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="grid grid-cols-3 pt-16 px-24 gap-16">
-      <div className="w-[440px] mx-auto pt-8">
+    <div className="flex flex-col md:flex-row pt-16 px-4 md:px-24 gap-8 md:gap-16">
+      {/* Sidebar for large screens */}
+      <div className="hidden md:block w-[440px] mx-auto pt-8">
         <div className="bg-white rounded-2xl overflow-hidden shadow-custom-sm">
           {SETTINGS_OPTIONS.map((opt) => (
             <div key={opt.key}>
@@ -32,7 +33,7 @@ const Settings = () => {
                 type="button"
                 onClick={() => {
                   if (opt.key === "settings") {
-                    setExpanded(!expanded); // toggle children
+                    setExpanded(!expanded);
                   } else {
                     setKeyValue(opt.key);
                   }
@@ -53,9 +54,8 @@ const Settings = () => {
                 )}
               </button>
 
-              {/* Render children if expanded */}
               {opt.children && expanded && (
-                <div className=" flex flex-col">
+                <div className="flex flex-col">
                   {opt.children.map((child) => (
                     <button
                       key={child.key}
@@ -63,7 +63,7 @@ const Settings = () => {
                       className={`pl-10 text-left px-4 py-2 text-sm rounded-md flex items-center gap-4 ${
                         keyValue === child.key
                           ? "bg-[#F0FAFF] text-[#36C0EF]"
-                          : "text-gray-600 hover:text-[#36C0EF] hover:bg-[#F0FAFF] "
+                          : "text-gray-600 hover:text-[#36C0EF] hover:bg-[#F0FAFF]"
                       }`}
                     >
                       <img
@@ -71,7 +71,6 @@ const Settings = () => {
                         alt={child.label}
                         className="h-6 w-6"
                       />
-
                       <p>{child.label}</p>
                     </button>
                   ))}
@@ -81,19 +80,37 @@ const Settings = () => {
           ))}
         </div>
       </div>
-      <div className="w-[700px] mx-auto pt-8">
+
+      {/* Dropdown for small screens */}
+      <div className="block md:hidden w-full pt-4">
+        <select
+          value={keyValue}
+          onChange={(e) => setKeyValue(e.target.value)}
+          className="w-full border border-gray-300 rounded-lg p-3 text-gray-800 focus:ring-2 focus:ring-[#29ABE2] focus:outline-none"
+        >
+          {SETTINGS_OPTIONS.map((opt) => (
+            <Fragment key={opt.key}>
+              <option value={opt.key}>{opt.label}</option>
+              {opt.children &&
+                opt.children.map((child) => (
+                  <option key={child.key} value={child.key}>
+                    └ {child.label}
+                  </option>
+                ))}
+            </Fragment>
+          ))}
+        </select>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 mx-auto pt-8 w-full md:w-[700px]">
         {keyValue === "profile" && <ProfileEdit />}
-        {keyValue === "wallet" && (
-          <div className=" rounded-2xl">
-            <Wallet />
-          </div>
-        )}
+        {keyValue === "wallet" && <Wallet />}
         {keyValue === "subscription" && (
-          <div className="w-[900px] overflow-x-auto ">
+          <div className="w-full overflow-x-auto">
             <SubscriptionPlans />
           </div>
         )}
-
         {keyValue === "notifications" && <NotificationsSetting />}
         {keyValue === "change-password" && <ChangePassword />}
         {keyValue === "delete-account" && <DeleteAccount />}

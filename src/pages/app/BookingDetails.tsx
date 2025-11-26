@@ -123,7 +123,7 @@ const BookingDetails = () => {
     (bookingDetails?.adminCommissionAmount || 0);
 
   return (
-    <div className="max-w-[1260px] mx-auto pt-10">
+    <div className="max-w-[1260px] mx-auto pt-10 lg:px-2 px-6">
       {state === "error" && <Toast {...toast} />}
 
       <div className="flex justify-between items-center mb-2 px-4">
@@ -142,7 +142,7 @@ const BookingDetails = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-8 py-6 space-y-1">
+      <div className="grid md:grid-cols-3 grid-cols-1 gap-8 py-6 space-y-1">
         {/* LEFT SECTION */}
         <div className="col-span-2">
           <div className=" bg-[#FFFFFF] p-8 rounded-3xl space-y-4">
@@ -232,7 +232,7 @@ const BookingDetails = () => {
         <div>
           <p className="text-black text-[16px] font-[600]">Guest</p>
           <div className=" bg-[#FFFFFF] px-4 pt-2 rounded-2xl space-y-4 flex justify-between items-center ">
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex flex-col sm:flex-row items-center gap-2 mt-2">
               <img
                 src={bookingDetails?.user?.profilePicture}
                 alt="user"

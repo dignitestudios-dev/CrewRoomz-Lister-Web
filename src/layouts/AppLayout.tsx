@@ -36,7 +36,7 @@ const AppLayout = ({ token, identityStatus }: LayoutProps) => {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen ">
       <Header />
       <Outlet />
     </div>

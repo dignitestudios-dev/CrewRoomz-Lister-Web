@@ -111,13 +111,13 @@ const Booking = () => {
   }, [status, selectDate, selectedStatus]);
 
   return (
-    <div className="max-w-[90em] mx-auto py-6 px-[4em]">
+    <div className="max-w-[90em] mx-auto py-6 lg:px-[4em] md:px-[4em] px-[2em]">
       {state === "error" && <Toast {...toast} />}
       <div className="flex items-center gap-3 mt-4">
         <h1 className="text-[26px] font-[600]">My Bookings</h1>
       </div>
 
-      <div className="flex justify-between items-center w-full">
+      <div className="flex flex-col md:flex-row md:justify-between md:w-full w-[50%] md:space-y-0 space-y-4">
         <StatusFilter
           statuses={statusOptions}
           setStatus={setStatus}
@@ -135,8 +135,8 @@ const Booking = () => {
         </div>
       ) : (
         <Fragment>
-          <div className="grid grid-cols-3 gap-8 py-6 space-y-1">
-            <div className=" bg-[#FFFFFF] p-4 rounded-3xl grid col-span-2">
+          <div className="grid md:grid-cols-3 grid-cols-1 gap-8 py-6 space-y-1">
+            <div className="order-2 sm:order-1 bg-[#FFFFFF] p-4 rounded-3xl grid col-span-2">
               <h2 className="text-[20px] font-[500] mb-4">Ongoing Bookings</h2>
 
               {bookings && bookings.length > 0 ? (
@@ -181,9 +181,9 @@ const Booking = () => {
                         </p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 mt-4 border-t border-[#E3DBDB]">
+                    <div className=" grid grid-cols-2 mt-4 border-t border-[#E3DBDB]">
                       <div>
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex flex-col md:flex-row md:items-center gap-2 mt-2">
                           <img
                             src={booking?.user?.profilePicture}
                             alt="user"
@@ -227,7 +227,7 @@ const Booking = () => {
             <BookingCalendar
               bookedRanges={bookedRanges}
               cancelledRanges={cancelledRanges}
-              bookedClass="bg-[#29ABE226]  border-[1px] border-[#29ABE280] rounded-xl" // uses your gradient class for booked
+              bookedClass=" bg-[#29ABE226]  border-[1px] border-[#29ABE280] rounded-xl" // uses your gradient class for booked
               cancelledClass="bg-[#FFDCDC] text-red-700 rounded-xl"
               onDayClick={(iso) => {
                 setSelectDate(iso);

@@ -169,7 +169,7 @@ const PropertyDetails = () => {
   return (
     <div className="max-w-[1260px] mx-auto pt-10">
       {(state === "error" || buttonState === "error") && <Toast {...toast} />}
-      <div className="flex justify-between items-center mb-2 px-4">
+      <div className="flex md:flex-row flex-col justify-between items-center mb-2 px-4">
         <div className="flex items-center gap-3">
           <button
             className="cursor-pointer"
@@ -189,7 +189,7 @@ const PropertyDetails = () => {
             {roomDetails?.roomStatus === "inactive" ? "Deactivated" : "Active"}
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 md:mt-0 mt-4">
           <button
             onClick={() => setIsDeActivate(true)}
             className="w-[97px] bg-transparent text-black border border-[#E3DBDB] text-[14px] flex items-center justify-center rounded-3xl font-medium "
@@ -221,7 +221,7 @@ const PropertyDetails = () => {
               <ImageGallery images={roomDetails?.media} />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-14 p-4 space-y-1">
+          <div className="grid md:grid-cols-2 grid-cols-1 gap-14 p-4 space-y-1">
             <div>
               <h2 className="text-[32px] font-semibold mb-2">
                 {roomDetails?.state},{roomDetails?.city}

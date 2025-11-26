@@ -4,16 +4,27 @@ import AuthInput from "../../components/Auth/AuthInput";
 import { useFormik } from "formik";
 import { resetPasswordSchema } from "../../schema/authSchema";
 import { resetValue } from "../../init/authValues";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import AuthButton from "../../components/Auth/AuthButton";
 import { CiCircleCheck } from "react-icons/ci";
 import axios from "../../axios";
 import Toast from "../../components/global/Toast";
 import { useToast } from "../../hooks/useToast";
 import { getErrorMessage } from "../../init/appValues";
+// import useAuthStore from "../../store/authStore";
+
+type ResetStateData = {
+  token?: string;
+  user?: Record<string, unknown>;
+};
 
 const ResetPassword = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const stateData = (location.state as { data?: ResetStateData } | null)?.data;
+  console.log("🚀 ~ ResetPassword ~ stateData:", stateData);
+  // const setAuth = useAuthStore((s) => s.setAuth);
+
   const { toast, showToast } = useToast();
 
   const [state, setState] = useState<LoadState>("idle");
@@ -30,12 +41,25 @@ const ResetPassword = () => {
           confirmPassword: values.cPassword,
           password: values.password,
         };
+        const token = stateData?.token;
+        // const user = stateData?.user;
+        if (!token) {
+          showToast(
+            "Missing reset token. Please request a new password reset.",
+            "error"
+          );
+          return;
+        }
+
         try {
           setState("loading");
-          const response = await axios.post("/auth/resetPassword", payload);
+          const response = await axios.post("/auth/resetPassword", payload, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
           if (response.status === 200) {
             setState("ready");
             setUpdatedSuccess(true);
+            // setAuth(token, user, true);
           }
         } catch (error) {
           setState("error");

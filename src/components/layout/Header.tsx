@@ -11,6 +11,8 @@ import { useToast } from "../../hooks/useToast.ts";
 import { getDateFormat, getErrorMessage } from "../../init/appValues.ts";
 import ConfirmationModal from "../global/ConfirmationModal.tsx";
 import { useNotificationStore } from "../../store/useNotificationStore.ts";
+import { GiHamburgerMenu } from "react-icons/gi";
+import { IoClose } from "react-icons/io5";
 
 interface notificationsData {
   _id: string | number; // allow both
@@ -35,6 +37,7 @@ const Header = () => {
 
   const [state, setState] = useState<LoadState>("idle");
   const [isLogout, setIsLogout] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const [notificationData, setNotificationData] = useState<notificationsData[]>(
     []
@@ -105,15 +108,22 @@ const Header = () => {
   }, []);
 
   return (
-    <div className="bg-[#FFFFFF] flex justify-between items-center rounded-b-3xl px-[6em] py-4">
+    <div className="bg-[#FFFFFF] flex justify-between items-center rounded-b-3xl px-[2em] lg:px-[6em] py-4 relative">
       {state === "error" && <Toast {...toast} />}
       {/* Logo */}
       <div className="flex items-center">
         <img src={logo} className="h-[4.4em] w-auto" alt="Company Logo" />
       </div>
 
+      <button
+        className="block lg:hidden text-3xl text-black"
+        onClick={() => setIsSidebarOpen(true)}
+      >
+        <GiHamburgerMenu />
+      </button>
+
       {/* header and User Section */}
-      <div className="flex items-center gap-6">
+      <div className="hidden lg:flex items-center gap-6">
         {headerOptions.map((item: HeaderOption, index: number) => (
           <div
             key={index}
@@ -308,6 +318,100 @@ const Header = () => {
           }}
           loading={"idle"}
         />
+      )}
+
+      {isSidebarOpen && (
+        <div
+          onClick={() => setIsSidebarOpen(false)}
+          className="fixed inset-0 bg-black bg-opacity-40 z-[90]"
+        >
+          {/* Sidebar Drawer */}
+          <div
+            className={`fixed top-0 left-0 h-full w-full sm:w-[300px] bg-white shadow-2xl z-[100] transform transition-transform duration-300 ${
+              isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            }`}
+          >
+            {/* Close Button */}
+            <div className="flex justify-between items-center p-4 border-b">
+              <img src={logo} className="h-[3em] w-auto" alt="Logo" />
+              <button
+                onClick={() => setIsSidebarOpen(false)}
+                className="text-3xl"
+              >
+                <IoClose />
+              </button>
+            </div>
+
+            {/* Header Options */}
+            <div className="flex flex-col px-6 mt-4 space-y-4">
+              {headerOptions.map((item: HeaderOption, index: number) => (
+                <div key={index}>
+                  {item.path === "notification" ? (
+                    <button
+                      onClick={() => {
+                        setIsNotificationDropdownOpen(true);
+                        setIsSidebarOpen(false);
+                      }}
+                      className="w-full text-left text-[16px] hover:text-[#29ABE2]"
+                    >
+                      {item.label}
+                    </button>
+                  ) : (
+                    <NavLink
+                      to={item.path}
+                      onClick={() => setIsSidebarOpen(false)}
+                      className={({ isActive }) =>
+                        `block py-2 text-[16px] ${
+                          isActive
+                            ? "gradient-text font-semibold"
+                            : "text-black"
+                        }`
+                      }
+                    >
+                      {item.label}
+                    </NavLink>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Divider */}
+            <div className="border-t my-4 mx-6"></div>
+
+            {/* User Section */}
+            <div className="flex flex-col items-center px-6">
+              <div className="h-16 w-16 rounded-full overflow-hidden mb-2">
+                <img
+                  src={user?.profilePicture}
+                  alt="User Avatar"
+                  className="h-full w-full object-cover"
+                />
+              </div>
+              <p className="text-black font-semibold">{user?.name}</p>
+              <p className="text-gray-500 text-sm mb-4">{user?.email}</p>
+
+              <button
+                onClick={() => {
+                  navigate("settings");
+                  setIsSidebarOpen(false);
+                }}
+                className="w-full text-left px-2 py-1 hover:text-blue-500"
+              >
+                Settings
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsLogout(true);
+                  setIsSidebarOpen(false);
+                }}
+                className="w-full text-left px-2 py-1 hover:text-blue-500"
+              >
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

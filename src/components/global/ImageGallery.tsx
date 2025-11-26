@@ -11,7 +11,7 @@ const ImageGallery: React.FC<ImgGalleryProps> = ({ images }) => {
 
   return (
     <PhotoProvider>
-      <div className="flex flex-col md:flex-row gap-4 w-[75.6em]">
+      <div className="flex flex-col md:flex-row gap-4 md:w-[75.6em]">
         {/* Main Large Image */}
         <div className="w-full md:w-[100em]">
           {images[0].endsWith(".mp4") ? (
@@ -46,7 +46,7 @@ const ImageGallery: React.FC<ImgGalleryProps> = ({ images }) => {
                   <img
                     src={img}
                     alt={`Gallery ${idx + 1}`}
-                    className="rounded-xl h-[190px] w-full object-cover cursor-pointer"
+                    className="rounded-xl h-[190px] w-[full] object-cover cursor-pointer"
                   />
                 </PhotoView>
               )}

@@ -97,7 +97,7 @@ const BedDetails: React.FC<BedDetailsProps> = ({
           {state.beds.map((bed, index) => (
             <div key={index} className="relative">
               <div
-                className={`flex items-center gap-3 w-[750px] ${
+                className={`flex sm:flex-row flex-col sm:items-center gap-3 w-[750px] ${
                   index % 2 !== 0
                     ? "border-t-[1px] border-t-[#E3E3E3] pt-3"
                     : ""

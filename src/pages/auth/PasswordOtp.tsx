@@ -8,11 +8,11 @@ import axios from "../../axios";
 import { getErrorMessage } from "../../init/appValues";
 import { useToast } from "../../hooks/useToast";
 import Toast from "../../components/global/Toast";
-import useAuthStore from "../../store/authStore";
+// import useAuthStore from "../../store/authStore";
 
 const PasswordOtp = () => {
   const navigate = useNavigate();
-  const setAuth = useAuthStore((s) => s.setAuth);
+  // const setAuth = useAuthStore((s) => s.setAuth);
 
   const location = useLocation();
   const { email } = location.state || {};
@@ -86,9 +86,9 @@ const PasswordOtp = () => {
         const data = response?.data?.data;
         setState("ready");
         showToast(response?.data?.message, "success");
-        setAuth(data.token, data.user, true);
+        // setAuth(data.token, data.user, true);
         if (toast?.visible === false) {
-          navigate("/reset-password");
+          navigate("/reset-password", { state: { data: data } });
         }
       }
     } catch (error) {
