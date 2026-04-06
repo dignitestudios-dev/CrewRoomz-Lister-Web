@@ -143,8 +143,8 @@ const ConnectStripeAccount = () => {
                       {pkg.productId === "annual_plan"
                         ? "/Annual"
                         : pkg.productId === "premium_plan"
-                        ? "/Monthly"
-                        : ""}
+                          ? "/Monthly"
+                          : ""}
                     </span>
                   </div>
 
@@ -162,7 +162,7 @@ const ConnectStripeAccount = () => {
                       {subscriptionFeatures[pkg.productId]?.map(
                         (feature, idx) => (
                           <li key={idx}>{feature}</li>
-                        )
+                        ),
                       )}
                     </ul>
                   </div>

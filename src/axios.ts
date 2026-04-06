@@ -27,7 +27,7 @@ instance.interceptors.request.use(
   async (request) => {
     if (!navigator.onLine) {
       ErrorToast(
-        "No internet connection. Please check your network and try again."
+        "No internet connection. Please check your network and try again.",
       );
       return Promise.reject(new Error("No internet connection"));
     }
@@ -42,7 +42,7 @@ instance.interceptors.request.use(
 
     return request;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 instance.interceptors.response.use(
@@ -62,7 +62,7 @@ instance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default instance;
