@@ -55,7 +55,7 @@ const BookingHistory = () => {
   const [status, setStatus] = useState<bookingStatus>("multi");
 
   const [progressStatus, setProgressStatus] =
-    useState<bookingStatusProgress>("completed");
+    useState<bookingStatusProgress>("current");
 
   const [selectedStatus, setSelectedStatus] = useState<"Daily" | "Monthly">(
     "Monthly",
