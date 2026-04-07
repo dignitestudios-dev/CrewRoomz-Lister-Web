@@ -12,10 +12,10 @@ import StatusFilter, {
   type bookingStatusOption,
 } from "../../components/global/StatusFilter";
 
-type bookingStatusProgress = "completed" | "cancelled";
+type bookingStatusProgress = "current" | "completed" | "cancelled";
 
 type bookingStatusProgressOption = {
-  label: "completed" | "cancelled";
+  label: "current" | "completed" | "cancelled";
   isActive: boolean;
 };
 
@@ -58,7 +58,7 @@ const BookingHistory = () => {
     useState<bookingStatusProgress>("completed");
 
   const [selectedStatus, setSelectedStatus] = useState<"Daily" | "Monthly">(
-    "Monthly"
+    "Monthly",
   );
 
   const [bookingsHistory, setBookingsHistory] = useState<
@@ -80,8 +80,9 @@ const BookingHistory = () => {
   ];
 
   const statusProgress: bookingStatusProgressOption[] = [
-    { label: "completed", isActive: progressActiveStatus === 0 },
-    { label: "cancelled", isActive: progressActiveStatus === 1 },
+    { label: "current", isActive: progressActiveStatus === 0 },
+    { label: "completed", isActive: progressActiveStatus === 1 },
+    { label: "cancelled", isActive: progressActiveStatus === 2 },
   ];
 
   const handleStatusChange = (index: number): void => {
@@ -96,9 +97,9 @@ const BookingHistory = () => {
     try {
       setState("loading");
       const { data } = await axios.get(
-        `/booking?roomType=${status}&bookingStatus=${progressStatus}&isMonthly=${
+        `/booking?roomType=${status}&bookingStatus=${progressStatus === "current" ? "pending" : progressStatus}&isMonthly=${
           selectedStatus === "Monthly" ? true : false
-        }&page=${pagination?.currentPage ?? 1}`
+        }&page=${pagination?.currentPage ?? 1}`,
       );
 
       if (data.success) {

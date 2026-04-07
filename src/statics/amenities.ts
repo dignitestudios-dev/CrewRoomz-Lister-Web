@@ -15,7 +15,6 @@ import {
   // silencerIcon,
   smokeIcon,
   stoveIcon,
-  teaIcon,
   tvIcon,
   washingIcon,
   wifiIcon,
@@ -25,7 +24,6 @@ import {
   towels,
   airfryer,
   steamer,
-
 } from "../assets/aminities/amenitiesExport";
 
 export const AMENITY_GROUPS: { title: string; items: string[] }[] = [
@@ -43,12 +41,12 @@ export const AMENITY_GROUPS: { title: string; items: string[] }[] = [
       "Hair dryer",
       "Dedicated Workspace",
       "Dishwasher",
-       "Bed Linens", 
-       "Towels",
-       "Steamer",
-       "Multiple Fridges",
-       "Deep Freezer",
-       "Multiple Fridges",
+      "Bed Linens",
+      "Towels",
+      "Steamer",
+      "Multiple Fridges",
+      "Deep Freezer",
+      "Multiple Fridges",
     ],
   },
   {
