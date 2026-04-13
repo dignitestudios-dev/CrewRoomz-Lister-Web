@@ -15,15 +15,15 @@ const TransactionsTable: React.FC<TransactionsTableProps> = ({
   const tabMap: { [key: string]: string } = {
     All: "All",
     Received: "received",
-    Withdraw: "withdraw", // adjust if your API uses a different label
+    Withdraw: "withdrawn", // adjust if your API uses a different label
   };
 
   // Filter transactions based on tab
   const filteredTransactions =
     activeTab === "All"
-      ? transactionList ?? []
+      ? (transactionList ?? [])
       : (transactionList ?? []).filter(
-          (item) => item.type.toLowerCase() === tabMap[activeTab]
+          (item) => item.type.toLowerCase() === tabMap[activeTab],
         );
 
   return (
