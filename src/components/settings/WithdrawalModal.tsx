@@ -34,7 +34,7 @@ const WithdrawalModal: React.FC<Props> = ({ onClose, balance, bankDetail }) => {
         stripeBankAccountId: bankDetail[0]?.accountNumber,
         amount: parseFloat(amount),
       });
-      if (response.status === 200) {
+      if (response.status === 200 || response.status === 201) {
         showToast("Withdrawal successful", "success");
         onClose(); // Close modal after successful withdrawal
       }
