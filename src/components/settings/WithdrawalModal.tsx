@@ -31,7 +31,7 @@ const WithdrawalModal: React.FC<Props> = ({ onClose, balance, bankDetail }) => {
     try {
       setLoading(true);
       const response = await axios.post("/stripe/withdrawFunds", {
-        stripeBankAccountId: bankDetail[0]?.stripeBankAccountId,
+        stripeBankAccountId: bankDetail[0]?.accountNumber,
         amount: parseFloat(amount),
       });
       if (response.status === 200) {
