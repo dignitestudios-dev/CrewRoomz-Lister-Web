@@ -39,7 +39,7 @@ const SubscriptionPlans = () => {
   const [isSubscription, setIsSubscription] = useState<SubscriptionStatus>();
 
   const [state, setState] = useState<"idle" | "loading" | "ready" | "error">(
-    "idle"
+    "idle",
   );
 
   useEffect(() => {
@@ -53,7 +53,7 @@ const SubscriptionPlans = () => {
       setState("loading");
       const response = await axios.post(
         "/subscription/cancelStripeSubscription",
-        { subscriptionId }
+        { subscriptionId },
       );
       if (response.status === 200) {
         setState("ready");
@@ -90,7 +90,7 @@ const SubscriptionPlans = () => {
         "/subscription/createStripeSubscription",
         {
           productId: productId,
-        }
+        },
       );
 
       if (response.status === 200) {
@@ -128,7 +128,7 @@ const SubscriptionPlans = () => {
       {componentState === "error" && <Toast {...toast} />}
       <div className="flex items-center justify-center w-full">
         <p className="text-[24px] text-[#181818] font-semibold mb-4">
-          SubscriptionPlans
+          Subscription Plans
         </p>
       </div>
 
@@ -180,7 +180,7 @@ const SubscriptionPlans = () => {
                         <button
                           onClick={() => {
                             setPendingSubscriptionId(
-                              isSubscription?.subscriptionId
+                              isSubscription?.subscriptionId,
                             );
                             setIsDelete(true);
                           }}
